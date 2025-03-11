@@ -2,8 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Role, RoleDocument } from './schemas/role.schema';
-import {CreateRoleDto, UpdateRoleDto} from "./dto/create-role.dto";
 import {PermissionsGroupEnum} from "../../config/permissions-group.enum";
+import {CreateRoleDto} from "./dto/create-role.dto";
+import {UpdateRoleDto} from "./dto/update-role.dto";
 
 @Injectable()
 export class RoleService {

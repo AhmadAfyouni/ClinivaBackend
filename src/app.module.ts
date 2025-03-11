@@ -50,7 +50,16 @@ import {JwtAuthGuard} from "./modules/auth/jwt-auth.guard";
   providers: [
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard, // Applies authentication globally
+      useFactory: () => {
+        return new (class extends JwtAuthGuard {
+          canActivate(context) {
+            const request = context.switchToHttp().getRequest();
+            // Allow /api/docs to be accessed without authentication
+            if (request.url.startsWith('/api/docs')) return true;
+            return super.canActivate(context); // Use the default JwtAuthGuard behavior
+          }
+        })();
+      },
     },
   ],
 })

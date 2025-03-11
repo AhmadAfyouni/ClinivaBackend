@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Appointment, AppointmentDocument } from './schemas/appointment.schema';
-import {CreateAppointmentDto} from "./dto/update-appointment.dto";
-import {UpdateAppointmentDto} from "./dto/create-appointment.dto";
+import {CreateAppointmentDto} from "./dto/create-appointment.dto";
+import {UpdateAppointmentDto} from "./dto/update-appointment.dto";
 
 @Injectable()
 export class AppointmentService {
