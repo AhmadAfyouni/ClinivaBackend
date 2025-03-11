@@ -1,6 +1,6 @@
 import { IsNotEmpty, IsOptional, IsString, IsArray, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
-import { WorkingHours } from '../../../common/helper';
+import { WorkingHours } from '../../../common/utlis/helper';
 
 export class CreateDoctorDto {
     @IsNotEmpty()

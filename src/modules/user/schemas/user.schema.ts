@@ -5,6 +5,8 @@ export type UserDocument = User & Document;
 
 @Schema({ timestamps: true }) // سيضيف createdAt و updatedAt تلقائيًا
 export class User {
+    _id: Types.ObjectId;
+
     @Prop({ required: true })
     name: string;  // اسم المستخدم
 
