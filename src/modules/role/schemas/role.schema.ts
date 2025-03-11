@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import {PermissionsEnum} from "../../../config/permission.enum";
 
 export type RoleDocument = Role & Document;
 
@@ -10,8 +11,11 @@ export class Role {
     @Prop({ required: true, unique: true })
     name: string; // Role name (Admin, Doctor, Receptionist)
 
+    @Prop({ type: [String], enum: Object.values(PermissionsEnum), default: [] })
+    permissions: string[]; // قائمة الصلاحيات المرتبطة بالدور
+
     @Prop({ type: [String], default: [] })
-    permissions: string[]; // List of system permissions "view_patients", "write_prescriptions"
+    permissionGroups: string[]; // قائمة المجموعات التي ينتمي إليها الدور
 
     @Prop()
     description?: string;

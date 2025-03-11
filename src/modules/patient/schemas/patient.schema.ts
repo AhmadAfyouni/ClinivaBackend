@@ -1,48 +1,50 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Schema as MongooseSchema } from 'mongoose';
+import {Document, Types} from 'mongoose';
 
 export type PatientDocument = Patient & Document;
 
-@Schema({ timestamps: true }) // إضافة حقول createdAt و updatedAt تلقائيًا
+@Schema({ timestamps: true })
 export class Patient {
-    @Prop({ required: true })
-    name: string;  // اسم المريض
+    _id: Types.ObjectId;
 
     @Prop({ required: true })
-    phone: string;  // رقم هاتف المريض (للتواصل)
+    name: string;
 
     @Prop({ required: true })
-    dateOfBirth: Date;  // تاريخ الميلاد
+    phone: string;
+
+    @Prop({ required: true })
+    dateOfBirth: Date;
 
     @Prop({ required: true, enum: ['male', 'female'] })
-    gender: string;  // الجنس
+    gender: string;
 
     @Prop()
-    email?: string;  // البريد الإلكتروني للمريض (اختياري)
+    email?: string;
 
     @Prop()
-    address?: string;  // عنوان المريض (اختياري)
+    address?: string;
 
     @Prop()
-    notes?: string; // ملاحظات إضافية عن المريض
+    notes?: string;
 
     @Prop({
-        type: {
-            insuranceProvider: { type: String, required: false }, // اسم شركة التأمين
-            insuranceNumber: { type: String, required: false }, // رقم بطاقة التأمين
-            coveragePercentage: { type: Number, required: false, min: 0, max: 100 }, // نسبة التغطية (مثلاً 80%)
-            expiryDate: { type: Date, required: false }, // تاريخ انتهاء صلاحية التأمين
-            insuranceType: { type: String, required: false, enum: ['private', 'governmental', 'corporate'] }, // نوع التأمين
-        },
-        default: null
+        type: [{
+            insuranceProvider: { type: String, required: true },
+            insuranceNumber: { type: String, required: true },
+            coveragePercentage: { type: Number, min: 0, max: 100, required: true },
+            expiryDate: { type: Date, required: true },
+            insuranceType: { type: String, enum: ['private', 'governmental', 'corporate'], required: true }
+        }],
+        default: []
     })
-    insurance?: {
-        insuranceProvider?: string;
-        insuranceNumber?: string;
-        coveragePercentage?: number;
-        expiryDate?: Date;
-        insuranceType?: string;
-    };
+    insurances: {
+        insuranceProvider: string;
+        insuranceNumber: string;
+        coveragePercentage: number;
+        expiryDate: Date;
+        insuranceType: string;
+    }[];
 }
 
 export const PatientSchema = SchemaFactory.createForClass(Patient);

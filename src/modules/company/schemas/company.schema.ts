@@ -10,6 +10,9 @@ export class Company {
     @Prop({ required: true, unique: true })
     name: string;  // اسم الشركة
 
+    @Prop({ required: true})
+    address: string;
+
     @Prop({ type: [Types.ObjectId], ref: 'ClinicCollection', default: [] })
     clinicCollections: Types.ObjectId[]; // المجموعات المرتبطة بها
 }
