@@ -73,6 +73,11 @@ export class CreatePatientDto {
   number_children: number;
 
   @IsOptional()
+  height: number;
+  @IsOptional()
+  weight: number;
+
+  @IsOptional()
   @IsString()
   email?: string;
 

@@ -20,11 +20,13 @@ export class Doctor {
 
     @Prop({ type: [WorkingHours], default: [] })
     workingHours: WorkingHours[];
+    
     @Prop()
     birthdate?: Date;
 
-    @Prop()
-    gender?: string; // Example: "Male", "Female", "Other"
+    @Prop({ required: true, enum: ['male', 'female'] })
+    gender: string;
+  
 
     @Prop()
     identity?: string; // National ID or Passport Number
@@ -32,9 +34,10 @@ export class Doctor {
     @Prop()
     nationality?: string;
 
-    @Prop()
-    marital_status?: string; // Example: "Single", "Married", "Divorced", "Widowed"
 
+    @Prop({ required: true, enum: ['Single', 'Married', 'Divorced'] })
+    marital_status?: string; // Example: "Single", "Married", "Divorced", etc.
+  
     @Prop()
     number_children?: number;
 
@@ -47,17 +50,19 @@ export class Doctor {
     @Prop()
     weight?: number; // in kg
 
+    @Prop({ type: [String], default: [] })
+    Languages?: string[];
+    
+    @Prop()
+    Evaluation?: number; // Example: 1-10 rating system
+
     @Prop()
     notes?: string;
 
     @Prop({ unique: true })
     email?: string;
 
-    @Prop({ type: [String], default: [] })
-    Languages?: string[];
 
-    @Prop()
-    Evaluation?: number; // Example: 1-10 rating system
 
 }
 

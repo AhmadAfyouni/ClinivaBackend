@@ -26,9 +26,9 @@ export class Employee {
     @Prop()
     nationality?: string;
 
-    @Prop()
-    marital_status?: string; // Example: "Single", "Married", "Divorced", "Widowed"
-
+    @Prop({ required: true, enum: ['Single', 'Married', 'Divorced'] })
+    marital_status?: string; // Example: "Single", "Married", "Divorced", etc.
+  
     @Prop()
     number_children?: number;
 
