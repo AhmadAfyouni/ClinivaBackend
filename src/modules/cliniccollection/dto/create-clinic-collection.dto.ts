@@ -6,12 +6,9 @@ import {
   IsArray,
 } from 'class-validator';
 import { Types } from 'mongoose';
+import { CreateBaseEntityDto } from 'src/inheritance/entity/dto/create-entity.dto';
 
-export class CreateClinicCollectionDto {
-  @IsNotEmpty()
-  @IsString()
-  name: string;
-
+export class CreateClinicCollectionDto extends CreateBaseEntityDto {
   @IsOptional()
   @IsMongoId()
   companyId?: Types.ObjectId; // مرجع إلى الشركة المالكة (اختياري)

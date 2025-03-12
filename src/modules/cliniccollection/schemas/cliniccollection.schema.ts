@@ -1,15 +1,11 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema, Types } from 'mongoose';
+import { BaseEntity } from 'src/inheritance/entity/schemas/entity.schema';
 
 export type ClinicCollectionDocument = ClinicCollection & Document;
 
 @Schema({ timestamps: true })
-export class ClinicCollection {
-  _id: Types.ObjectId;
-
-  @Prop({ required: true })
-  name: string; // اسم مجموعة العيادات
-
+export class ClinicCollection extends BaseEntity {
   @Prop({ type: Types.ObjectId, ref: 'Company', default: null })
   companyId?: Types.ObjectId; // الشركة المالكة للمجموعة (إذا وجدت)
 

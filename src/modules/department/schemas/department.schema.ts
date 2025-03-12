@@ -1,14 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema, Types } from 'mongoose';
+import { BaseEntity } from 'src/inheritance/entity/schemas/entity.schema';
 
 export type DepartmentDocument = Department & Document;
 
 @Schema({ timestamps: true })
-export class Department {
+export class Department extends BaseEntity {
   _id: Types.ObjectId;
-
-  @Prop({ required: true })
-  name: string; // اسم القسم (مثال: طب الأسنان، الجراحة العامة)
 
   @Prop({ type: Types.ObjectId, ref: 'ClinicCollection', required: true })
   clinicCollectionId: Types.ObjectId; // مجموعة العيادات التي ينتمي إليها القسم

@@ -7,16 +7,9 @@ import {
   IsMongoId,
 } from 'class-validator';
 import { Types } from 'mongoose';
+import { CreateBaseEntityDto } from 'src/inheritance/entity/dto/create-entity.dto';
 
-export class CreateClinicDto {
-  @IsNotEmpty()
-  @IsString()
-  name: string;
-
-  @IsNotEmpty()
-  @IsString()
-  address: string;
-
+export class CreateClinicDto extends CreateBaseEntityDto {
   @IsOptional()
   @IsMongoId()
   departmentId?: Types.ObjectId; // القسم الذي تنتمي له العيادة (اختياري)
