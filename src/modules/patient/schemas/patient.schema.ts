@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import {Document, Types} from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type PatientDocument = Patient & Document;
 
@@ -20,13 +20,46 @@ export class Patient {
     gender: string;
 
     @Prop()
+    identity?: string; // National ID or Passport
+
+    @Prop()
+    nationality?: string;
+
+    @Prop()
+    marital_status?: string; // Example: "Single", "Married", "Divorced", etc.
+
+    @Prop()
+    number_children?: number;
+
+    @Prop()
+    blood_type?: string; // Example: "A+", "B-", "O+", etc.
+
+    @Prop()
+    height?: number; // in cm
+
+    @Prop()
+    weight?: number; // in kg
+
+    @Prop()
+    notes?: string;
+
+    @Prop()
     email?: string;
 
     @Prop()
     address?: string;
 
-    @Prop()
-    notes?: string;
+    @Prop({
+        type: {
+            name: { type: String, required: true },
+            phone: { type: String, required: true }
+        },
+        required: false, // Emergency contact is optional
+    })
+    emergencyContact?: {
+        name: string;
+        phone: string;
+    };
 
     @Prop({
         type: [{
