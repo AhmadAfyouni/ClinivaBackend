@@ -1,69 +1,63 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import {WorkingHours} from "../../../common/utlis/helper";
+import { WorkingHours } from '../../../common/utlis/helper';
 
 export type DoctorDocument = Doctor & Document;
 
-
 @Schema({ timestamps: true })
 export class Doctor {
-    _id: Types.ObjectId;
+  _id: Types.ObjectId;
 
-    @Prop({ required: true })
-    name: string;  // اسم الطبيب
+  @Prop({ required: true })
+  name: string; // اسم الطبيب
 
-    @Prop()
-    phone: string;  // رقم هاتف الطبيب
+  @Prop()
+  phone: string; // رقم هاتف الطبيب
 
-    @Prop({ type: [String], default: [] })
-    specialties: string[];  // تخصصات الطبيب
+  @Prop({ type: [String], default: [] })
+  specialties: string[]; // تخصصات الطبيب
 
-    @Prop({ type: [WorkingHours], default: [] })
-    workingHours: WorkingHours[];
-    
-    @Prop()
-    birthdate?: Date;
+  @Prop({ type: [WorkingHours], default: [] })
+  workingHours: WorkingHours[];
 
-    @Prop({ required: true, enum: ['male', 'female'] })
-    gender: string;
-  
+  @Prop()
+  birthdate?: Date;
 
-    @Prop()
-    identity?: string; // National ID or Passport Number
+  @Prop({ required: true, enum: ['male', 'female'] })
+  gender: string;
 
-    @Prop()
-    nationality?: string;
+  @Prop()
+  identity?: string; // National ID or Passport Number
 
+  @Prop()
+  nationality?: string;
 
-    @Prop({ required: true, enum: ['Single', 'Married', 'Divorced'] })
-    marital_status?: string; // Example: "Single", "Married", "Divorced", etc.
-  
-    @Prop()
-    number_children?: number;
+  @Prop({ required: true, enum: ['Single', 'Married', 'Divorced'] })
+  marital_status?: string; // Example: "Single", "Married", "Divorced", etc.
 
-    @Prop()
-    blood_type?: string; // Example: "A+", "B-", "O+", etc.
+  @Prop()
+  number_children?: number;
 
-    @Prop()
-    height?: number; // in cm
+  @Prop()
+  blood_type?: string; // Example: "A+", "B-", "O+", etc.
 
-    @Prop()
-    weight?: number; // in kg
+  @Prop()
+  height?: number; // in cm
 
-    @Prop({ type: [String], default: [] })
-    Languages?: string[];
-    
-    @Prop()
-    Evaluation?: number; // Example: 1-10 rating system
+  @Prop()
+  weight?: number; // in kg
 
-    @Prop()
-    notes?: string;
+  @Prop({ type: [String], default: [] })
+  Languages?: string[];
 
-    @Prop({ unique: true })
-    email?: string;
+  @Prop()
+  Evaluation?: number; // Example: 1-10 rating system
 
+  @Prop()
+  notes?: string;
 
-
+  @Prop({ unique: true })
+  email?: string;
 }
 
 export const DoctorSchema = SchemaFactory.createForClass(Doctor);

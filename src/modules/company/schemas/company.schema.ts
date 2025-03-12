@@ -5,16 +5,16 @@ export type CompanyDocument = Company & Document;
 
 @Schema({ timestamps: true })
 export class Company {
-    _id: Types.ObjectId;
+  _id: Types.ObjectId;
 
-    @Prop({ required: true, unique: true })
-    name: string;  // اسم الشركة
+  @Prop({ required: true, unique: true })
+  name: string; // اسم الشركة
 
-    @Prop({ required: true})
-    address: string;
+  @Prop({ required: true })
+  address: string;
 
-    @Prop({ type: [Types.ObjectId], ref: 'ClinicCollection', default: [] })
-    clinicCollections: Types.ObjectId[]; // المجموعات المرتبطة بها
+  @Prop({ type: [Types.ObjectId], ref: 'ClinicCollection', default: [] })
+  clinicCollections: Types.ObjectId[]; // المجموعات المرتبطة بها
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);

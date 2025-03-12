@@ -47,7 +47,7 @@ export class CreateDoctorDto {
 
   @IsNotEmpty()
   number_children: number;
-  
+
   @IsOptional()
   height: number;
   @IsOptional()
@@ -55,9 +55,9 @@ export class CreateDoctorDto {
   @IsOptional()
   Evaluation: number;
 
-  @IsOptional()   
-  @IsArray()     
-  @IsString({ each: true })  
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
   Languages?: string[];
 
   @IsOptional()

@@ -5,9 +5,11 @@ import { DoctorController } from './doctor.controller';
 import { Doctor, DoctorSchema } from './schemas/doctor.schema';
 
 @Module({
-    imports: [MongooseModule.forFeature([{ name: Doctor.name, schema: DoctorSchema }])],
-    controllers: [DoctorController],
-    providers: [DoctorService],
-    exports: [DoctorService], // تصدير الخدمة لاستخدامها في وحدات أخرى إذا لزم الأمر
+  imports: [
+    MongooseModule.forFeature([{ name: Doctor.name, schema: DoctorSchema }]),
+  ],
+  controllers: [DoctorController],
+  providers: [DoctorService],
+  exports: [DoctorService], // تصدير الخدمة لاستخدامها في وحدات أخرى إذا لزم الأمر
 })
 export class DoctorModule {}

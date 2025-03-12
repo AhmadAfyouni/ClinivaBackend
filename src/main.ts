@@ -3,7 +3,6 @@ import { AppModule } from './app.module';
 import { Logger } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
-
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   // Set Global API Prefix (e.g., /api/v1/)
@@ -11,11 +10,11 @@ async function bootstrap() {
 
   // Enable Swagger
   const config = new DocumentBuilder()
-      .setTitle('Clinic Management API')
-      .setDescription('API documentation for the Clinic Management System')
-      .setVersion('1.0')
-      .addBearerAuth() // Enable JWT Authentication in Swagger
-      .build();
+    .setTitle('Clinic Management API')
+    .setDescription('API documentation for the Clinic Management System')
+    .setVersion('1.0')
+    .addBearerAuth() // Enable JWT Authentication in Swagger
+    .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/v1/docs', app, document); // Swagger UI available at /api
 
@@ -25,7 +24,6 @@ async function bootstrap() {
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
-
 
   // Error Handling
   process.on('uncaughtException', (err) => {
@@ -38,6 +36,8 @@ async function bootstrap() {
   });
 
   await app.listen(process.env.PORT ?? 80);
-  Logger.log(`Server is running on http://localhost:${process.env.PORT ?? 80}/api/v1`);
+  Logger.log(
+    `Server is running on http://localhost:${process.env.PORT ?? 80}/api/v1`,
+  );
 }
 bootstrap();

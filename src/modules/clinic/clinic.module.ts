@@ -5,9 +5,11 @@ import { ClinicController } from './clinic.controller';
 import { Clinic, ClinicSchema } from './schemas/clinic.schema';
 
 @Module({
-    imports: [MongooseModule.forFeature([{ name: Clinic.name, schema: ClinicSchema }])],
-    controllers: [ClinicController],
-    providers: [ClinicService],
-    exports: [ClinicService]
+  imports: [
+    MongooseModule.forFeature([{ name: Clinic.name, schema: ClinicSchema }]),
+  ],
+  controllers: [ClinicController],
+  providers: [ClinicService],
+  exports: [ClinicService],
 })
 export class ClinicModule {}

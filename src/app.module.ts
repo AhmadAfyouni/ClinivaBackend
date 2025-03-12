@@ -4,7 +4,7 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { APP_GUARD } from '@nestjs/core';
 
 // Database & Configuration Modules
-import {DatabaseModule} from "./modules/database/database.module";
+import { DatabaseModule } from './modules/database/database.module';
 
 // Authentication & Authorization Modules
 import { AuthModule } from './modules/auth/auth.module';
@@ -21,7 +21,7 @@ import { DoctorModule } from './modules/doctor/doctor.module';
 import { PatientModule } from './modules/patient/patient.module';
 import { AppointmentModule } from './modules/appointment/appointment.module';
 import { MedicalRecordModule } from './modules/medicalrecord/medical-record.module';
-import {JwtAuthGuard} from "./modules/auth/jwt-auth.guard";
+import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 
 // Security & Middleware
 

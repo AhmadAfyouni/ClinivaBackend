@@ -23,7 +23,7 @@ export class Patient {
   identity?: string; // National ID or Passport
 
   @Prop()
-  nationality?: string; 
+  nationality?: string;
 
   @Prop({ required: true, enum: ['Single', 'Married', 'Divorced'] })
   marital_status?: string; // Example: "Single", "Married", "Divorced", etc.
