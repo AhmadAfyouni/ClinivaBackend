@@ -14,16 +14,4 @@ export class CreateCompanyDto {
     clinicCollections?: Types.ObjectId[];
 }
 
-export class UpdateCompanyDto {
-    @IsOptional()
-    @IsString()
-    name?: string;
-
-    @IsOptional()
-    @IsString()
-    address?: string;
-
-    @IsOptional()
-    clinicCollections?: Types.ObjectId[];
-}
 

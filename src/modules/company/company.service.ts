@@ -2,7 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Company, CompanyDocument } from './schemas/company.schema';
-import {CreateCompanyDto, UpdateCompanyDto} from "./dto/create-company.dto";
+import {CreateCompanyDto} from "./dto/create-company.dto";
+import {UpdateCompanyDto} from "./dto/update-company.dto";
 
 @Injectable()
 export class CompanyService {
