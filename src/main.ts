@@ -6,6 +6,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  // Set Global API Prefix (e.g., /api/v1/)
+  app.setGlobalPrefix('api/v1');
 
   // Enable Swagger
   const config = new DocumentBuilder()
@@ -15,16 +17,15 @@ async function bootstrap() {
       .addBearerAuth() // Enable JWT Authentication in Swagger
       .build();
   const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api/docs', app, document); // Swagger UI available at /api
+  SwaggerModule.setup('api/v1/docs', app, document); // Swagger UI available at /api
 
   // Enable CORS for frontend/backend communication
   app.enableCors({
     origin: process.env.CORS_ORIGIN || '*', // Configure based on environment
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // Set Global API Prefix (e.g., /api/v1/)
-  app.setGlobalPrefix('api/v1');
 
   // Error Handling
   process.on('uncaughtException', (err) => {
@@ -36,7 +37,7 @@ async function bootstrap() {
     Logger.error(`Unhandled Rejection: ${reason}`);
   });
 
-  await app.listen(process.env.PORT ?? 3000);
-  Logger.log(`🚀 Server is running on http://localhost:${process.env.PORT ?? 3000}/api/v1`);
+  await app.listen(process.env.PORT ?? 80);
+  Logger.log(`Server is running on http://localhost:${process.env.PORT ?? 80}/api/v1`);
 }
 bootstrap();

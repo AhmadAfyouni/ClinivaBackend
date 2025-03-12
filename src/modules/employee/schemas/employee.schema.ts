@@ -17,9 +17,6 @@ export class Employee {
     @Prop()
     jobTitle: string;
 
-    @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', unique: true, default: null })
-    user?: MongooseSchema.Types.ObjectId;  // مرجع لحساب المستخدم (اختياري)
-
     @Prop({ type: [WorkingHours], default: [] })
     workingHours: WorkingHours[];
 }
