@@ -10,6 +10,50 @@ export enum DayOfWeek {
   Saturday = 'Saturday',
   Sunday = 'Sunday',
 }
+export class InsuranceCompany extends Document {
+  @Prop({ required: true })
+  companyName: string; // اسم الشركة
+
+  @Prop({ required: true, unique: true })
+  companyPhone: string; // هاتف الشركة
+
+  @Prop({ required: true, unique: true })
+  companyEmail: string; // إيميل الشركة
+}
+
+export class BankAccount {
+  @Prop({ required: true })
+  accountName: string; // اسم الحساب
+
+  @Prop({ required: true, unique: true })
+  swiftCode: string; // Swift Code
+
+  @Prop({ required: true })
+  bankName: string; // اسم البنك
+
+  @Prop()
+  bankAddress: string; // عنوان البنك (اختياري)
+
+  @Prop({ required: true, unique: true })
+  accountNumber: string; // رقم الحساب
+}
+
+export class CommercialRecord {
+  @Prop({ required: true, unique: true })
+  recordNumber: string; // رقم السجل
+
+  @Prop({ required: true, type: Date })
+  grantDate: Date; // تاريخ المنح
+
+  @Prop({ required: true, type: Date })
+  issueDate: Date; // تاريخ الإصدار
+
+  @Prop({ required: true, type: Date })
+  expirationDate: Date; // الصلاحية
+
+  @Prop({ required: true, unique: true })
+  taxNumber: string; // الرقم الضريبي
+}
 
 export class Holiday {
   @Prop({ required: true })
@@ -89,6 +133,14 @@ export class BaseEntity {
 
   @Prop({ type: [WorkingDays], default: [] })
   workingDays: WorkingDays[];
+
+  @Prop({ type: [BankAccount], default: [] })
+  bankAccount: BankAccount[];
+
+  @Prop({ type: [InsuranceCompany], default: [] })
+  insuranceCompany: InsuranceCompany[];
+  @Prop({ type: CommercialRecord })
+  commercialRecord: CommercialRecord;
 
   @Prop({ type: Object })
   locationGoogl: { x: number; y: number };
