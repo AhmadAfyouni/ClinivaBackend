@@ -8,8 +8,10 @@ import {
   IsString,
   IsEmail,
   IsNotEmpty,
+  ValidateNested,
   IsPhoneNumber,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { DayOfWeek } from '../schemas/entity.schema'; // استيراد Enum DayOfWeek
 export class CreateCommercialRecordDto {
   @IsString()
@@ -148,26 +150,38 @@ export class CreateBaseEntityDto {
   details?: string; // التفاصيل
 
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateContactInfoDto)
   @IsOptional()
   ContactInfos?: CreateContactInfoDto[]; // قائمة من ContactInfo
 
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateHolidayDto)
   @IsOptional()
   holidays?: CreateHolidayDto[]; // قائمة من Holidays
 
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateSpecializationDto)
   @IsOptional()
   specialization?: CreateSpecializationDto[]; // قائمة من Specializations
 
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateWorkingDaysDto)
   @IsOptional()
   workingDays?: CreateWorkingDaysDto[]; // قائمة من WorkingDays
 
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateInsuranceCompanyDto)
   @IsOptional()
   insuranceCompany?: CreateInsuranceCompanyDto[];
 
   @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateBankAccountDto)
   @IsOptional()
   bankAccount?: CreateBankAccountDto[];
 

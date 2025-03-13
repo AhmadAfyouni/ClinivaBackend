@@ -10,7 +10,7 @@ export enum DayOfWeek {
   Saturday = 'Saturday',
   Sunday = 'Sunday',
 }
-export class InsuranceCompany extends Document {
+export class InsuranceCompany {
   @Prop({ required: true })
   companyName: string; // اسم الشركة
 
@@ -139,6 +139,7 @@ export class BaseEntity {
 
   @Prop({ type: [InsuranceCompany], default: [] })
   insuranceCompany: InsuranceCompany[];
+
   @Prop({ type: CommercialRecord })
   commercialRecord: CommercialRecord;
 
