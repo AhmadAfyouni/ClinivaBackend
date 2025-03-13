@@ -3,10 +3,71 @@ import {
   IsBoolean,
   IsDateString,
   IsEnum,
+  IsDate,
   IsOptional,
   IsString,
+  IsEmail,
+  IsNotEmpty,
+  IsPhoneNumber,
 } from 'class-validator';
 import { DayOfWeek } from '../schemas/entity.schema'; // استيراد Enum DayOfWeek
+export class CreateCommercialRecordDto {
+  @IsString()
+  @IsNotEmpty()
+  recordNumber: string;
+
+  @IsDate()
+  @IsNotEmpty()
+  grantDate: Date;
+
+  @IsDate()
+  @IsNotEmpty()
+  issueDate: Date;
+
+  @IsDate()
+  @IsNotEmpty()
+  expirationDate: Date;
+
+  @IsString()
+  @IsNotEmpty()
+  taxNumber: string;
+}
+
+export class CreateInsuranceCompanyDto {
+  @IsString()
+  @IsNotEmpty()
+  companyName: string;
+
+  @IsPhoneNumber()
+  @IsNotEmpty()
+  companyPhone: string;
+
+  @IsEmail()
+  @IsNotEmpty()
+  companyEmail: string;
+}
+
+export class CreateBankAccountDto {
+  @IsString()
+  @IsNotEmpty()
+  accountName: string;
+
+  @IsString()
+  @IsNotEmpty()
+  swiftCode: string;
+
+  @IsString()
+  @IsNotEmpty()
+  bankName: string;
+
+  @IsString()
+  @IsOptional()
+  bankAddress?: string; // اختياري
+
+  @IsString()
+  @IsNotEmpty()
+  accountNumber: string;
+}
 
 // DTO للـ ContactInfo
 export class CreateContactInfoDto {
@@ -101,6 +162,17 @@ export class CreateBaseEntityDto {
   @IsArray()
   @IsOptional()
   workingDays?: CreateWorkingDaysDto[]; // قائمة من WorkingDays
+
+  @IsArray()
+  @IsOptional()
+  insuranceCompany?: CreateInsuranceCompanyDto[];
+
+  @IsArray()
+  @IsOptional()
+  bankAccount?: CreateBankAccountDto[];
+
+  @IsOptional()
+  commercialRecord?: CreateCommercialRecordDto;
 
   @IsOptional()
   locationGoogl?: { x: number; y: number }; // الموقع باستخدام إحداثيات
