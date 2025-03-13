@@ -147,8 +147,7 @@ export class Company {
     @Prop({ type: Object })
     locationGoogl: { x: number; y: number };
 
-    @Prop({ required: true})
-    address: string;
+
 
     @Prop({ type: [Types.ObjectId], ref: 'ClinicCollection', default: [] })
     clinicCollections: Types.ObjectId[]; // المجموعات المرتبطة بها
