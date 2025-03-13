@@ -1,8 +1,4 @@
-Sure! Below is the content for your `README.md` file in **English**, covering all the details of your **authentication system** using **JWT**, **roles & permissions**, and the overall **system structure**.
-
----
-
-# 🏥 CLINIC MANAGEMENT SYSTEM - README
+#  CLINIC MANAGEMENT SYSTEM 🏥 - README
 
 ## 📌 Introduction
 This project is a **Clinic Management System** built using **NestJS**, **MongoDB**, and **JWT Authentication**. The system provides a structured hierarchy for **companies, clinic collections, departments, and clinics**. It also includes **user management**, **roles and permissions**, and a secure **authentication system** using **JWT**.
@@ -203,16 +199,10 @@ npm install
 npm run start:dev
 ```
 
-### 3️⃣ Running with Docker
-```sh
-docker-compose up --build
-```
 
----
 
 ## 📌 Conclusion
 This **Clinic Management System** provides a **secure, scalable, and flexible** structure for handling **authentication, user management, roles & permissions, clinics, appointments, and patient records**.
 
-If you have any **questions or improvements**, feel free to **contribute**! 🚀
 
 ---

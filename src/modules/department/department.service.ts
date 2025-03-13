@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Department, DepartmentDocument } from './schemas/department.schema';
-import {CreateDepartmentDto} from "./dto/update-department.dto";
-import {UpdateDepartmentDto} from "./dto/create-department.dto";
+import {CreateDepartmentDto} from "./dto/create-department.dto";
+import {UpdateDepartmentDto} from "./dto/update-department.dto";
 
 @Injectable()
 export class DepartmentService {

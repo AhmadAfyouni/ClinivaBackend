@@ -10,8 +10,6 @@ export class CreateCompanyDto {
     @IsString()
     address: string;
 
-    @IsOptional()
-    clinicCollections?: Types.ObjectId[];
 }
 
 

@@ -1,4 +1,13 @@
-import {PartialType} from "@nestjs/mapped-types";
-import {CreateDepartmentDto} from "./update-department.dto";
+import { IsNotEmpty, IsOptional, IsString, IsMongoId, IsArray } from 'class-validator';
+import { Types } from 'mongoose';
 
-export class UpdateDepartmentDto extends PartialType(CreateDepartmentDto) { }
+export class CreateDepartmentDto {
+    @IsNotEmpty()
+    @IsString()
+    name: string; // اسم القسم
+
+    @IsNotEmpty()
+    @IsMongoId()
+    clinicCollectionId: Types.ObjectId; // مجموعة العيادات التي ينتمي إليها القسم
+
+}
