@@ -59,6 +59,13 @@ export class Doctor {
     @Prop()
     Evaluation?: number; // Example: 1-10 rating system
 
+    // Access Control Directly in Doctor Schema
+    @Prop({ type: Types.ObjectId, ref: 'Department',  default: null })
+    departmentId: Types.ObjectId;  // Doctor must belong to a department
+
+    @Prop({ type: [Types.ObjectId], ref: 'Clinic', default: [] })
+    clinics: Types.ObjectId[];  // Clinics where the doctor works
+
 }
 
 export const DoctorSchema = SchemaFactory.createForClass(Doctor);

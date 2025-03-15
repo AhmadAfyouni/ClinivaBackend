@@ -150,11 +150,6 @@ export class Clinic {
     @Prop({ type: Types.ObjectId, ref: 'Department', default: null })
     departmentId?: Types.ObjectId;  // القسم الذي تتبع له العيادة (إذا وجدت)
 
-    @Prop({ type: Types.ObjectId, ref: 'ClinicCollection', default: null })
-    clinicCollectionId?: Types.ObjectId;  // المجموعة التي تنتمي إليها العيادة (إذا وجدت)
-
-    @Prop({ type: [Types.ObjectId], ref: 'User', default: [] })
-    staff: Types.ObjectId[]; // الموظفون والأطباء العاملون في هذه العيادة
 }
 
 export const ClinicSchema = SchemaFactory.createForClass(Clinic);

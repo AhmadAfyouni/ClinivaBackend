@@ -149,8 +149,6 @@ export class Company {
 
 
 
-    @Prop({ type: [Types.ObjectId], ref: 'ClinicCollection', default: [] })
-    clinicCollections: Types.ObjectId[]; // المجموعات المرتبطة بها
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);

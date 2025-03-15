@@ -152,8 +152,6 @@ export class Department {
     @Prop({ type: Types.ObjectId, ref: 'ClinicCollection', required: true })
     clinicCollectionId: Types.ObjectId;  // مجموعة العيادات التي ينتمي إليها القسم
 
-    @Prop({ type: [Types.ObjectId], ref: 'Clinic', default: [] })
-    clinics: Types.ObjectId[]; // العيادات التي تتبع هذا القسم
 }
 
 export const DepartmentSchema = SchemaFactory.createForClass(Department);

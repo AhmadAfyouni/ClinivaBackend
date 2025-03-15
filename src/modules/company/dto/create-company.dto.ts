@@ -193,8 +193,6 @@ export class CreateCompanyDto {
     locationGoogl?: { x: number; y: number }; // الموقع باستخدام إحداثيات
   
 
-    @IsOptional()
-    clinicCollections?: Types.ObjectId[];
 }
 
 

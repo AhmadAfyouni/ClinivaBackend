@@ -16,9 +16,26 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
           throw new Error('MONGO_URI is missing in environment variables!');
         }
 
-        console.log(` Connecting to MongoDB at: ${mongoUri}`);
+        console.log(`Connecting to MongoDB at: ${mongoUri}`);
         console.log(`Using database: ${dbName}`);
 
+        // Handling connection errors and logging details
+        try {
+          const mongoose = require('mongoose');
+          mongoose.connect(mongoUri, { dbName })
+            .then(() => {
+              console.log('Successfully connected to MongoDB');
+            })
+            .catch((error) => {
+              console.error('Error connecting to MongoDB:', error.message);
+              // process.exit(1); // Exit the process if the connection fails
+            }); 
+        } catch (error) {
+          console.error('An unexpected error occurred while connecting to MongoDB:', error.message);
+          // process.exit(1); // Exit the process if an unexpected error occurs
+        }
+
+        // Return the connection options
         return { uri: mongoUri, dbName };
       },
     }),
