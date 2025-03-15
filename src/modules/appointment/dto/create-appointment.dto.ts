@@ -5,7 +5,7 @@ export class CreateAppointmentDto {
     @IsNotEmpty()
     @IsMongoId()
     patient: Types.ObjectId; // معرف المريض
-
+ 
     @IsNotEmpty()
     @IsMongoId()
     clinic: Types.ObjectId; // معرف العيادة

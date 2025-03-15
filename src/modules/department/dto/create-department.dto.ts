@@ -17,7 +17,7 @@ import {
   import { DayOfWeek } from '../schemas/department.schema'; // استيراد Enum DayOfWeek
   export class CreateCommercialRecordDto {
     @IsString()
-    @IsNotEmpty()
+    @IsNotEmpty() 
     recordNumber: string;
   
     @IsDate()

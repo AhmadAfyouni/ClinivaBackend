@@ -130,7 +130,7 @@ export class Department {
   
     @Prop({ type: [Holiday], default: [] })
     holidays: Holiday[];
-  
+   
     @Prop({ type: [Specialization], default: [] })
     specialization: Specialization[];
   
