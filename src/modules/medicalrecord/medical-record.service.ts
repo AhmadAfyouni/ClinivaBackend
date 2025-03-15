@@ -1,13 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import {Injectable, NotFoundException} from '@nestjs/common';
+import {InjectModel} from '@nestjs/mongoose';
+import {Model} from 'mongoose';
 import {MedicalRecord, MedicalRecordDocument} from "./schemas/medicalrecord.schema";
 import {CreateMedicalRecordDto} from "./dto/create-medical-record.dto";
 import {UpdateMedicalRecordDto} from "./dto/update-medical-record.dto";
 
 @Injectable()
 export class MedicalRecordService {
-    constructor(@InjectModel(MedicalRecord.name) private medicalRecordModel: Model<MedicalRecordDocument>) {}
+    constructor(@InjectModel(MedicalRecord.name) private medicalRecordModel: Model<MedicalRecordDocument>) {
+    }
 
     async createMedicalRecord(createMedicalRecordDto: CreateMedicalRecordDto): Promise<MedicalRecord> {
         const newRecord = new this.medicalRecordModel(createMedicalRecordDto);
@@ -25,7 +26,7 @@ export class MedicalRecordService {
     }
 
     async updateMedicalRecord(id: string, updateMedicalRecordDto: UpdateMedicalRecordDto): Promise<MedicalRecord> {
-        const updatedRecord = await this.medicalRecordModel.findByIdAndUpdate(id, updateMedicalRecordDto, { new: true }).exec();
+        const updatedRecord = await this.medicalRecordModel.findByIdAndUpdate(id, updateMedicalRecordDto, {new: true}).exec();
         if (!updatedRecord) throw new NotFoundException('Medical Record not found');
         return updatedRecord;
     }

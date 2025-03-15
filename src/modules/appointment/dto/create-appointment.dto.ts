@@ -1,18 +1,18 @@
-import { IsNotEmpty, IsOptional, IsEnum, IsDate, IsMongoId, Min, Max, IsNumber, IsString } from 'class-validator';
-import { Types } from 'mongoose';
+import {IsDate, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min} from 'class-validator';
+import {Types} from 'mongoose';
 
 export class CreateAppointmentDto {
     @IsNotEmpty()
     @IsMongoId()
     patient: Types.ObjectId; // معرف المريض
- 
+
     @IsNotEmpty()
     @IsMongoId()
     clinic: Types.ObjectId; // معرف العيادة
 
     @IsNotEmpty()
     @IsMongoId()
-    doctor: Types.ObjectId; // معرف الطبيب
+    doctor: Types.ObjectId; // doctor is  employee
 
     @IsNotEmpty()
 

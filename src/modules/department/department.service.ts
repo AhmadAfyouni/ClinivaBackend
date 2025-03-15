@@ -1,13 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Department, DepartmentDocument } from './schemas/department.schema';
+import {Injectable, NotFoundException} from '@nestjs/common';
+import {InjectModel} from '@nestjs/mongoose';
+import {Model} from 'mongoose';
+import {Department, DepartmentDocument} from './schemas/department.schema';
 import {CreateDepartmentDto} from "./dto/create-department.dto";
 import {UpdateDepartmentDto} from "./dto/update-department.dto";
 
 @Injectable()
 export class DepartmentService {
-    constructor(@InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>) {}
+    constructor(@InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>) {
+    }
 
     async createDepartment(createDepartmentDto: CreateDepartmentDto): Promise<Department> {
         const newDepartment = new this.departmentModel(createDepartmentDto);
@@ -25,7 +26,7 @@ export class DepartmentService {
     }
 
     async updateDepartment(id: string, updateDepartmentDto: UpdateDepartmentDto): Promise<Department> {
-        const updatedDepartment = await this.departmentModel.findByIdAndUpdate(id, updateDepartmentDto, { new: true }).populate(['clinicCollectionId', 'clinics']);
+        const updatedDepartment = await this.departmentModel.findByIdAndUpdate(id, updateDepartmentDto, {new: true}).populate(['clinicCollectionId', 'clinics']);
         if (!updatedDepartment) throw new NotFoundException('Department not found');
         return updatedDepartment;
     }

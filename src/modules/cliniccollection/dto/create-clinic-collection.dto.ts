@@ -1,203 +1,171 @@
+import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
+import {IsArray, IsDate, IsMongoId, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested} from 'class-validator';
+import {Type} from 'class-transformer';
+import {Types} from 'mongoose';
+
 import {
-    IsArray,
-    IsBoolean,
-    IsDateString,
-    IsEnum,
-    IsDate,
-    IsOptional,
-    IsString,
-    IsEmail,
-    IsNotEmpty,
-    ValidateNested,
-    IsPhoneNumber,
-    IsMongoId,
-  } from 'class-validator';
-  import { Types } from 'mongoose';
-  import { Type } from 'class-transformer';
-  import { DayOfWeek } from '../schemas/cliniccollection.schema'; // استيراد Enum DayOfWeek
-  export class CreateCommercialRecordDto {
-    @IsString()
-    @IsNotEmpty()
-    recordNumber: string; 
-  
-    @IsDate()
-    @IsNotEmpty()
-    grantDate: Date;
-  
-    @IsDate()
-    @IsNotEmpty()
-    issueDate: Date;
-  
-    @IsDate()
-    @IsNotEmpty()
-    expirationDate: Date;
-  
-    @IsString()
-    @IsNotEmpty()
-    taxNumber: string;
-  }
-  
-  export class CreateInsuranceCompanyDto {
-    @IsString()
-    @IsNotEmpty()
-    companyName: string;
-  
-    @IsPhoneNumber()
-    @IsNotEmpty()
-    companyPhone: string;
-  
-    @IsEmail()
-    @IsNotEmpty()
-    companyEmail: string;
-  }
-  
-  export class CreateBankAccountDto {
-    @IsString()
-    @IsNotEmpty()
-    accountName: string;
-  
-    @IsString()
-    @IsNotEmpty()
-    swiftCode: string;
-  
-    @IsString()
-    @IsNotEmpty()
-    bankName: string;
-  
-    @IsString()
-    @IsOptional()
-    bankAddress?: string; // اختياري
-  
-    @IsString()
-    @IsNotEmpty()
-    accountNumber: string;
-  }
-  
-  // DTO للـ ContactInfo
-  export class CreateContactInfoDto {
-    @IsString()
-    value: string; // القيمة مثل البريد الإلكتروني أو رقم الهاتف أو حساب التواصل الاجتماعي
-  
-    @IsEnum(['email', 'phone', 'socialMedia'])
-    type: string; // نوع التواصل مثل البريد الإلكتروني أو الهاتف أو حساب التواصل الاجتماعي
-  
-    @IsBoolean()
-    isPublic: boolean; // إذا كان هذا النوع من الاتصال عام أو خاص
-  
-    @IsOptional()
-    @IsString()
-    subType?: string; // نوع الاتصال مثل العمل أو المكتب أو الشخصي
-  }
-  
-  // DTO للـ Holiday
-  export class CreateHolidayDto {
-    @IsString()
-    name: string; // اسم العطلة
-  
-    @IsDateString()
-    date: string; // تاريخ العطلة
-  
-    @IsString()
-    reason: string; // سبب العطلة
-  }
-  
-  // DTO للـ Specialization
-  export class CreateSpecializationDto {
-    @IsString()
-    name: string; // اسم التخصص
-  
-    @IsString()
-    description: string; // وصف التخصص
-  }
-  
-  // DTO للـ WorkingDays
-  export class CreateWorkingDaysDto {
-    @IsEnum(DayOfWeek)
-    name: DayOfWeek; // يوم العمل من أيام الأسبوع
-  
-    @IsString()
-    startOfWorkingTime: string; // وقت بدء العمل
-  
-    @IsString()
-    endOfWorkingTime: string; // وقت نهاية العمل
-  }
-  
+    BankAccount,
+    CommercialRecord,
+    ContactInfo,
+    Holiday,
+    InsuranceCompany,
+    Specialization,
+    WorkingHours
+} from '../../../common/utlis/helper';
+
 export class CreateClinicCollectionDto {
+    @ApiProperty({description: 'Clinic Collection name', example: 'Saudi Clinics Group'})
     @IsString()
-    name: string; // اسم الكيان
-  
-    @IsOptional()
-    @IsString()
-    intro?: string; // المقدمة
-  
-    @IsOptional()
-    @IsDateString()
-    yearOfEstablishment?: string; // سنة التأسيس
-  
+    @IsNotEmpty()
+    name: string;
+
+    @ApiPropertyOptional({
+        description: 'Brief introduction of the clinic collection',
+        example: 'A leading healthcare provider in Saudi Arabia.'
+    })
     @IsOptional()
     @IsString()
-    address?: string; // العنوان
-  
+    introduction?: string;
+
+    @ApiPropertyOptional({description: 'Year of establishment', example: '2010-05-20'})
+    @IsOptional()
+    @IsDate()
+    yearOfEstablishment?: Date;
+
+    @ApiProperty({description: 'Clinic Collection address', example: '456 Health Street, Jeddah, Saudi Arabia'})
+    @IsString()
+    @IsNotEmpty()
+    address: string;
+
+    @ApiPropertyOptional({description: 'Logo URL', example: 'https://clinic.com/logo.png'})
     @IsOptional()
     @IsString()
-    logo?: string; // الشعار
-  
+    logo?: string;
+
+    @ApiPropertyOptional({description: 'Vision statement', example: 'Providing the best medical care in the region.'})
     @IsOptional()
     @IsString()
-    vision?: string; // الرؤية
-  
+    vision?: string;
+
+    @ApiPropertyOptional({description: 'Additional details', example: 'We have over 50 branches across the country.'})
     @IsOptional()
     @IsString()
-    details?: string; // التفاصيل
-  
+    details?: string;
+
+    @ApiPropertyOptional({
+        type: [ContactInfo],
+        description: 'Contact information of the clinic collection',
+        example: [
+            {type: 'phone', value: '+966123456789', isPublic: true, subType: 'work'},
+            {type: 'email', value: 'info@clinicgroup.com', isPublic: true, subType: 'corporate'}
+        ]
+    })
     @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreateContactInfoDto)
+    @ValidateNested({each: true})
+    @Type(() => ContactInfo)
     @IsOptional()
-    ContactInfos?: CreateContactInfoDto[]; // قائمة من ContactInfo
-  
+    ContactInfos?: ContactInfo[];
+
+    @ApiPropertyOptional({
+        type: [Holiday],
+        description: 'Clinic collection holidays',
+        example: [
+            {name: 'Eid Al-Fitr', date: '2025-04-21', reason: 'Public holiday'}
+        ]
+    })
     @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreateHolidayDto)
+    @ValidateNested({each: true})
+    @Type(() => Holiday)
     @IsOptional()
-    holidays?: CreateHolidayDto[]; // قائمة من Holidays
-  
+    holidays?: Holiday[];
+
+    @ApiPropertyOptional({
+        type: [Specialization],
+        description: 'Specializations available in the clinic collection',
+        example: [
+            {name: 'Cardiology', description: 'Heart and vascular care'},
+            {name: 'Dermatology', description: 'Skin and cosmetic treatments'}
+        ]
+    })
     @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreateSpecializationDto)
+    @ValidateNested({each: true})
+    @Type(() => Specialization)
     @IsOptional()
-    specialization?: CreateSpecializationDto[]; // قائمة من Specializations
-  
+    specialization?: Specialization[];
+
+    @ApiPropertyOptional({
+        type: [WorkingHours],
+        description: 'Working hours of the clinic collection',
+        example: [
+            {day: 'Monday', timeSlots: [{startTime: '09:00 AM', endTime: '05:00 PM'}]}
+        ]
+    })
     @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreateWorkingDaysDto)
+    @ValidateNested({each: true})
+    @Type(() => WorkingHours)
     @IsOptional()
-    workingDays?: CreateWorkingDaysDto[]; // قائمة من WorkingDays
-  
+    workingDays?: WorkingHours[];
+
+    @ApiPropertyOptional({
+        type: [BankAccount],
+        description: 'Bank accounts associated with the clinic collection',
+        example: [
+            {
+                accountName: 'Clinic Main Account',
+                swiftCode: 'SA123456',
+                bankName: 'Al Rajhi Bank',
+                accountNumber: '1234567890'
+            }
+        ]
+    })
     @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreateInsuranceCompanyDto)
+    @ValidateNested({each: true})
+    @Type(() => BankAccount)
     @IsOptional()
-    insuranceCompany?: CreateInsuranceCompanyDto[];
-  
+    bankAccount?: BankAccount[];
+
+    @ApiPropertyOptional({
+        type: [InsuranceCompany],
+        description: 'Accepted insurance companies',
+        example: [
+            {companyName: 'Bupa Arabia', companyPhone: '+9661122334455', companyEmail: 'support@bupa.com.sa'}
+        ]
+    })
     @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CreateBankAccountDto)
+    @ValidateNested({each: true})
+    @Type(() => InsuranceCompany)
     @IsOptional()
-    bankAccount?: CreateBankAccountDto[];
-  
+    insuranceCompany?: InsuranceCompany[];
+
+    @ApiPropertyOptional({
+        type: CommercialRecord,
+        description: 'Commercial record of the clinic collection',
+        example: {
+            recordNumber: '1234567890',
+            grantDate: '2015-06-15',
+            issueDate: '2015-06-15',
+            expirationDate: '2030-06-15',
+            taxNumber: '9876543210'
+        }
+    })
     @IsOptional()
-    commercialRecord?: CreateCommercialRecordDto;
-  
+    @ValidateNested()
+    @Type(() => CommercialRecord)
+    commercialRecord?: CommercialRecord;
+
+    @ApiPropertyOptional({
+        description: 'Google Maps location coordinates',
+        example: {x: 24.7136, y: 46.6753}
+    })
     @IsOptional()
-    locationGoogl?: { x: number; y: number }; // الموقع باستخدام إحداثيات
-  
+    @IsObject()
+    locationGoogl?: { x: number; y: number };
+
+    @ApiPropertyOptional({
+        description: 'Company ID that the clinic collection belongs to',
+        example: '60f7c7b84f1a2c001c8b4567'
+    })
     @IsOptional()
     @IsMongoId()
-    companyId?: Types.ObjectId; // مرجع إلى الشركة المالكة (اختياري)
-
-    @IsOptional()
-    @IsArray()
-    @IsMongoId({ each: true })
-    departments?: Types.ObjectId[]; // قائمة معرفات الأقسام
+    companyId?: Types.ObjectId;
 }

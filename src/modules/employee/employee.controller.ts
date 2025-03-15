@@ -1,12 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { EmployeeService } from './employee.service';
-import { Employee } from './schemas/employee.schema';
+import {Body, Controller, Delete, Get, Param, Patch, Post} from '@nestjs/common';
+import {EmployeeService} from './employee.service';
+import {Employee} from './schemas/employee.schema';
 import {CreateEmployeeDto} from "./dto/create-employee.dto";
 import {UpdateEmployeeDto} from "./dto/update-employee.dto";
 
 @Controller('employees')
 export class EmployeeController {
-    constructor(private readonly employeeService: EmployeeService) {}
+    constructor(private readonly employeeService: EmployeeService) {
+    }
 
     @Post()
     async createEmployee(@Body() createEmployeeDto: CreateEmployeeDto): Promise<Employee> {

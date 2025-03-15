@@ -1,43 +1,40 @@
-import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
+import {Document, Types} from 'mongoose';
 
 export type AppointmentDocument = Appointment & Document;
 
-@Schema({ timestamps: true })
+@Schema({timestamps: true})
 export class Appointment {
     _id: Types.ObjectId;
 
-    @Prop({ type: Types.ObjectId, ref: 'Patient', required: true })
-    patient: Types.ObjectId;  // مرجع إلى المريض
+    @Prop({type: Types.ObjectId, ref: 'Patient', required: true})
+    patient: Types.ObjectId;
 
-    @Prop({ type: Types.ObjectId, ref: 'Clinic', required: true })
-    clinic: Types.ObjectId;  // العيادة التي تم فيها الموعد
+    @Prop({type: Types.ObjectId, ref: 'Clinic', required: true})
+    clinic: Types.ObjectId;
 
-    @Prop({ type: Types.ObjectId, ref: 'Doctor', required: true })
-    doctor: Types.ObjectId;  // الطبيب الذي تم الحجز عنده
+    @Prop({type: Types.ObjectId, ref: 'Employee', required: true})
+    doctor: Types.ObjectId;
 
-    @Prop({ required: true })
-    datetime: Date;  // تاريخ ووقت الموعد المحدد للحجز
-
-    @Prop()
-    startTime?: Date;  // وقت بدء الموعد الفعلي
+    @Prop({required: true})
+    datetime: Date;
 
     @Prop()
-    endTime?: Date;  // وقت انتهاء الموعد الفعلي
+    startTime?: Date;
 
     @Prop()
-    reason?: string;  // سبب الزيارة
+    endTime?: Date;
 
-    @Prop({ enum: ['scheduled', 'completed', 'cancelled'], default: 'scheduled' })
-    status: string;  // حالة الموعد
+    @Prop()
+    reason?: string;
 
-    // @Prop({ type: Types.ObjectId, ref: 'MedicalRecord', default: null })
-    // medicalRecord?: Types.ObjectId;  // مرجع إلى السجل الطبي (يتم إنشاؤه بعد انتهاء الموعد)
+    @Prop({enum: ['scheduled', 'completed', 'cancelled'], default: 'scheduled'})
+    status: string;
 
-    @Prop({ type: Number, min: 1, max: 5 })
+    @Prop({type: Number, min: 1, max: 5})
     patientRating?: number;  // تقييم المريض للطبيب (1-5 نجوم)
 
-    @Prop({ default: '' })
+    @Prop({default: ''})
     patientFeedback?: string;  // ملاحظات المريض عن الخدمة
 }
 

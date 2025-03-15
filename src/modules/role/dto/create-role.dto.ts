@@ -1,17 +1,31 @@
-import { IsNotEmpty, IsOptional, IsString, IsArray } from 'class-validator';
-import {PermissionsEnum} from "../../../config/permission.enum";
+import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
+import {IsArray, IsEnum, IsNotEmpty, IsOptional, IsString} from 'class-validator';
+import {PermissionsEnum} from '../../../config/permission.enum';
 
 export class CreateRoleDto {
-    @IsNotEmpty()
+    @ApiProperty({description: 'Role name', example: 'Admin'})
     @IsString()
-    name: string; // اسم الدور
+    @IsNotEmpty()
+    name: string;
 
-    @IsOptional()
+    @ApiPropertyOptional({
+        type: [String],
+        enum: Object.values(PermissionsEnum),
+        description: 'List of permissions associated with the role'
+    })
     @IsArray()
-    permissions?: PermissionsEnum[]; // قائمة بالصلاحيات الفردية
+    @IsOptional()
+    @IsEnum(PermissionsEnum, {each: true})
+    permissions?: string[];
 
-    @IsOptional()
+    @ApiPropertyOptional({type: [String], description: 'List of permission groups associated with the role'})
     @IsArray()
-    permissionGroups?: string[]; // قائمة بمجموعات الصلاحيات
+    @IsOptional()
+    @IsString({each: true})
+    permissionGroups?: string[];
+
+    @ApiPropertyOptional({description: 'Role description'})
+    @IsOptional()
+    @IsString()
+    description?: string;
 }
-

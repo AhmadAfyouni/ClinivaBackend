@@ -1,15 +1,16 @@
-import { Injectable, UnauthorizedException} from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import {Injectable, UnauthorizedException} from '@nestjs/common';
+import {JwtService} from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { UserService } from '../user/user.service';
-import { User } from '../user/schemas/user.schema';
+import {UserService} from '../user/user.service';
+import {User} from '../user/schemas/user.schema';
 
 @Injectable()
 export class AuthService {
     constructor(
         private readonly userService: UserService,
         private readonly jwtService: JwtService
-    ) {}
+    ) {
+    }
 
     async validateUser(email: string, password: string): Promise<User | null> {
         const user = await this.userService.getUserByEmail(email);
@@ -33,11 +34,11 @@ export class AuthService {
             throw new UnauthorizedException('User ID is missing');
         }
 
-        const payload = { sub: user._id.toString(), email: user.email, roles: user.roleIds };
+        const payload = {sub: user._id.toString(), email: user.email, roles: user.roleIds};
 
         return {
-            accessToken: this.jwtService.sign(payload, { expiresIn: '30m' }), // Short-lived access token
-            refreshToken: this.jwtService.sign(payload, { expiresIn: '7d' }),  // Long-lived refresh token
+            accessToken: this.jwtService.sign(payload, {expiresIn: '30m'}), // Short-lived access token
+            refreshToken: this.jwtService.sign(payload, {expiresIn: '7d'}),  // Long-lived refresh token
         };
     }
 
@@ -45,7 +46,11 @@ export class AuthService {
         try {
             const payload = this.jwtService.verify(refreshToken);
             return {
-                accessToken: this.jwtService.sign({ sub: payload.sub, email: payload.email, roles: payload.roles }, { expiresIn: '15m' }),
+                accessToken: this.jwtService.sign({
+                    sub: payload.sub,
+                    email: payload.email,
+                    roles: payload.roles
+                }, {expiresIn: '15m'}),
             };
         } catch (error) {
             throw new UnauthorizedException('Invalid or expired refresh token');

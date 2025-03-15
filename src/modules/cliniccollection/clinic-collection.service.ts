@@ -1,13 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import {Injectable, NotFoundException} from '@nestjs/common';
+import {InjectModel} from '@nestjs/mongoose';
+import {Model} from 'mongoose';
 import {ClinicCollection, ClinicCollectionDocument} from "./schemas/cliniccollection.schema";
 import {UpdateClinicCollectionDto} from "./dto/update-clinic-collection.dto";
 import {CreateClinicCollectionDto} from "./dto/create-clinic-collection.dto";
 
 @Injectable()
 export class ClinicCollectionService {
-    constructor(@InjectModel(ClinicCollection.name) private clinicCollectionModel: Model<ClinicCollectionDocument>) {}
+    constructor(@InjectModel(ClinicCollection.name) private clinicCollectionModel: Model<ClinicCollectionDocument>) {
+    }
 
     async createClinicCollection(createClinicCollectionDto: CreateClinicCollectionDto): Promise<ClinicCollection> {
         const newClinicCollection = new this.clinicCollectionModel(createClinicCollectionDto);
@@ -25,7 +26,7 @@ export class ClinicCollectionService {
     }
 
     async updateClinicCollection(id: string, updateClinicCollectionDto: UpdateClinicCollectionDto): Promise<ClinicCollection> {
-        const updatedClinicCollection = await this.clinicCollectionModel.findByIdAndUpdate(id, updateClinicCollectionDto, { new: true }).populate(['companyId', 'departments']);
+        const updatedClinicCollection = await this.clinicCollectionModel.findByIdAndUpdate(id, updateClinicCollectionDto, {new: true}).populate(['companyId', 'departments']);
         if (!updatedClinicCollection) throw new NotFoundException('Clinic Collection not found');
         return updatedClinicCollection;
     }

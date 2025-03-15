@@ -1,13 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Clinic, ClinicDocument } from './schemas/clinic.schema';
+import {Injectable, NotFoundException} from '@nestjs/common';
+import {InjectModel} from '@nestjs/mongoose';
+import {Model} from 'mongoose';
+import {Clinic, ClinicDocument} from './schemas/clinic.schema';
 import {CreateClinicDto} from "./dto/create-clinic.dto";
 import {UpdateClinicDto} from "./dto/update-clinic.dto";
 
 @Injectable()
 export class ClinicService {
-    constructor(@InjectModel(Clinic.name) private clinicModel: Model<ClinicDocument>) {}
+    constructor(@InjectModel(Clinic.name) private clinicModel: Model<ClinicDocument>) {
+    }
 
     async createClinic(createClinicDto: CreateClinicDto): Promise<Clinic> {
         const newClinic = new this.clinicModel(createClinicDto);
@@ -25,7 +26,7 @@ export class ClinicService {
     }
 
     async updateClinic(id: string, updateClinicDto: UpdateClinicDto): Promise<Clinic> {
-        const updatedClinic = await this.clinicModel.findByIdAndUpdate(id, updateClinicDto, { new: true }).populate(['departmentId', 'clinicCollectionId', 'doctors', 'employees']);
+        const updatedClinic = await this.clinicModel.findByIdAndUpdate(id, updateClinicDto, {new: true}).populate(['departmentId', 'clinicCollectionId', 'doctors', 'employees']);
         if (!updatedClinic) throw new NotFoundException('Clinic not found');
         return updatedClinic;
     }

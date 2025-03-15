@@ -1,11 +1,12 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
-import { ClinicService } from './clinic.service';
+import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {ClinicService} from './clinic.service';
 import {CreateClinicDto} from "./dto/create-clinic.dto";
 import {UpdateClinicDto} from "./dto/update-clinic.dto";
 
 @Controller('clinics')
 export class ClinicController {
-    constructor(private readonly clinicService: ClinicService) {}
+    constructor(private readonly clinicService: ClinicService) {
+    }
 
     @Post()
     async createClinic(@Body() createClinicDto: CreateClinicDto) {

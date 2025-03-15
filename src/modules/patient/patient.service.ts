@@ -1,13 +1,14 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { Patient, PatientDocument } from './schemas/patient.schema';
+import {Injectable, NotFoundException} from '@nestjs/common';
+import {InjectModel} from '@nestjs/mongoose';
+import {Model} from 'mongoose';
+import {Patient, PatientDocument} from './schemas/patient.schema';
 import {CreatePatientDto} from "./dto/create-patient.dto";
 import {UpdatePatientDto} from "./dto/update-patient.dto";
 
 @Injectable()
 export class PatientService {
-    constructor(@InjectModel(Patient.name) private patientModel: Model<PatientDocument>) {}
+    constructor(@InjectModel(Patient.name) private patientModel: Model<PatientDocument>) {
+    }
 
     async createPatient(createPatientDto: CreatePatientDto): Promise<Patient> {
         const newPatient = new this.patientModel(createPatientDto);
@@ -25,7 +26,7 @@ export class PatientService {
     }
 
     async updatePatient(id: string, updatePatientDto: UpdatePatientDto): Promise<Patient> {
-        const updatedPatient = await this.patientModel.findByIdAndUpdate(id, updatePatientDto, { new: true }).exec();
+        const updatedPatient = await this.patientModel.findByIdAndUpdate(id, updatePatientDto, {new: true}).exec();
         if (!updatedPatient) throw new NotFoundException('Patient not found');
         return updatedPatient;
     }

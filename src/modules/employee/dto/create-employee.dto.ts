@@ -1,194 +1,186 @@
+import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
 import {
-  IsNotEmpty,IsObject,
-  IsOptional,
-  IsString,
-  IsArray,Min,Max,
-  ValidateNested,IsEmail,IsMongoId,
-  IsPhoneNumber,IsEnum,IsDate,IsNumber,
+    IsArray,
+    IsDate,
+    IsEnum,
+    IsNotEmpty,
+    IsNumber,
+    IsObject,
+    IsOptional,
+    IsString,
+    ValidateNested
 } from 'class-validator';
-import { Type } from 'class-transformer';
-import { WorkingHours } from '../../../common/utlis/helper';
-
-export class EmergencyContactDto {
-  @IsString()
-  name: string;
-
-  @IsPhoneNumber()
-  phone: string;
-}
-
-export class DiseaseDto {
-  @IsString()
-  disease_name: string;
-}
-export class InsuranceDto {
-  @IsNotEmpty()
-  @IsString()
-  insuranceProvider: string;
-
-  @IsNotEmpty()
-  @IsString()
-  insuranceNumber: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  @Max(100)
-  coveragePercentage: number;
-
-  @IsNotEmpty()
-  @IsDate()
-  @Type(() => Date)
-  expiryDate: Date;
-
-  @IsNotEmpty()
-  @IsString()
-  @IsEnum(['private', 'governmental', 'corporate'])
-  insuranceType: string;
-}
-
-export class TimeSlotDto {
-  @IsNotEmpty()
-  @IsString()
-  startTime: string; // وقت بدء العمل (مثال: "04:00 PM")
-
-  @IsNotEmpty()
-  @IsString()
-  endTime: string; // وقت انتهاء العمل (مثال: "08:00 PM")
-}
- 
-  
- 
-export class WorkingHoursDto {
-  @IsNotEmpty()
-  @IsString()
-  @IsEnum([
-    'Sunday',
-    'Monday',
-    'Tuesday',
-    'Wednesday',
-    'Thursday',
-    'Friday',
-    'Saturday',
-  ])
-  day: string; // اليوم
-
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => TimeSlotDto)
-  timeSlots: TimeSlotDto[]; // قائمة الفترات الزمنية لكل يوم
-}
+import {Type} from 'class-transformer';
+import {ContactInfo, WorkingHours} from '../../../common/utlis/helper';
 
 export class CreateEmployeeDto {
-
-  
+    @ApiProperty({description: 'Employee name', example: 'John Doe'})
     @IsString()
+    @IsNotEmpty()
     name: string;
-  
+
+    @ApiPropertyOptional({
+        type: [ContactInfo],
+        description: 'List of contact information',
+        example: [
+            {type: 'phone', value: '+966501234567', isPublic: true, subType: 'work'},
+            {type: 'email', value: 'johndoe@hospital.com', isPublic: true, subType: 'corporate'}
+        ]
+    })
+    @IsArray()
+    @ValidateNested({each: true})
+    @Type(() => ContactInfo)
     @IsOptional()
-    @IsPhoneNumber()
-    phone?: string;
-  
+    ContactInfos?: ContactInfo[];
+
+    @ApiProperty({description: 'Date of Birth', example: '1985-06-15'})
     @IsDate()
-    @Type(() => Date)
+    @IsNotEmpty()
     dateOfBirth: Date;
-  
+
+    @ApiProperty({description: 'Gender', enum: ['male', 'female'], example: 'male'})
     @IsEnum(['male', 'female'])
+    @IsNotEmpty()
     gender: string;
-  
-    @IsOptional()
+
+    @ApiProperty({description: 'National ID or Passport', example: '1234567890'})
     @IsString()
-    identity?: string; // National ID or Passport
-  
+    @IsNotEmpty()
+    identity: string;
+
+    @ApiProperty({description: 'Nationality', example: 'Saudi'})
     @IsString()
+    @IsNotEmpty()
     nationality: string;
-  
+
+    @ApiPropertyOptional({description: 'Profile image URL', example: 'https://hospital.com/employees/johndoe.png'})
     @IsOptional()
     @IsString()
     image?: string;
-  
+
+    @ApiProperty({
+        description: 'Marital Status',
+        enum: ['Single', 'Married', 'Divorced', 'Widowed'],
+        example: 'Married'
+    })
     @IsEnum(['Single', 'Married', 'Divorced', 'Widowed'])
     @IsOptional()
-    marital_status?: string; // القيمة الافتراضية Single
-  
+    marital_status?: string;
+
+    @ApiPropertyOptional({description: 'Number of Children', example: 2})
     @IsNumber()
-    number_children: number;
-  
     @IsOptional()
+    number_children?: number;
+
+    @ApiPropertyOptional({
+        description: 'Blood Type',
+        enum: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],
+        example: 'O+'
+    })
     @IsEnum(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'])
+    @IsOptional()
     blood_type?: string;
-  
-    @IsOptional()
+
+    @ApiPropertyOptional({description: 'Height in cm', example: 180})
     @IsNumber()
-    height?: number; // in cm
-  
     @IsOptional()
+    height?: number;
+
+    @ApiPropertyOptional({description: 'Weight in kg', example: 75})
     @IsNumber()
-    weight?: number; // in kg
-  
+    @IsOptional()
+    weight?: number;
+
+    @ApiPropertyOptional({description: 'Notes', example: 'Expert in cardiology and patient care.'})
     @IsOptional()
     @IsString()
     notes?: string;
-  
+
+    @ApiPropertyOptional({description: 'Email address', example: 'john.doe@example.com'})
     @IsOptional()
-    @IsEmail()
-    email?: string;
-  
     @IsString()
+    email?: string;
+
+    @ApiProperty({description: 'Residential address', example: 'Riyadh, Saudi Arabia'})
+    @IsString()
+    @IsNotEmpty()
     address: string;
-  
+
+    @ApiPropertyOptional({
+        description: 'Emergency Contact',
+        type: Object,
+        example: {name: 'Jane Doe', phone: '+966551234567'}
+    })
     @IsOptional()
     @IsObject()
-    @Type(() => EmergencyContactDto)
-    emergencyContact?: EmergencyContactDto;  // يحتوي على الاسم ورقم الهاتف
-  
+    emergencyContact?: {
+        name: string;
+        phone: string;
+    };
+
+    @ApiPropertyOptional({
+        type: [Object],
+        description: 'List of chronic diseases',
+        example: [
+            {disease_name: 'Hypertension'},
+            {disease_name: 'Diabetes'}
+        ]
+    })
     @IsArray()
     @IsOptional()
-    @Type(() => DiseaseDto)
-    ChronicDiseases?: DiseaseDto[];
-  
-    @IsArray()
-    @IsOptional()
-    @Type(() => InsuranceDto)
-    insurances?: InsuranceDto[];
-  
+    ChronicDiseases?: { disease_name: string }[];
+
+    @ApiPropertyOptional({
+        description: 'Professional experience details',
+        example: '10 years of experience in emergency medicine.'
+    })
     @IsOptional()
     @IsString()
-    professiona_experience?: string;
-  
+    professional_experience?: string;
+
+    @ApiPropertyOptional({
+        type: [String],
+        description: 'Specialties',
+        example: ['Cardiology', 'Emergency Medicine']
+    })
     @IsArray()
     @IsOptional()
-    specialties: string[];
-  
+    specialties?: string[];
+
+    @ApiPropertyOptional({
+        type: [String],
+        description: 'Languages spoken',
+        example: ['English', 'Arabic']
+    })
     @IsArray()
     @IsOptional()
     Languages?: string[];
-  
+
+    @ApiPropertyOptional({
+        type: [WorkingHours],
+        description: 'Working hours',
+        example: [
+            {day: 'Monday', timeSlots: [{startTime: '08:00 AM', endTime: '04:00 PM'}]},
+            {day: 'Wednesday', timeSlots: [{startTime: '08:00 AM', endTime: '04:00 PM'}]}
+        ]
+    })
     @IsArray()
+    @ValidateNested({each: true})
+    @Type(() => WorkingHours)
     @IsOptional()
-    @Type(() => WorkingHoursDto)
-    workingHours?: WorkingHoursDto[];
-  
-    @IsOptional()
+    workingHours?: WorkingHours[];
+
+    @ApiPropertyOptional({description: 'Evaluation score (1-10)', example: 8})
     @IsNumber()
-    evaluation?: number; // مثال: 1-10 rating system
     @IsOptional()
-    @IsMongoId()
-    companyId?: string; // Employee can belong to a company
-  
-    @IsArray()
-    @IsOptional()
-    @IsMongoId({ each: true })
-    clinicCollectionId?: string[]; // Employee can belong to multiple clinic collection
-  
-    @IsArray()
-    @IsOptional()
-    @IsMongoId({ each: true })
-    departmentId?: string[]; // Employee can belong to multiple department
-  
-    @IsArray()
-    @IsOptional()
-    @IsMongoId({ each: true })
-    clinics?: string[]; // Employee can work in multiple clinics
+    evaluation?: number;
+
+    @ApiProperty({
+        description: 'Employee Type',
+        enum: ['Doctor', 'Nurse', 'Technician', 'Administrative', 'Employee', 'Other'],
+        example: 'Doctor'
+    })
+    @IsEnum(['Doctor', 'Nurse', 'Technician', 'Administrative', 'Employee', 'Other'])
+    @IsNotEmpty()
+    employeeType: string;
 }

@@ -1,126 +1,113 @@
+import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
 import {
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-  IsDate,
-  IsEnum,
-  IsArray,
-  ValidateNested,
-  IsNumber,
-  Min,
-  Max,
-  IsEmail,
+    IsArray,
+    IsDate,
+    IsEnum,
+    IsNotEmpty,
+    IsNumber,
+    IsObject,
+    IsOptional,
+    IsString,
+    ValidateNested
 } from 'class-validator';
-import { Type } from 'class-transformer';
-class EmergencyContactDto {
-  @IsNotEmpty()
-  @IsString()
-  name: string;
-
-  @IsNotEmpty()
-  @IsString()
-  phone: string;
-}
-class InsuranceDto {
-  @IsNotEmpty()
-  @IsString()
-  insuranceProvider: string;
-
-  @IsNotEmpty()
-  @IsString()
-  insuranceNumber: string;
-
-  @IsNotEmpty()
-  @IsNumber()
-  @Min(0)
-  @Max(100)
-  coveragePercentage: number;
-
-  @IsNotEmpty()
-  @IsDate()
-  @Type(() => Date)
-  expiryDate: Date;
-
-  @IsNotEmpty()
-  @IsString()
-  @IsEnum(['private', 'governmental', 'corporate'])
-  insuranceType: string;
-}
-export class DiseaseDto {
-  @IsString()
-  disease_name: string;
-}
+import {Type} from 'class-transformer';
+import {ContactInfo, Insurance} from '../../../common/utlis/helper';
 
 export class CreatePatientDto {
-  @IsNotEmpty()
-  @IsString()
-  name: string;
+    @ApiProperty({description: 'Patient name', example: 'Jane Doe'})
+    @IsString()
+    @IsNotEmpty()
+    name: string;
 
-  @IsOptional()
-  @IsString()
-  phone?: string;
+    @ApiPropertyOptional({type: [ContactInfo], description: 'List of contact information'})
+    @IsArray()
+    @ValidateNested({each: true})
+    @Type(() => ContactInfo)
+    @IsOptional()
+    ContactInfos?: ContactInfo[];
 
-  @IsNotEmpty()
-  @IsDate()
-  @Type(() => Date)
-  dateOfBirth: Date;
+    @ApiProperty({description: 'Date of Birth', example: '1990-05-20'})
+    @IsDate()
+    @IsNotEmpty()
+    dateOfBirth: Date;
 
-  @IsNotEmpty()
-  @IsEnum(['male', 'female'])
-  gender: string;
+    @ApiProperty({description: 'Gender', enum: ['male', 'female']})
+    @IsEnum(['male', 'female'])
+    @IsNotEmpty()
+    gender: string;
 
-  @IsOptional()
-  @IsString()
-  @IsEmail()
-  email?: string;
+    @ApiProperty({description: 'National ID or Passport', example: '9876543210'})
+    @IsString()
+    @IsNotEmpty()
+    identity: string;
 
-  @IsNotEmpty()
-  @IsString()
-  nationality: string;
+    @ApiProperty({description: 'Nationality', example: 'Saudi'})
+    @IsString()
+    @IsNotEmpty()
+    nationality: string;
 
-  @IsOptional()
-  @IsString()
-  image?: string;
+    @ApiPropertyOptional({description: 'Profile image URL'})
+    @IsOptional()
+    @IsString()
+    image?: string;
 
-  @IsOptional()
-  @IsEnum(['Single', 'Married', 'Divorced', 'Widowed'])
-  marital_status?: string;
+    @ApiProperty({description: 'Marital Status', enum: ['Single', 'Married', 'Divorced', 'Widowed'], default: 'Single'})
+    @IsEnum(['Single', 'Married', 'Divorced', 'Widowed'])
+    @IsOptional()
+    marital_status?: string;
 
-  @IsNotEmpty()
-  @IsNumber()
-  number_children: number;
+    @ApiProperty({description: 'Number of Children', example: 3})
+    @IsNumber()
+    @IsNotEmpty()
+    number_children: number;
 
-  @IsOptional()
-  @IsEnum(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'])
-  blood_type?: string;
+    @ApiPropertyOptional({description: 'Blood Type', enum: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-']})
+    @IsEnum(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'])
+    @IsOptional()
+    blood_type?: string;
 
-  @IsOptional()
-  @IsNumber()
-  height?: number;
+    @ApiPropertyOptional({description: 'Height in cm', example: 165})
+    @IsNumber()
+    @IsOptional()
+    height?: number;
 
-  @IsOptional()
-  @IsNumber()
-  weight?: number;
+    @ApiPropertyOptional({description: 'Weight in kg', example: 60})
+    @IsNumber()
+    @IsOptional()
+    weight?: number;
 
-  @IsOptional()
-  @IsString()
-  notes?: string;
+    @ApiPropertyOptional({description: 'Notes'})
+    @IsOptional()
+    @IsString()
+    notes?: string;
 
-  @IsNotEmpty()
-  @IsString()
-  address: string;
+    @ApiPropertyOptional({description: 'Email address', example: 'jane.doe@example.com'})
+    @IsOptional()
+    @IsString()
+    email?: string;
 
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => EmergencyContactDto)
-  emergencyContact?: EmergencyContactDto;
-  @IsArray()
-  @IsOptional()
-  @Type(() => DiseaseDto)
-  ChronicDiseases?: DiseaseDto[];
-  @IsOptional()
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => InsuranceDto)
-  insurances?: InsuranceDto[];
+    @ApiProperty({description: 'Residential address', example: 'Jeddah, Saudi Arabia'})
+    @IsString()
+    @IsNotEmpty()
+    address: string;
+
+    @ApiPropertyOptional({description: 'Emergency Contact', type: Object})
+    @IsOptional()
+    @IsObject()
+    emergencyContact?: {
+        name: string;
+        phone: string;
+    };
+
+    @ApiPropertyOptional({type: [String], description: 'List of chronic diseases'})
+    @IsArray()
+    @IsOptional()
+    ChronicDiseases?: { disease_name: string }[];
+
+    @ApiPropertyOptional({type: [Insurance], description: 'List of insurance details'})
+    @IsArray()
+    @ValidateNested({each: true})
+    @Type(() => Insurance)
+    @IsOptional()
+    insurances?: Insurance[];
 }

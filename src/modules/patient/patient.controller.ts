@@ -1,12 +1,13 @@
-import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
-import { PatientService } from './patient.service';
-import { Patient } from './schemas/patient.schema';
+import {Body, Controller, Delete, Get, Param, Patch, Post} from '@nestjs/common';
+import {PatientService} from './patient.service';
+import {Patient} from './schemas/patient.schema';
 import {CreatePatientDto} from "./dto/create-patient.dto";
 import {UpdatePatientDto} from "./dto/update-patient.dto";
 
 @Controller('patients')
 export class PatientController {
-    constructor(private readonly patientService: PatientService) {}
+    constructor(private readonly patientService: PatientService) {
+    }
 
     @Post()
     async createPatient(@Body() createPatientDto: CreatePatientDto): Promise<Patient> {

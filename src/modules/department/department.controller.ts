@@ -1,11 +1,12 @@
-import { Controller, Get, Post, Put, Delete, Body, Param } from '@nestjs/common';
-import { DepartmentService } from './department.service';
+import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {DepartmentService} from './department.service';
 import {CreateDepartmentDto} from "./dto/create-department.dto";
 import {UpdateDepartmentDto} from "./dto/update-department.dto";
 
 @Controller('departments')
 export class DepartmentController {
-    constructor(private readonly departmentService: DepartmentService) {}
+    constructor(private readonly departmentService: DepartmentService) {
+    }
 
     @Post()
     async createDepartment(@Body() createDepartmentDto: CreateDepartmentDto) {
@@ -13,7 +14,7 @@ export class DepartmentController {
     }
 
     @Get()
-    async getAllDepartments() { 
+    async getAllDepartments() {
         return this.departmentService.getAllDepartments();
     }
 
