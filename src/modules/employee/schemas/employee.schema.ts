@@ -116,18 +116,18 @@ export class Employee {
   @Prop()
   evaluation?: number; // Example: 1-10 rating system
 
-    // Access Control Directly in Employee Schema
-    @Prop({ type: Types.ObjectId, ref: 'Company', default: null })
-    companyId?: Types.ObjectId; // Employee can belong to a company
+    // // Access Control Directly in Employee Schema
+    // @Prop({ type: Types.ObjectId, ref: 'Company', default: null })
+    // companyId?: Types.ObjectId; // Employee can belong to a company
 
-    @Prop({ type: [Types.ObjectId], ref: 'ClinicCollection', default: [] })
-    clinicCollectionId?: Types.ObjectId; // Employee can belong to multiple clinic collection
+    // @Prop({ type: [Types.ObjectId], ref: 'ClinicCollection', default: [] })
+    // clinicCollectionId?: Types.ObjectId; // Employee can belong to multiple clinic collection
 
-    @Prop({ type: [Types.ObjectId], ref: 'Department', default: [] })
-    departmentId?: Types.ObjectId; // Employee can belong to multiple department
+    // @Prop({ type: [Types.ObjectId], ref: 'Department', default: [] })
+    // departmentId?: Types.ObjectId; // Employee can belong to multiple department
 
-    @Prop({ type: [Types.ObjectId], ref: 'Clinic', default: [] })
-    clinics: Types.ObjectId[]; // Employee can work in multiple clinics
+    // @Prop({ type: [Types.ObjectId], ref: 'Clinic', default: [] })
+    // clinics: Types.ObjectId[]; // Employee can work in multiple clinics
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);

@@ -118,8 +118,8 @@ export class Doctor {
 //      @Prop({ type: Types.ObjectId, ref: 'Department',  default: null })
 //   departmentId: Types.ObjectId;  // Doctor must belong to a department
 
-  @Prop({ type: [Types.ObjectId], ref: 'Clinic', default: [] })
-  clinics: Types.ObjectId[]; // Clinics where the doctor works
+  // @Prop({ type: [Types.ObjectId], ref: 'Clinic', default: [] })
+  // clinics: Types.ObjectId[]; // Clinics where the doctor works
 }
 
 export const DoctorSchema = SchemaFactory.createForClass(Doctor);
