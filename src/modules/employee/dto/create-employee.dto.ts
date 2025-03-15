@@ -1,4 +1,4 @@
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import {
     IsArray,
     IsDate,
@@ -10,50 +10,55 @@ import {
     IsString,
     ValidateNested
 } from 'class-validator';
-import {Type} from 'class-transformer';
-import {ContactInfo, WorkingHours} from '../../../common/utlis/helper';
+import { Type } from 'class-transformer';
+import { ContactInfo, WorkingHours } from '../../../common/utlis/helper';
 
 export class CreateEmployeeDto {
-    @ApiProperty({description: 'Employee name', example: 'John Doe'})
+    @ApiProperty({ description: 'Employee name', example: 'John Doe', required: true })
     @IsString()
     @IsNotEmpty()
     name: string;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: [ContactInfo],
         description: 'List of contact information',
+        required: false,
         example: [
-            {type: 'phone', value: '+966501234567', isPublic: true, subType: 'work'},
-            {type: 'email', value: 'johndoe@hospital.com', isPublic: true, subType: 'corporate'}
+            { type: 'phone', value: '+966501234567', isPublic: true, subType: 'work' },
+            { type: 'email', value: 'johndoe@hospital.com', isPublic: true, subType: 'corporate' }
         ]
     })
     @IsArray()
-    @ValidateNested({each: true})
+    @ValidateNested({ each: true })
     @Type(() => ContactInfo)
     @IsOptional()
     ContactInfos?: ContactInfo[];
 
-    @ApiProperty({description: 'Date of Birth', example: '1985-06-15'})
+    @ApiProperty({ description: 'Date of Birth', example: '1985-06-15', required: true })
     @IsDate()
     @IsNotEmpty()
     dateOfBirth: Date;
 
-    @ApiProperty({description: 'Gender', enum: ['male', 'female'], example: 'male'})
+    @ApiProperty({ description: 'Gender', enum: ['male', 'female'], example: 'male', required: true })
     @IsEnum(['male', 'female'])
     @IsNotEmpty()
     gender: string;
 
-    @ApiProperty({description: 'National ID or Passport', example: '1234567890'})
+    @ApiProperty({ description: 'National ID or Passport', example: '1234567890', required: true })
     @IsString()
     @IsNotEmpty()
     identity: string;
 
-    @ApiProperty({description: 'Nationality', example: 'Saudi'})
+    @ApiProperty({ description: 'Nationality', example: 'Saudi', required: true })
     @IsString()
     @IsNotEmpty()
     nationality: string;
 
-    @ApiPropertyOptional({description: 'Profile image URL', example: 'https://hospital.com/employees/johndoe.png'})
+    @ApiProperty({
+        description: 'Profile image URL',
+        example: 'https://hospital.com/employees/johndoe.png',
+        required: false
+    })
     @IsOptional()
     @IsString()
     image?: string;
@@ -61,55 +66,78 @@ export class CreateEmployeeDto {
     @ApiProperty({
         description: 'Marital Status',
         enum: ['Single', 'Married', 'Divorced', 'Widowed'],
-        example: 'Married'
+        example: 'Married',
+        required: false
     })
     @IsEnum(['Single', 'Married', 'Divorced', 'Widowed'])
     @IsOptional()
     marital_status?: string;
 
-    @ApiPropertyOptional({description: 'Number of Children', example: 2})
+    @ApiProperty({
+        description: 'Number of Children',
+        example: 2,
+        required: false
+    })
     @IsNumber()
     @IsOptional()
     number_children?: number;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         description: 'Blood Type',
         enum: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],
-        example: 'O+'
+        example: 'O+',
+        required: false
     })
     @IsEnum(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'])
     @IsOptional()
     blood_type?: string;
 
-    @ApiPropertyOptional({description: 'Height in cm', example: 180})
+    @ApiProperty({
+        description: 'Height in cm',
+        example: 180,
+        required: false
+    })
     @IsNumber()
     @IsOptional()
     height?: number;
 
-    @ApiPropertyOptional({description: 'Weight in kg', example: 75})
+    @ApiProperty({
+        description: 'Weight in kg',
+        example: 75,
+        required: false
+    })
     @IsNumber()
     @IsOptional()
     weight?: number;
 
-    @ApiPropertyOptional({description: 'Notes', example: 'Expert in cardiology and patient care.'})
+    @ApiProperty({
+        description: 'Notes',
+        example: 'Expert in cardiology and patient care.',
+        required: false
+    })
     @IsOptional()
     @IsString()
     notes?: string;
 
-    @ApiPropertyOptional({description: 'Email address', example: 'john.doe@example.com'})
+    @ApiProperty({
+        description: 'Email address',
+        example: 'john.doe@example.com',
+        required: false
+    })
     @IsOptional()
     @IsString()
     email?: string;
 
-    @ApiProperty({description: 'Residential address', example: 'Riyadh, Saudi Arabia'})
+    @ApiProperty({ description: 'Residential address', example: 'Riyadh, Saudi Arabia', required: true })
     @IsString()
     @IsNotEmpty()
     address: string;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         description: 'Emergency Contact',
         type: Object,
-        example: {name: 'Jane Doe', phone: '+966551234567'}
+        required: false,
+        example: { name: 'Jane Doe', phone: '+966551234567' }
     })
     @IsOptional()
     @IsObject()
@@ -118,59 +146,67 @@ export class CreateEmployeeDto {
         phone: string;
     };
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: [Object],
         description: 'List of chronic diseases',
+        required: false,
         example: [
-            {disease_name: 'Hypertension'},
-            {disease_name: 'Diabetes'}
+            { disease_name: 'Hypertension' },
+            { disease_name: 'Diabetes' }
         ]
     })
     @IsArray()
     @IsOptional()
     ChronicDiseases?: { disease_name: string }[];
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         description: 'Professional experience details',
-        example: '10 years of experience in emergency medicine.'
+        example: '10 years of experience in emergency medicine.',
+        required: false
     })
     @IsOptional()
     @IsString()
     professional_experience?: string;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: [String],
         description: 'Specialties',
+        required: false,
         example: ['Cardiology', 'Emergency Medicine']
     })
     @IsArray()
     @IsOptional()
     specialties?: string[];
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: [String],
         description: 'Languages spoken',
+        required: false,
         example: ['English', 'Arabic']
     })
     @IsArray()
     @IsOptional()
     Languages?: string[];
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: [WorkingHours],
         description: 'Working hours',
+        required: true,
         example: [
-            {day: 'Monday', timeSlots: [{startTime: '08:00 AM', endTime: '04:00 PM'}]},
-            {day: 'Wednesday', timeSlots: [{startTime: '08:00 AM', endTime: '04:00 PM'}]}
+            { day: 'Monday', timeSlots: [{ startTime: '08:00 AM', endTime: '04:00 PM' }] },
+            { day: 'Wednesday', timeSlots: [{ startTime: '08:00 AM', endTime: '04:00 PM' }] }
         ]
     })
     @IsArray()
-    @ValidateNested({each: true})
+    @ValidateNested({ each: true })
     @Type(() => WorkingHours)
-    @IsOptional()
-    workingHours?: WorkingHours[];
+    workingHours: WorkingHours[];
 
-    @ApiPropertyOptional({description: 'Evaluation score (1-10)', example: 8})
+    @ApiProperty({
+        description: 'Evaluation score (1-10)',
+        example: 8,
+        required: false
+    })
     @IsNumber()
     @IsOptional()
     evaluation?: number;
@@ -178,7 +214,8 @@ export class CreateEmployeeDto {
     @ApiProperty({
         description: 'Employee Type',
         enum: ['Doctor', 'Nurse', 'Technician', 'Administrative', 'Employee', 'Other'],
-        example: 'Doctor'
+        example: 'Doctor',
+        required: true
     })
     @IsEnum(['Doctor', 'Nurse', 'Technician', 'Administrative', 'Employee', 'Other'])
     @IsNotEmpty()

@@ -34,8 +34,8 @@ export class User {
     @Prop({type: [Types.ObjectId], ref: 'Clinic', default: []})
     clinics: Types.ObjectId[]; // العيادات التي يعمل بها الطبيب أو الموظف (يمكن أن يعمل في أكثر من عيادة)
 
-    @Prop({type: Types.ObjectId, ref: 'Employee', default: null})
-    employeeId?: Types.ObjectId;  // مرجع إلى جدول الموظفين (إن كان المستخدم موظفًا)
+    @Prop({type: Types.ObjectId, ref: 'Employee', required: true})
+    employeeId: Types.ObjectId;  // مرجع إلى جدول الموظفين (إن كان المستخدم موظفًا)
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

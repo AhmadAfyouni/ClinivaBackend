@@ -1,7 +1,16 @@
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {IsArray, IsDate, IsMongoId, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested} from 'class-validator';
-import {Type} from 'class-transformer';
-import {Types} from 'mongoose';
+import { ApiProperty } from '@nestjs/swagger';
+import {
+    IsArray,
+    IsDate,
+    IsMongoId,
+    IsNotEmpty,
+    IsObject,
+    IsOptional,
+    IsString,
+    ValidateNested
+} from 'class-validator';
+import { Type } from 'class-transformer';
+import { Types } from 'mongoose';
 
 import {
     BankAccount,
@@ -14,101 +23,123 @@ import {
 } from '../../../common/utlis/helper';
 
 export class CreateClinicCollectionDto {
-    @ApiProperty({description: 'Clinic Collection name', example: 'Saudi Clinics Group'})
+    @ApiProperty({ description: 'Clinic Collection name', example: 'Saudi Clinics Group', required: true })
     @IsString()
     @IsNotEmpty()
     name: string;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         description: 'Brief introduction of the clinic collection',
-        example: 'A leading healthcare provider in Saudi Arabia.'
+        example: 'A leading healthcare provider in Saudi Arabia.',
+        required: false
     })
     @IsOptional()
     @IsString()
     introduction?: string;
 
-    @ApiPropertyOptional({description: 'Year of establishment', example: '2010-05-20'})
+    @ApiProperty({
+        description: 'Year of establishment',
+        example: '2010-05-20',
+        required: false
+    })
     @IsOptional()
     @IsDate()
     yearOfEstablishment?: Date;
 
-    @ApiProperty({description: 'Clinic Collection address', example: '456 Health Street, Jeddah, Saudi Arabia'})
+    @ApiProperty({ description: 'Clinic Collection address', example: '456 Health Street, Jeddah, Saudi Arabia', required: true })
     @IsString()
     @IsNotEmpty()
     address: string;
 
-    @ApiPropertyOptional({description: 'Logo URL', example: 'https://clinic.com/logo.png'})
+    @ApiProperty({
+        description: 'Logo URL',
+        example: 'https://clinic.com/logo.png',
+        required: false
+    })
     @IsOptional()
     @IsString()
     logo?: string;
 
-    @ApiPropertyOptional({description: 'Vision statement', example: 'Providing the best medical care in the region.'})
+    @ApiProperty({
+        description: 'Vision statement',
+        example: 'Providing the best medical care in the region.',
+        required: false
+    })
     @IsOptional()
     @IsString()
     vision?: string;
 
-    @ApiPropertyOptional({description: 'Additional details', example: 'We have over 50 branches across the country.'})
+    @ApiProperty({
+        description: 'Additional details',
+        example: 'We have over 50 branches across the country.',
+        required: false
+    })
     @IsOptional()
     @IsString()
     details?: string;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: [ContactInfo],
         description: 'Contact information of the clinic collection',
+        required: false,
         example: [
-            {type: 'phone', value: '+966123456789', isPublic: true, subType: 'work'},
-            {type: 'email', value: 'info@clinicgroup.com', isPublic: true, subType: 'corporate'}
+            { type: 'phone', value: '+966123456789', isPublic: true, subType: 'work' },
+            { type: 'email', value: 'info@clinicgroup.com', isPublic: true, subType: 'corporate' }
         ]
     })
     @IsArray()
-    @ValidateNested({each: true})
+    @ValidateNested({ each: true })
     @Type(() => ContactInfo)
     @IsOptional()
     ContactInfos?: ContactInfo[];
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: [Holiday],
         description: 'Clinic collection holidays',
+        required: false,
         example: [
-            {name: 'Eid Al-Fitr', date: '2025-04-21', reason: 'Public holiday'}
+            { name: 'Eid Al-Fitr', date: '2025-04-21', reason: 'Public holiday' }
         ]
     })
     @IsArray()
-    @ValidateNested({each: true})
+    @ValidateNested({ each: true })
     @Type(() => Holiday)
     @IsOptional()
     holidays?: Holiday[];
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: [Specialization],
         description: 'Specializations available in the clinic collection',
+        required: false,
         example: [
-            {name: 'Cardiology', description: 'Heart and vascular care'},
-            {name: 'Dermatology', description: 'Skin and cosmetic treatments'}
+            { name: 'Cardiology', description: 'Heart and vascular care' },
+            { name: 'Dermatology', description: 'Skin and cosmetic treatments' }
         ]
     })
     @IsArray()
-    @ValidateNested({each: true})
+    @ValidateNested({ each: true })
     @Type(() => Specialization)
     @IsOptional()
     specialization?: Specialization[];
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: [WorkingHours],
         description: 'Working hours of the clinic collection',
+        required: false,
         example: [
-            {day: 'Monday', timeSlots: [{startTime: '09:00 AM', endTime: '05:00 PM'}]}
+            { day: 'Monday', timeSlots: [{ startTime: '09:00 AM', endTime: '05:00 PM' }] }
         ]
     })
     @IsArray()
-    @ValidateNested({each: true})
+    @ValidateNested({ each: true })
     @Type(() => WorkingHours)
     @IsOptional()
     workingDays?: WorkingHours[];
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: [BankAccount],
         description: 'Bank accounts associated with the clinic collection',
+        required: false,
         example: [
             {
                 accountName: 'Clinic Main Account',
@@ -119,27 +150,29 @@ export class CreateClinicCollectionDto {
         ]
     })
     @IsArray()
-    @ValidateNested({each: true})
+    @ValidateNested({ each: true })
     @Type(() => BankAccount)
     @IsOptional()
     bankAccount?: BankAccount[];
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: [InsuranceCompany],
         description: 'Accepted insurance companies',
+        required: false,
         example: [
-            {companyName: 'Bupa Arabia', companyPhone: '+9661122334455', companyEmail: 'support@bupa.com.sa'}
+            { companyName: 'Bupa Arabia', companyPhone: '+9661122334455', companyEmail: 'support@bupa.com.sa' }
         ]
     })
     @IsArray()
-    @ValidateNested({each: true})
+    @ValidateNested({ each: true })
     @Type(() => InsuranceCompany)
     @IsOptional()
     insuranceCompany?: InsuranceCompany[];
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: CommercialRecord,
         description: 'Commercial record of the clinic collection',
+        required: false,
         example: {
             recordNumber: '1234567890',
             grantDate: '2015-06-15',
@@ -153,17 +186,19 @@ export class CreateClinicCollectionDto {
     @Type(() => CommercialRecord)
     commercialRecord?: CommercialRecord;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         description: 'Google Maps location coordinates',
-        example: {x: 24.7136, y: 46.6753}
+        required: false,
+        example: { x: 24.7136, y: 46.6753 }
     })
     @IsOptional()
     @IsObject()
     locationGoogl?: { x: number; y: number };
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         description: 'Company ID that the clinic collection belongs to',
-        example: '60f7c7b84f1a2c001c8b4567'
+        example: '60f7c7b84f1a2c001c8b4567',
+        required: false
     })
     @IsOptional()
     @IsMongoId()

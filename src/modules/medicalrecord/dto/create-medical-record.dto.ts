@@ -1,38 +1,61 @@
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {IsArray, IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString} from 'class-validator';
-import {Types} from 'mongoose';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Types } from 'mongoose';
 
 export class CreateMedicalRecordDto {
-    @ApiProperty({description: 'Appointment ID linked to the medical record', example: '60f7c7b84f1a2c001c8b4567'})
+    @ApiProperty({
+        description: 'Appointment ID linked to the medical record',
+        example: '60f7c7b84f1a2c001c8b4567',
+        required: true
+    })
     @IsMongoId()
     @IsNotEmpty()
     appointment: Types.ObjectId;
 
-    @ApiProperty({description: 'Medical diagnosis', example: 'Acute bronchitis'})
+    @ApiProperty({
+        description: 'Medical diagnosis',
+        example: 'Acute bronchitis',
+        required: true
+    })
     @IsString()
     @IsNotEmpty()
     diagnosis: string;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: [String],
         description: 'List of prescribed medications',
-        example: ['Paracetamol', 'Ibuprofen']
+        example: ['Paracetamol', 'Ibuprofen'],
+        required: false
     })
     @IsArray()
     @IsOptional()
     medications?: string[];
 
-    @ApiPropertyOptional({type: [String], description: 'List of required lab tests', example: ['Blood Test', 'X-Ray']})
+    @ApiProperty({
+        type: [String],
+        description: 'List of required lab tests',
+        example: ['Blood Test', 'X-Ray'],
+        required: false
+    })
     @IsArray()
     @IsOptional()
     labTests?: string[];
 
-    @ApiPropertyOptional({description: 'Additional doctor notes', example: 'Patient needs follow-up after two weeks'})
+    @ApiProperty({
+        description: 'Additional doctor notes',
+        example: 'Patient needs follow-up after two weeks',
+        required: false
+    })
     @IsOptional()
     @IsString()
     notes?: string;
 
-    @ApiProperty({description: 'Record status', enum: ['draft', 'finalized'], default: 'draft'})
+    @ApiProperty({
+        description: 'Record status',
+        enum: ['draft', 'finalized'],
+        example: 'draft',
+        required: false
+    })
     @IsEnum(['draft', 'finalized'])
     @IsOptional()
     recordStatus?: string;

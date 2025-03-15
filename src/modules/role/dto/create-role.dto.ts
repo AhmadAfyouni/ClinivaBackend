@@ -1,30 +1,38 @@
-import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {IsArray, IsEnum, IsNotEmpty, IsOptional, IsString} from 'class-validator';
-import {PermissionsEnum} from '../../../config/permission.enum';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { PermissionsEnum } from '../../../config/permission.enum';
 
 export class CreateRoleDto {
-    @ApiProperty({description: 'Role name', example: 'Admin'})
+    @ApiProperty({ description: 'Role name', example: 'Admin', required: true })
     @IsString()
     @IsNotEmpty()
     name: string;
 
-    @ApiPropertyOptional({
+    @ApiProperty({
         type: [String],
         enum: Object.values(PermissionsEnum),
-        description: 'List of permissions associated with the role'
+        description: 'List of permissions associated with the role',
+        required: false
     })
     @IsArray()
     @IsOptional()
-    @IsEnum(PermissionsEnum, {each: true})
+    @IsEnum(PermissionsEnum, { each: true })
     permissions?: string[];
 
-    @ApiPropertyOptional({type: [String], description: 'List of permission groups associated with the role'})
+    @ApiProperty({
+        type: [String],
+        description: 'List of permission groups associated with the role',
+        required: false
+    })
     @IsArray()
     @IsOptional()
-    @IsString({each: true})
+    @IsString({ each: true })
     permissionGroups?: string[];
 
-    @ApiPropertyOptional({description: 'Role description'})
+    @ApiProperty({
+        description: 'Role description',
+        required: false
+    })
     @IsOptional()
     @IsString()
     description?: string;
