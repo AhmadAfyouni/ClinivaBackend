@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body,Patch, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {ClinicCollectionService} from './clinic-collection.service';
 import {CreateClinicCollectionDto} from "./dto/create-clinic-collection.dto";
 import {UpdateClinicCollectionDto} from "./dto/update-clinic-collection.dto";
@@ -23,7 +23,7 @@ export class ClinicCollectionController {
         return this.clinicCollectionService.getClinicCollectionById(id);
     }
 
-    @Put(':id')
+    @Patch(':id')
     async updateClinicCollection(@Param('id') id: string, @Body() updateClinicCollectionDto: UpdateClinicCollectionDto) {
         return this.clinicCollectionService.updateClinicCollection(id, updateClinicCollectionDto);
     }

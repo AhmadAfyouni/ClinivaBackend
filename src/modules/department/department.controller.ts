@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body, Controller,Patch, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {DepartmentService} from './department.service';
 import {CreateDepartmentDto} from "./dto/create-department.dto";
 import {UpdateDepartmentDto} from "./dto/update-department.dto";
@@ -23,7 +23,7 @@ export class DepartmentController {
         return this.departmentService.getDepartmentById(id);
     }
 
-    @Put(':id')
+    @Patch(':id')
     async updateDepartment(@Param('id') id: string, @Body() updateDepartmentDto: UpdateDepartmentDto) {
         return this.departmentService.updateDepartment(id, updateDepartmentDto);
     }

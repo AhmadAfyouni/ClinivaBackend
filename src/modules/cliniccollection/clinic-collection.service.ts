@@ -16,17 +16,17 @@ export class ClinicCollectionService {
     }
 
     async getAllClinicCollections(): Promise<ClinicCollection[]> {
-        return this.clinicCollectionModel.find().populate(['companyId', 'departments']).exec();
+        return this.clinicCollectionModel.find().populate(['companyId',  ]).exec();
     }
 
     async getClinicCollectionById(id: string): Promise<ClinicCollection> {
-        const clinicCollection = await this.clinicCollectionModel.findById(id).populate(['companyId', 'departments']);
+        const clinicCollection = await this.clinicCollectionModel.findById(id).populate(['companyId',  ]);
         if (!clinicCollection) throw new NotFoundException('Clinic Collection not found');
         return clinicCollection;
     }
 
     async updateClinicCollection(id: string, updateClinicCollectionDto: UpdateClinicCollectionDto): Promise<ClinicCollection> {
-        const updatedClinicCollection = await this.clinicCollectionModel.findByIdAndUpdate(id, updateClinicCollectionDto, {new: true}).populate(['companyId', 'departments']);
+        const updatedClinicCollection = await this.clinicCollectionModel.findByIdAndUpdate(id, updateClinicCollectionDto, {new: true}).populate(['companyId',  ]);
         if (!updatedClinicCollection) throw new NotFoundException('Clinic Collection not found');
         return updatedClinicCollection;
     }

@@ -16,11 +16,11 @@ export class CompanyService {
     }
 
     async findAll(): Promise<Company[]> {
-        return this.companyModel.find().populate('clinicCollections').exec();
+        return this.companyModel.find().exec();
     }
 
     async findOne(id: string): Promise<Company> {
-        const company = await this.companyModel.findById(id).populate('clinicCollections').exec();
+        const company = await this.companyModel.findById(id).exec();
         if (!company) {
             throw new NotFoundException(`Company with ID ${id} not found`);
         }

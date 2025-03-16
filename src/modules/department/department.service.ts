@@ -16,17 +16,17 @@ export class DepartmentService {
     }
 
     async getAllDepartments(): Promise<Department[]> {
-        return this.departmentModel.find().populate(['clinicCollectionId', 'clinics']).exec();
+        return this.departmentModel.find().populate(['clinicCollectionId',  ]).exec();
     }
 
     async getDepartmentById(id: string): Promise<Department> {
-        const department = await this.departmentModel.findById(id).populate(['clinicCollectionId', 'clinics']);
+        const department = await this.departmentModel.findById(id).populate(['clinicCollectionId',  ]);
         if (!department) throw new NotFoundException('Department not found');
         return department;
     }
 
     async updateDepartment(id: string, updateDepartmentDto: UpdateDepartmentDto): Promise<Department> {
-        const updatedDepartment = await this.departmentModel.findByIdAndUpdate(id, updateDepartmentDto, {new: true}).populate(['clinicCollectionId', 'clinics']);
+        const updatedDepartment = await this.departmentModel.findByIdAndUpdate(id, updateDepartmentDto, {new: true}).populate(['clinicCollectionId',  ]);
         if (!updatedDepartment) throw new NotFoundException('Department not found');
         return updatedDepartment;
     }

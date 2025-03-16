@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body, Controller,Patch, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {CompanyService} from './company.service';
 import {Company} from './schemas/company.schema';
 import {CreateCompanyDto} from "./dto/create-company.dto";
@@ -24,7 +24,7 @@ export class CompanyController {
         return this.companyService.findOne(id);
     }
 
-    @Put(':id')
+    @Patch(':id')
     async update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto): Promise<Company> {
         return this.companyService.update(id, updateCompanyDto);
     }
