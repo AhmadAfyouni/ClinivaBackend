@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, Param, Patch, Post} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {MedicalRecordService} from './medical-record.service';
 import {MedicalRecord} from "./schemas/medicalrecord.schema";
 import {CreateMedicalRecordDto} from "./dto/create-medical-record.dto";
@@ -24,7 +24,7 @@ export class MedicalRecordController {
         return this.medicalRecordService.getMedicalRecordById(id);
     }
 
-    @Patch(':id')
+    @Put(':id')
     async updateMedicalRecord(@Param('id') id: string, @Body() updateMedicalRecordDto: UpdateMedicalRecordDto): Promise<MedicalRecord> {
         return this.medicalRecordService.updateMedicalRecord(id, updateMedicalRecordDto);
     }
