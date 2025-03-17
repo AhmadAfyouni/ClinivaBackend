@@ -155,7 +155,7 @@ export enum PermissionsGroupEnum {
 | GET    | `/users`        | Get all users           |
 | GET    | `/users/:id`    | Get a specific user     |
 | POST   | `/users`        | Create a new user       |
-| PATCH  | `/users/:id`    | Update user details     |
+| PUT    | `/users/:id`    | Update user details     |
 | DELETE | `/users/:id`    | Delete a user           |
 
 ### 🔹 Roles & Permissions (`/roles`)
@@ -164,7 +164,7 @@ export enum PermissionsGroupEnum {
 | GET    | `/roles`        | Get all roles           |
 | GET    | `/roles/:id`    | Get a specific role     |
 | POST   | `/roles`        | Create a new role       |
-| PATCH  | `/roles/:id`    | Update role permissions |
+| PUT    | `/roles/:id`    | Update role permissions |
 | DELETE | `/roles/:id`    | Delete a role           |
 
 ### 🔹 Clinics (`/clinics`)
@@ -173,7 +173,7 @@ export enum PermissionsGroupEnum {
 | GET    | `/clinics`      | Get all clinics         |
 | GET    | `/clinics/:id`  | Get a specific clinic   |
 | POST   | `/clinics`      | Create a new clinic     |
-| PATCH  | `/clinics/:id`  | Update clinic details   |
+| PUt    | `/clinics/:id`  | Update clinic details   |
 | DELETE | `/clinics/:id`  | Delete a clinic         |
 
 ### 🔹 Appointments (`/appointments`)
@@ -182,7 +182,7 @@ export enum PermissionsGroupEnum {
 | GET    | `/appointments`     | Get all appointments        |
 | GET    | `/appointments/:id` | Get appointment details     |
 | POST   | `/appointments`     | Schedule a new appointment |
-| PATCH  | `/appointments/:id` | Update appointment status  |
+| PUT    | `/appointments/:id` | Update appointment status  |
 | DELETE | `/appointments/:id` | Cancel an appointment      |
 
 ---
