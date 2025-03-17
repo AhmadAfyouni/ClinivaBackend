@@ -86,7 +86,7 @@ export class CreateAppointmentDto {
     @IsEnum(['scheduled', 'completed', 'cancelled'])
     status?: string;
 
-    @ApiProperty({
+/*    @ApiProperty({
         description: 'Reference to the patient’s medical record (MongoDB ObjectId)',
         example: '60f7c7b84f1a2c001c8b5555',
         required: false
@@ -94,7 +94,7 @@ export class CreateAppointmentDto {
     @IsOptional()
     @IsMongoId()
     medicalRecord?: Types.ObjectId;
-
+*/
     @ApiProperty({
         description: 'Patient rating for the doctor (1-5)',
         example: 4,
