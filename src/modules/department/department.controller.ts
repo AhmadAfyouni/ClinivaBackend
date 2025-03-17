@@ -23,7 +23,7 @@ export class DepartmentController {
         return this.departmentService.getDepartmentById(id);
     }
 
-    @Patch(':id')
+    @Put(':id')
     async updateDepartment(@Param('id') id: string, @Body() updateDepartmentDto: UpdateDepartmentDto) {
         return this.departmentService.updateDepartment(id, updateDepartmentDto);
     }

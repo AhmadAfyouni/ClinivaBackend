@@ -24,7 +24,7 @@ export class CompanyController {
         return this.companyService.findOne(id);
     }
 
-    @Patch(':id')
+    @Put(':id')
     async update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto): Promise<Company> {
         return this.companyService.update(id, updateCompanyDto);
     }

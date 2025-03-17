@@ -16,17 +16,17 @@ export class ClinicService {
     }
 
     async getAllClinics(): Promise<Clinic[]> {
-        return this.clinicModel.find().populate(['departmentId', 'clinicCollectionId', 'doctors', 'employees']).exec();
+        return this.clinicModel.find().populate(['departmentId', ]).exec();
     }
 
     async getClinicById(id: string): Promise<Clinic> {
-        const clinic = await this.clinicModel.findById(id).populate(['departmentId', 'clinicCollectionId', 'doctors', 'employees']);
+        const clinic = await this.clinicModel.findById(id).populate(['departmentId',  ]);
         if (!clinic) throw new NotFoundException('Clinic not found');
         return clinic;
     }
 
     async updateClinic(id: string, updateClinicDto: UpdateClinicDto): Promise<Clinic> {
-        const updatedClinic = await this.clinicModel.findByIdAndUpdate(id, updateClinicDto, {new: true}).populate(['departmentId', 'clinicCollectionId', 'doctors', 'employees']);
+        const updatedClinic = await this.clinicModel.findByIdAndUpdate(id, updateClinicDto, {new: true}).populate(['departmentId',  ]);
         if (!updatedClinic) throw new NotFoundException('Clinic not found');
         return updatedClinic;
     }
