@@ -1,4 +1,4 @@
-import {Body, Controller,Patch, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
 import {CompanyService} from './company.service';
 import {Company} from './schemas/company.schema';
 import {CreateCompanyDto} from "./dto/create-company.dto";
