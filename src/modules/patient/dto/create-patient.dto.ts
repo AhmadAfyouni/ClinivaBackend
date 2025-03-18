@@ -5,7 +5,7 @@ import {
     IsEnum,
     IsNotEmpty,
     IsNumber,
-    IsObject,
+    IsObject,IsBoolean,
     IsOptional,
     IsString,
     ValidateNested
@@ -106,7 +106,7 @@ export class CreatePatientDto {
     @IsOptional()
     @IsString()
     notes?: string;
-
+/*
     @ApiProperty({
         description: 'Email address',
         example: 'jane.doe@example.com',
@@ -115,6 +115,15 @@ export class CreatePatientDto {
     @IsOptional()
     @IsString()
     email?: string;
+*/
+    @ApiProperty({
+        description: 'patient activation status',
+        example: true,
+        required: false
+    })
+    @IsBoolean()
+    @IsOptional()
+    isActive?: boolean;
 
     @ApiProperty({ description: 'Residential address', example: 'Jeddah, Saudi Arabia', required: true })
     @IsString()
@@ -125,13 +134,14 @@ export class CreatePatientDto {
         description: 'Emergency Contact',
         type: Object,
         required: false,
-        example: { name: 'John Doe', phone: '+966551234567' }
+        example: { name: 'John Doe', phone: '+966551234567',relationToPatient: "brother"}
     })
     @IsOptional()
     @IsObject()
     emergencyContact?: {
         name: string;
         phone: string;
+        relationToPatient: string;
     };
 
     @ApiProperty({

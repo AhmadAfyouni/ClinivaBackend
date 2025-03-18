@@ -55,8 +55,11 @@ export class Patient {
     @Prop()
     notes?: string;
 
-    @Prop()
-    email?: string;
+    // @Prop()
+    // email?: string;
+
+    @Prop({default: true})
+    isActive: boolean;
 
     @Prop({required: true})
     address?: string;
@@ -65,12 +68,14 @@ export class Patient {
         type: {
             name: {type: String, required: true},
             phone: {type: String, required: true},
+            relationToPatient: {type: String, required: true},
         },
         required: false, // Emergency contact is optional
     })
     emergencyContact?: {
         name: string;
         phone: string;
+        relationToPatient: string;
     };
 
     @Prop({type: [{disease_name: String}], default: []})

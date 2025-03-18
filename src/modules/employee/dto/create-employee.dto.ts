@@ -11,7 +11,9 @@ import {
     ValidateNested
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ContactInfo, WorkingHours } from '../../../common/utlis/helper';
+import { ContactInfo, WorkingHours, Vacation } from '../../../common/utlis/helper';
+
+
 
 export class CreateEmployeeDto {
     @ApiProperty({ description: 'Employee name', example: 'John Doe', required: true })
@@ -119,14 +121,14 @@ export class CreateEmployeeDto {
     @IsString()
     notes?: string;
 
-    @ApiProperty({
-        description: 'Email address',
-        example: 'john.doe@example.com',
-        required: false
-    })
-    @IsOptional()
-    @IsString()
-    email?: string;
+    // @ApiProperty({
+    //     description: 'Email address',
+    //     example: 'john.doe@example.com',
+    //     required: false
+    // })
+    // @IsOptional()
+    // @IsString()
+    // email?: string;
 
     @ApiProperty({ description: 'Residential address', example: 'Riyadh, Saudi Arabia', required: true })
     @IsString()
@@ -137,14 +139,16 @@ export class CreateEmployeeDto {
         description: 'Emergency Contact',
         type: Object,
         required: false,
-        example: { name: 'Jane Doe', phone: '+966551234567' }
+        example: { name: 'John Doe', phone: '+966551234567',relationToPatient: "brother"}
     })
     @IsOptional()
     @IsObject()
     emergencyContact?: {
         name: string;
         phone: string;
+        relationToPatient: string;
     };
+
 
     @ApiProperty({
         type: [Object],
@@ -201,6 +205,22 @@ export class CreateEmployeeDto {
     @ValidateNested({ each: true })
     @Type(() => WorkingHours)
     workingHours: WorkingHours[];
+
+
+
+    @ApiProperty({ 
+        type: [Vacation], 
+        description: 'List of leaves', 
+        required: true,
+        example: [
+          { leaveStartDate: '2025-03-20', leaveEndDate: '2025-03-25', leaveType: 'Sick Leave', status: 'Pending' },
+          { leaveStartDate: '2025-04-10', leaveEndDate: '2025-04-15', leaveType: 'Vacation', status: 'Approved' }
+        ]
+      })
+      @IsArray()
+      @ValidateNested({ each: true })
+      @Type(() => Vacation)
+      leaves: Vacation[];
 
     @ApiProperty({
         description: 'Evaluation score (1-10)',

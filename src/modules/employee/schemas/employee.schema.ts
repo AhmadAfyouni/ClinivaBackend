@@ -1,6 +1,6 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {Document, Types} from 'mongoose';
-import {ContactInfo, WorkingHours} from "../../../common/utlis/helper";
+import {ContactInfo, WorkingHours,Vacation} from "../../../common/utlis/helper";
 
 export type EmployeeDocument = Employee & Document;
 
@@ -54,22 +54,25 @@ export class Employee {
     @Prop()
     notes?: string;
 
-    @Prop()
-    email?: string;
+    // @Prop()
+    // email?: string;
 
     @Prop({required: true})
     address?: string;
+
 
     @Prop({
         type: {
             name: {type: String, required: true},
             phone: {type: String, required: true},
+            relationToPatient: {type: String, required: true},
         },
-        required: false,
+        required: false, // Emergency contact is optional
     })
     emergencyContact?: {
         name: string;
         phone: string;
+        relationToPatient: string;
     };
 
     @Prop({type: [{disease_name: String}], default: []})
@@ -96,6 +99,10 @@ export class Employee {
         required: true,
     })
     employeeType: string;
+
+    @Prop({ type: [Vacation], default: [] }) 
+    leaveRecords: Vacation[]; // سجل الإجازات
+  
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);

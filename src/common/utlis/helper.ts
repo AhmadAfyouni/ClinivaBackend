@@ -141,3 +141,19 @@ export class WorkingDays {
     @Prop({required: true})
     endOfWorkingTime: string;
 }
+
+export class Vacation {
+    @Prop({ required: true,type: Date })
+
+    leaveStartDate: Date; // تاريخ بدء الإجازة
+  
+    @Prop({ required: true,type: Date })
+
+    leaveEndDate: Date; // تاريخ انتهاء الإجازة
+  
+    @Prop({ required: true, enum: ['Vacation', 'Sick Leave', 'Emergency'] })
+    leaveType: string; // نوع الإجازة (عطلة/إجازة مرضية/طارئة)
+  
+    @Prop({ required: true, enum: ['Approved', 'Pending'], default: 'Pending' })
+    status: string; // الحالة (موافقة/معلقة)
+}

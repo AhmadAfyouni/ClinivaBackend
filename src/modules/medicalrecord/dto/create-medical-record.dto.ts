@@ -12,6 +12,25 @@ export class CreateMedicalRecordDto {
     @IsNotEmpty()
     appointment: Types.ObjectId;
 
+    
+    @ApiProperty({
+        description: 'Patient symptoms',
+        example: 'Fever, Cough, Shortness of breath',
+        required: false
+      })
+      @IsOptional()
+      @IsString()
+      symptoms?: string;  // الأعراض
+    
+      @ApiProperty({
+        description: 'Treatment plan prescribed by the doctor',
+        example: 'Rest, Hydration, Paracetamol 500mg twice a day',
+        required: false
+      })
+      @IsOptional()
+      @IsString()
+      treatmentPlan?: string;  // خطة العلاج
+
     @ApiProperty({
         description: 'Medical diagnosis',
         example: 'Acute bronchitis',

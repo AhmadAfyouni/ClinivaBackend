@@ -1,5 +1,5 @@
 import {ApiProperty, ApiPropertyOptional} from '@nestjs/swagger';
-import {IsArray, IsDate, IsMongoId, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested} from 'class-validator';
+import {IsArray, IsDate, IsMongoId, IsNotEmpty, IsNumber, IsObject, IsOptional, IsString, ValidateNested} from 'class-validator';
 import {Type} from 'class-transformer';
 import {
     BankAccount,
@@ -17,6 +17,11 @@ export class CreateClinicDto {
     @IsString()
     @IsNotEmpty()
     name: string;
+
+    @ApiPropertyOptional({description: 'Add the expected time for each visit in minutes.',example:30})
+    @IsNotEmpty()
+    @IsNumber()
+    AverageDurationOfVisit: number;
 
     @ApiPropertyOptional({description: 'Brief introduction of the clinic'})
     @IsOptional()

@@ -12,6 +12,12 @@ export class MedicalRecord {
 
     @Prop({required: true})
     diagnosis: string;  // التشخيص الطبي
+   
+    @Prop()
+    Symptoms?: string;  //  الاعراض
+   
+    @Prop()
+    treatmentPlan?: string;  //  خطة العلاج
 
     @Prop({type: [String], default: []})
     medications: string[];  // قائمة الأدوية الموصوفة

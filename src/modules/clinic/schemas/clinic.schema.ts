@@ -19,6 +19,9 @@ export class Clinic {
     @Prop({required: true})
     name: string;
 
+    @Prop({required: true})
+    AverageDurationOfVisit: number;
+
     @Prop()
     introduction?: string;
 
