@@ -36,6 +36,10 @@ export class Appointment {
 
     @Prop({default: ''})
     patientFeedback?: string;  // ملاحظات المريض عن الخدمة
+    
+    @Prop()
+    cancellationReason?: string; // سبب الإلغاء في حالة كان status = 'cancelled'
+  
 }
 
 export const AppointmentSchema = SchemaFactory.createForClass(Appointment);

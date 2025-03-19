@@ -114,4 +114,14 @@ export class CreateAppointmentDto {
     @IsOptional()
     @IsString()
     patientFeedback?: string;
+
+
+    @ApiProperty({
+        description: 'سبب إلغاء الحجز',
+        example: 'المريض غير قادر على الحضور',
+        required: false,
+      })
+      @IsOptional()
+      @IsString()
+      cancellationReason?: string;  // سبب إلغاء الحجز
 }

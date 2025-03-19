@@ -157,3 +157,11 @@ export class Vacation {
     @Prop({ required: true, enum: ['Approved', 'Pending'], default: 'Pending' })
     status: string; // الحالة (موافقة/معلقة)
 }
+
+export class Medication {
+    @Prop({ required: true, })
+    name: string;
+  
+    @Prop({ required: true, })
+    dosage: string;
+  }

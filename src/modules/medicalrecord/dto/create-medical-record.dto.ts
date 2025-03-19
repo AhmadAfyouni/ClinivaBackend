@@ -1,6 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsArray, IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Types } from 'mongoose';
+import { Medication } from 'src/common/utlis/helper';
 
 export class CreateMedicalRecordDto {
     @ApiProperty({
@@ -41,14 +43,18 @@ export class CreateMedicalRecordDto {
     diagnosis: string;
 
     @ApiProperty({
-        type: [String],
-        description: 'List of prescribed medications',
-        example: ['Paracetamol', 'Ibuprofen'],
-        required: false
-    })
-    @IsArray()
-    @IsOptional()
-    medications?: string[];
+        type: [Medication],
+        description: 'قائمة الأدوية الموصوفة',
+        required: true,
+        example: [
+          { name: 'Paracetamol', dosage: '500mg' },
+          { name: 'Ibuprofen', dosage: '200mg' },
+        ],
+      })
+      @IsArray()
+      @ValidateNested({ each: true })
+      @Type(() => Medication)
+      medications: Medication[];
 
     @ApiProperty({
         type: [String],

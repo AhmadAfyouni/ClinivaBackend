@@ -1,5 +1,6 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {Document, Types} from 'mongoose';
+import { Medication} from '../../../common/utlis/helper';
 
 export type MedicalRecordDocument = MedicalRecord & Document;
 
@@ -19,8 +20,8 @@ export class MedicalRecord {
     @Prop()
     treatmentPlan?: string;  //  خطة العلاج
 
-    @Prop({type: [String], default: []})
-    medications: string[];  // قائمة الأدوية الموصوفة
+    @Prop({type: [Medication], default: []})
+    medications: Medication[]; // قائمة الأدوية مع الجرعة
 
     @Prop({type: [String], default: []})
     labTests: string[];  // التحاليل المطلوبة
