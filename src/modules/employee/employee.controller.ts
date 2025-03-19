@@ -1,8 +1,9 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put, Query} from '@nestjs/common';
 import {EmployeeService} from './employee.service';
 import {Employee} from './schemas/employee.schema';
 import {CreateEmployeeDto} from "./dto/create-employee.dto";
 import {UpdateEmployeeDto} from "./dto/update-employee.dto";
+import {PaginationAndFilterDto} from "../../common/dtos/pagination-filter.dto";
 
 @Controller('employees')
 export class EmployeeController {
@@ -15,9 +16,12 @@ export class EmployeeController {
     }
 
     @Get()
-    async getAllEmployees(): Promise<Employee[]> {
-        return this.employeeService.getAllEmployees();
+    async getAllEmployees(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any) {
+        const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+
+        return this.employeeService.getAllEmployees(paginationDto, filters);
     }
+
 
     @Get(':id')
     async getEmployeeById(@Param('id') id: string): Promise<Employee> {

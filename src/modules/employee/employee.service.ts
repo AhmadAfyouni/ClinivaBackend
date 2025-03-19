@@ -4,6 +4,8 @@ import {Model} from 'mongoose';
 import {Employee, EmployeeDocument} from './schemas/employee.schema';
 import {CreateEmployeeDto} from "./dto/create-employee.dto";
 import {UpdateEmployeeDto} from "./dto/update-employee.dto";
+import {paginate} from "../../common/utlis/paginate";
+import {PaginationAndFilterDto} from "../../common/dtos/pagination-filter.dto";
 
 @Injectable()
 export class EmployeeService {
@@ -15,8 +17,16 @@ export class EmployeeService {
         return newEmployee.save();
     }
 
-    async getAllEmployees(): Promise<Employee[]> {
-        return this.employeeModel.find().exec();
+    async getAllEmployees(paginationDto: PaginationAndFilterDto, filters: any) {
+        let { page, limit, allData, sortBy, order } = paginationDto;
+
+        // Convert page & limit to numbers
+        page = Number(page) || 1;
+        limit = Number(limit) || 10;
+
+        const sortField: string = sortBy ?? 'createdAt';
+        const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
+        return paginate(this.employeeModel, page, limit, allData, filters, sort);
     }
 
     async getEmployeeById(id: string): Promise<Employee> {
