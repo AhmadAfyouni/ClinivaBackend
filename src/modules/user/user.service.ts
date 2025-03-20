@@ -4,6 +4,8 @@ import {Model} from 'mongoose';
 import {User, UserDocument} from './schemas/user.schema';
 import {CreateUserDto} from './dto/create-user.dto';
 import {UpdateUserDto} from './dto/update-user.dto';
+import { paginate } from 'src/common/utlis/paginate';
+import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Injectable()
 export class UserService {
@@ -15,8 +17,17 @@ export class UserService {
         return newUser.save();
     }
 
-    async getAllUsers(): Promise<User[]> {
-        return this.userModel.find().exec();
+
+    async getAllUsers(paginationDto: PaginationAndFilterDto, filters: any) {
+        let { page, limit, allData, sortBy, order } = paginationDto;
+
+        // Convert page & limit to numbers
+        page = Number(page) || 1;
+        limit = Number(limit) || 10;
+
+        const sortField: string = sortBy ?? 'createdAt';
+        const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
+        return paginate(this.userModel,[], page, limit, allData, filters, sort);
     }
 
     async getUserById(id: string): Promise<User> {

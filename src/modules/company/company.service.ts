@@ -4,6 +4,8 @@ import {Model} from 'mongoose';
 import {Company, CompanyDocument} from './schemas/company.schema';
 import {CreateCompanyDto} from "./dto/create-company.dto";
 import {UpdateCompanyDto} from "./dto/update-company.dto";
+import { paginate } from 'src/common/utlis/paginate';
+import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Injectable()
 export class CompanyService {
@@ -15,10 +17,18 @@ export class CompanyService {
         return createdCompany.save();
     }
 
-    async findAll(): Promise<Company[]> {
-        return this.companyModel.find().exec();
-    }
+    async findAll(paginationDto: PaginationAndFilterDto, filters: any) {
 
+        let { page, limit, allData, sortBy, order } = paginationDto;
+
+        // Convert page & limit to numbers
+        page = Number(page) || 1;
+        limit = Number(limit) || 10;
+
+        const sortField: string = sortBy ?? 'createdAt';
+        const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
+        return paginate(this.companyModel,[], page, limit, allData, filters, sort);
+    }
     async findOne(id: string): Promise<Company> {
         const company = await this.companyModel.findById(id).exec();
         if (!company) {

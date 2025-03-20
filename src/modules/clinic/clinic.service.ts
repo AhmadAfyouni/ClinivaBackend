@@ -4,6 +4,8 @@ import {Model} from 'mongoose';
 import {Clinic, ClinicDocument} from './schemas/clinic.schema';
 import {CreateClinicDto} from "./dto/create-clinic.dto";
 import {UpdateClinicDto} from "./dto/update-clinic.dto";
+import { paginate } from 'src/common/utlis/paginate';
+import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Injectable()
 export class ClinicService {
@@ -15,10 +17,19 @@ export class ClinicService {
         return newClinic.save();
     }
 
-    async getAllClinics(): Promise<Clinic[]> {
-        return this.clinicModel.find().populate(['departmentId', ]).exec();
-    }
 
+    
+    async getAllClinics(paginationDto: PaginationAndFilterDto, filters: any) {
+        let { page, limit, allData, sortBy, order } = paginationDto;
+
+        // Convert page & limit to numbers
+        page = Number(page) || 1;
+        limit = Number(limit) || 10;
+
+        const sortField: string = sortBy ?? 'createdAt';
+        const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
+        return paginate(this.clinicModel,['departmentId'], page, limit, allData, filters, sort);
+    }
     async getClinicById(id: string): Promise<Clinic> {
         const clinic = await this.clinicModel.findById(id).populate(['departmentId',  ]);
         if (!clinic) throw new NotFoundException('Clinic not found');

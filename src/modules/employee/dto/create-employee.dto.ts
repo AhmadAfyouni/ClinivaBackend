@@ -220,7 +220,7 @@ export class CreateEmployeeDto {
       @IsArray()
       @ValidateNested({ each: true })
       @Type(() => Vacation)
-      leaves: Vacation[];
+      vacations: Vacation[];
 
     @ApiProperty({
         description: 'Evaluation score (1-10)',

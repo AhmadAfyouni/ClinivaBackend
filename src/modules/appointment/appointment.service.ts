@@ -4,6 +4,8 @@ import {Model} from 'mongoose';
 import {Appointment, AppointmentDocument} from './schemas/appointment.schema';
 import {CreateAppointmentDto} from "./dto/create-appointment.dto";
 import {UpdateAppointmentDto} from "./dto/update-appointment.dto";
+import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
+import { paginate } from 'src/common/utlis/paginate';
 
 @Injectable()
 export class AppointmentService {
@@ -15,9 +17,17 @@ export class AppointmentService {
         return newAppointment.save();
     }
 
-    async getAllAppointments(): Promise<Appointment[]> {
-        return this.appointmentModel.find().populate('patient clinic doctor').exec();
-    }
+        async getAllAppointments(paginationDto: PaginationAndFilterDto, filters: any) {
+            let { page, limit, allData, sortBy, order } = paginationDto;
+    
+            // Convert page & limit to numbers
+            page = Number(page) || 1;
+            limit = Number(limit) || 10;
+    
+            const sortField: string = sortBy ?? 'createdAt';
+            const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
+            return paginate(this.appointmentModel,['patient', 'clinic', 'doctor'], page, limit, allData, filters, sort);
+        }
 
     async getAppointmentById(id: string): Promise<Appointment> {
         const appointment = await this.appointmentModel.findById(id).populate('patient clinic doctor');

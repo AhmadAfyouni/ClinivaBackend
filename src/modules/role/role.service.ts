@@ -5,6 +5,8 @@ import {Role, RoleDocument} from './schemas/role.schema';
 import {PermissionsGroupEnum} from "../../config/permissions-group.enum";
 import {CreateRoleDto} from "./dto/create-role.dto";
 import {UpdateRoleDto} from "./dto/update-role.dto";
+import { paginate } from 'src/common/utlis/paginate';
+import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Injectable()
 export class RoleService {
@@ -24,9 +26,17 @@ export class RoleService {
         return newRole.save();
     }
 
-    async getAllRoles(): Promise<Role[]> {
-        return this.roleModel.find().exec();
-    }
+        async getAllRoles(paginationDto: PaginationAndFilterDto, filters: any) {
+            let { page, limit, allData, sortBy, order } = paginationDto;
+    
+            // Convert page & limit to numbers
+            page = Number(page) || 1;
+            limit = Number(limit) || 10;
+    
+            const sortField: string = sortBy ?? 'createdAt';
+            const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
+            return paginate(this.roleModel,[], page, limit, allData, filters, sort);
+        }
 
     async getRoleById(id: string): Promise<Role> {
         const role = await this.roleModel.findById(id);

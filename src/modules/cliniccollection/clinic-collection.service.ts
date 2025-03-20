@@ -4,6 +4,8 @@ import {Model} from 'mongoose';
 import {ClinicCollection, ClinicCollectionDocument} from "./schemas/cliniccollection.schema";
 import {UpdateClinicCollectionDto} from "./dto/update-clinic-collection.dto";
 import {CreateClinicCollectionDto} from "./dto/create-clinic-collection.dto";
+import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
+import { paginate } from 'src/common/utlis/paginate';
 
 @Injectable()
 export class ClinicCollectionService {
@@ -15,8 +17,16 @@ export class ClinicCollectionService {
         return newClinicCollection.save();
     }
 
-    async getAllClinicCollections(): Promise<ClinicCollection[]> {
-        return this.clinicCollectionModel.find().populate(['companyId',  ]).exec();
+    async getAllClinicCollections(paginationDto: PaginationAndFilterDto, filters: any) {
+        let { page, limit, allData, sortBy, order } = paginationDto;
+
+        // Convert page & limit to numbers
+        page = Number(page) || 1;
+        limit = Number(limit) || 10;
+
+        const sortField: string = sortBy ?? 'createdAt';
+        const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
+        return paginate(this.clinicCollectionModel,['companyId'], page, limit, allData, filters, sort);
     }
 
     async getClinicCollectionById(id: string): Promise<ClinicCollection> {

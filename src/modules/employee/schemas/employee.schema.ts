@@ -102,7 +102,7 @@ export class Employee {
     employeeType: string;
 
     @Prop({ type: [Vacation], default: [] }) 
-    leaveRecords: Vacation[]; // سجل الإجازات
+    vacationRecords: Vacation[]; // سجل الإجازات
   
 }
 

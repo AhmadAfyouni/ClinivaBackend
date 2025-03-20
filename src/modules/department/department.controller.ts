@@ -1,7 +1,8 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put, Query} from '@nestjs/common';
 import {DepartmentService} from './department.service';
 import {CreateDepartmentDto} from "./dto/create-department.dto";
 import {UpdateDepartmentDto} from "./dto/update-department.dto";
+import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Controller('departments')
 export class DepartmentController {
@@ -14,10 +15,10 @@ export class DepartmentController {
     }
 
     @Get()
-    async getAllDepartments() {
-        return this.departmentService.getAllDepartments();
+    async getAllDepartments(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any) {
+        const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+        return this.departmentService.getAllDepartments(paginationDto, filters);
     }
-
     @Get(':id')
     async getDepartmentById(@Param('id') id: string) {
         return this.departmentService.getDepartmentById(id);

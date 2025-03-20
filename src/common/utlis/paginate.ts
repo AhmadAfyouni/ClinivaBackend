@@ -15,6 +15,7 @@ export interface ApiResponse<T> {
 
 export async function paginate<T>(
     model: Model<T>,
+    populate:any=[],
     page: number = 1,
     limit: number = 10,
     allData: boolean = false,
@@ -33,7 +34,7 @@ export async function paginate<T>(
 
     //allData === true
     if (allData) {
-        const data = await model.find(filter).sort(sort).exec();
+        const data = await model.find(filter).populate(populate).sort(sort).exec();
         return {
             message,
             data,
@@ -41,7 +42,7 @@ export async function paginate<T>(
         };
     }
 
-    const data = await model.find(filter)
+    const data = await model.find(filter).populate(populate)
         .sort(sort)
         .skip(skip)
         .limit(limitNumber) // Ensures only `limit` number of records are returned

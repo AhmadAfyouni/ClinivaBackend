@@ -1,7 +1,8 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put, Query} from '@nestjs/common';
 import {ClinicCollectionService} from './clinic-collection.service';
 import {CreateClinicCollectionDto} from "./dto/create-clinic-collection.dto";
 import {UpdateClinicCollectionDto} from "./dto/update-clinic-collection.dto";
+import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Controller('cliniccollections')
 export class ClinicCollectionController {
@@ -14,8 +15,10 @@ export class ClinicCollectionController {
     }
 
     @Get()
-    async getAllClinicCollections() {
-        return this.clinicCollectionService.getAllClinicCollections();
+    async getAllClinicCollections(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any) {
+        const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+
+        return this.clinicCollectionService.getAllClinicCollections(paginationDto, filters);
     }
 
     @Get(':id')

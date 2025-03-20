@@ -4,6 +4,8 @@ import {Model} from 'mongoose';
 import {Department, DepartmentDocument} from './schemas/department.schema';
 import {CreateDepartmentDto} from "./dto/create-department.dto";
 import {UpdateDepartmentDto} from "./dto/update-department.dto";
+import { paginate } from 'src/common/utlis/paginate';
+import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Injectable()
 export class DepartmentService {
@@ -15,9 +17,17 @@ export class DepartmentService {
         return newDepartment.save();
     }
 
-    async getAllDepartments(): Promise<Department[]> {
-        return this.departmentModel.find().populate(['clinicCollectionId',  ]).exec();
-    }
+        async getAllDepartments(paginationDto: PaginationAndFilterDto, filters: any) {
+            let { page, limit, allData, sortBy, order } = paginationDto;
+    
+            // Convert page & limit to numbers
+            page = Number(page) || 1;
+            limit = Number(limit) || 10;
+    
+            const sortField: string = sortBy ?? 'createdAt';
+            const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
+            return paginate(this.departmentModel,['clinicCollectionId'], page, limit, allData, filters, sort);
+        }
 
     async getDepartmentById(id: string): Promise<Department> {
         const department = await this.departmentModel.findById(id).populate(['clinicCollectionId',  ]);

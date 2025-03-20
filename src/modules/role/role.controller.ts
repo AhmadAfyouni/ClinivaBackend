@@ -1,8 +1,9 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put, Query} from '@nestjs/common';
 import {RoleService} from './role.service';
 import {Role} from './schemas/role.schema';
 import {CreateRoleDto} from "./dto/create-role.dto";
 import {UpdateRoleDto} from "./dto/update-role.dto";
+import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Controller('roles')
 export class RoleController {
@@ -15,8 +16,10 @@ export class RoleController {
     }
 
     @Get()
-    async getAllRoles(): Promise<Role[]> {
-        return this.roleService.getAllRoles();
+    async getAllRoles(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any) {
+        const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+
+        return this.roleService.getAllRoles(paginationDto, filters);
     }
 
     @Get(':id')

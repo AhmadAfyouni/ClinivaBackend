@@ -1,7 +1,8 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put, Query} from '@nestjs/common';
 import {UserService} from './user.service';
 import {CreateUserDto} from './dto/create-user.dto';
 import {UpdateUserDto} from './dto/update-user.dto';
+import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Controller('users')
 export class UserController {
@@ -13,10 +14,11 @@ export class UserController {
         return this.userService.createUser(createUserDto);
     }
 
-    @Get()
-    findAll() {
-        return this.userService.getAllUsers();
-    }
+   @Get()
+   async findAll(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any) {
+       const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+       return this.userService.getAllUsers(paginationDto, filters);
+   }
 
     @Get(':id')
     findOne(@Param('id') id: string) {
