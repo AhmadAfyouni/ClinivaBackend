@@ -1,8 +1,9 @@
-import {Body, Controller, Delete, Get, Param, Post, Put} from '@nestjs/common';
+import {Body, Controller, Delete, Get, Param, Post, Put, Query} from '@nestjs/common';
 import {MedicalRecordService} from './medical-record.service';
 import {MedicalRecord} from "./schemas/medicalrecord.schema";
 import {CreateMedicalRecordDto} from "./dto/create-medical-record.dto";
 import {UpdateMedicalRecordDto} from "./dto/update-medical-record.dto";
+import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Controller('medicalrecords')
 export class MedicalRecordController {
@@ -14,10 +15,14 @@ export class MedicalRecordController {
         return this.medicalRecordService.createMedicalRecord(createMedicalRecordDto);
     }
 
-    @Get()
-    async getAllMedicalRecords(): Promise<MedicalRecord[]> {
-        return this.medicalRecordService.getAllMedicalRecords();
-    }
+
+
+        @Get()
+        async getAllMedicalRecords(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any) {
+            const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+    
+            return this.medicalRecordService.getAllMedicalRecords(paginationDto, filters);
+        }
 
     @Get(':id')
     async getMedicalRecordById(@Param('id') id: string): Promise<MedicalRecord> {

@@ -4,6 +4,8 @@ import {Model} from 'mongoose';
 import {MedicalRecord, MedicalRecordDocument} from "./schemas/medicalrecord.schema";
 import {CreateMedicalRecordDto} from "./dto/create-medical-record.dto";
 import {UpdateMedicalRecordDto} from "./dto/update-medical-record.dto";
+import { paginate } from 'src/common/utlis/paginate';
+import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Injectable()
 export class MedicalRecordService {
@@ -15,9 +17,17 @@ export class MedicalRecordService {
         return newRecord.save();
     }
 
-    async getAllMedicalRecords(): Promise<MedicalRecord[]> {
-        return this.medicalRecordModel.find().populate('appointment').exec();
-    }
+        async getAllMedicalRecords(paginationDto: PaginationAndFilterDto, filters: any) {
+            let { page, limit, allData, sortBy, order } = paginationDto;
+    
+            // Convert page & limit to numbers
+            page = Number(page) || 1;
+            limit = Number(limit) || 10;
+    
+            const sortField: string = sortBy ?? 'createdAt';
+            const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
+            return paginate(this.medicalRecordModel,['appointment'], page, limit, allData, filters, sort);
+        }
 
     async getMedicalRecordById(id: string): Promise<MedicalRecord> {
         const record = await this.medicalRecordModel.findById(id).populate('appointment').exec();
