@@ -39,17 +39,9 @@ export class Employee {
     @Prop({required: true})
     number_children?: number;
 
-    @Prop({
-        type: String,
-        enum: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],select:false
-    })
-    blood_type?: string;
 
-    @Prop({select:false})
-    height?: number;
 
-    @Prop({select:false})
-    weight?: number;
+
 
     @Prop()
     notes?: string;
@@ -61,23 +53,7 @@ export class Employee {
     address?: string;
 
 
-    @Prop({
-        type: {
-            name: {type: String, required: true},
-            phone: {type: String, required: true},
-            relationToPatient: {type: String, required: true},
-        },
-        required: false, // Emergency contact is optional
-        select:false
-    })
-    emergencyContact?: {
-        name: string;
-        phone: string;
-        relationToPatient: string;
-    };
 
-    @Prop({type: [{disease_name: String}], default: [],select:false})
-    ChronicDiseases?: { disease_name: string }[];
 
     @Prop({})
     professional_experience: string;

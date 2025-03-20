@@ -85,34 +85,6 @@ export class CreateEmployeeDto {
     number_children?: number;
 
     @ApiProperty({
-        description: 'Blood Type',
-        enum: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'],
-        example: 'O+',
-        required: false
-    })
-    @IsEnum(['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'])
-    @IsOptional()
-    blood_type?: string;
-
-    @ApiProperty({
-        description: 'Height in cm',
-        example: 180,
-        required: false
-    })
-    @IsNumber()
-    @IsOptional()
-    height?: number;
-
-    @ApiProperty({
-        description: 'Weight in kg',
-        example: 75,
-        required: false
-    })
-    @IsNumber()
-    @IsOptional()
-    weight?: number;
-
-    @ApiProperty({
         description: 'Notes',
         example: 'Expert in cardiology and patient care.',
         required: false
@@ -135,33 +107,7 @@ export class CreateEmployeeDto {
     @IsNotEmpty()
     address: string;
 
-    @ApiProperty({
-        description: 'Emergency Contact',
-        type: Object,
-        required: false,
-        example: { name: 'John Doe', phone: '+966551234567',relationToPatient: "brother"}
-    })
-    @IsOptional()
-    @IsObject()
-    emergencyContact?: {
-        name: string;
-        phone: string;
-        relationToPatient: string;
-    };
 
-
-    @ApiProperty({
-        type: [Object],
-        description: 'List of chronic diseases',
-        required: false,
-        example: [
-            { disease_name: 'Hypertension' },
-            { disease_name: 'Diabetes' }
-        ]
-    })
-    @IsArray()
-    @IsOptional()
-    ChronicDiseases?: { disease_name: string }[];
 
     @ApiProperty({
         description: 'Professional experience details',
