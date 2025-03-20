@@ -6,10 +6,9 @@ import {GlobalExceptionFilter} from "./common/global-exception.filter";
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
-    app.useGlobalFilters(new GlobalExceptionFilter()); // Apply globally
+    app.useGlobalFilters(new GlobalExceptionFilter());           // Apply globally
+    app.setGlobalPrefix('api/v1');                              // Set Global API Prefix (e.g., /api/v1/)
 
-    // Set Global API Prefix (e.g., /api/v1/)
-    app.setGlobalPrefix('api/v1');
 
     // Enable Swagger
     const config = new DocumentBuilder()

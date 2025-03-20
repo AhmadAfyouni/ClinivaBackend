@@ -1,0 +1,12 @@
+
+#server muaz
+#MONGO_URI='mongodb://mongo:314c8464dbfa5c263070@147.93.121.215:27017/?tls=false'
+# server task
+MONGO_URI='mongodb://mongo:13b69b8c32298696dd8c@92.112.194.101:5430'
+
+JWT_SECRET = 'd3b07384d113edec49eaa6238ad5ff00b204e9800998ecf8427e';
+JWT_REFRESH_SECRET = 'd3b07384d113edec49eaa6238ad5ff00b204e9800998ecf8427e';
+JWT_EXPIRATION = '7d';
+#JWT
+JWT_SECRET=your-secret-key
+JWT_EXPIRATION=3600s

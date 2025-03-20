@@ -10,7 +10,7 @@ import {ConfigModule, ConfigService} from '@nestjs/config';
             inject: [ConfigService],
             useFactory: async (configService: ConfigService) => {
                 const mongoUri = configService.get<string>('MONGO_URI');
-                const dbName = configService.get<string>('DB_NAME', 'clinic_management');
+                const dbName = configService.get<string>('DB_NAME', 'db');
 
                 if (!mongoUri) {
                     throw new Error('MONGO_URI is missing in environment variables!');
