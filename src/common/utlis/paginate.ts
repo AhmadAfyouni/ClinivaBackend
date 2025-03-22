@@ -2,7 +2,8 @@ import { Model } from 'mongoose';
 
 export interface ApiResponse<T> {
     message: string;
-    data: T[];
+    success:boolean,
+    data?: T[]|T|null;
     pagination?: {
         current_page: number;
         total_pages: number;
@@ -36,6 +37,7 @@ export async function paginate<T>(
     if (allData) {
         const data = await model.find(filter).populate(populate).sort(sort).exec();
         return {
+            success:true,
             message,
             data,
             pagination: null // Correctly set to null when fetching all data
@@ -53,6 +55,7 @@ export async function paginate<T>(
     const totalPages = Math.ceil(totalItems / limitNumber);
 
     return {
+        success:true,
         message,
         data,
         pagination: {

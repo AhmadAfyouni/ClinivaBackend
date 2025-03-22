@@ -6,7 +6,8 @@ import {
     IsMongoId,
     IsNotEmpty,
     IsOptional,
-    IsString
+    IsString,
+    MinLength
 } from 'class-validator';
 import { Types } from 'mongoose';
 
@@ -24,6 +25,7 @@ export class CreateUserDto {
     @ApiProperty({ description: 'User password', example: 'securePassword123', required: true })
     @IsString()
     @IsNotEmpty()
+    @MinLength(6,{ message: 'Password must be at least 6 characters long' })
     password: string;
 
     @ApiProperty({

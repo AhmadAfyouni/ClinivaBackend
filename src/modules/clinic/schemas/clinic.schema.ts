@@ -23,7 +23,7 @@ export class Clinic {
     AverageDurationOfVisit: number;
 
     @Prop()
-    introduction?: string;
+    overview?: string;
 
     @Prop({type: Date})
     yearOfEstablishment?: Date;
@@ -38,7 +38,7 @@ export class Clinic {
     vision?: string;
 
     @Prop()
-    details?: string;
+    goals?: string;
 
     @Prop({type: [ContactInfo], default: []})
     ContactInfos: ContactInfo[];

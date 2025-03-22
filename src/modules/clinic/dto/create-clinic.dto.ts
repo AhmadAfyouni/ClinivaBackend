@@ -23,10 +23,10 @@ export class CreateClinicDto {
     @IsNumber()
     AverageDurationOfVisit: number;
 
-    @ApiPropertyOptional({description: 'Brief introduction of the clinic'})
+    @ApiPropertyOptional({description: 'Brief overview of the clinic'})
     @IsOptional()
     @IsString()
-    introduction?: string;
+    overview?: string;
 
     @ApiPropertyOptional({description: 'Year of establishment', example: '2005-06-15'})
     @IsOptional()
@@ -48,10 +48,10 @@ export class CreateClinicDto {
     @IsString()
     vision?: string;
 
-    @ApiPropertyOptional({description: 'Additional details about the clinic'})
+    @ApiPropertyOptional({description: 'Additional goals about the clinic'})
     @IsOptional()
     @IsString()
-    details?: string;
+    goals?: string;
 
     @ApiPropertyOptional({type: [ContactInfo], description: 'Contact information of the clinic'})
     @IsArray()

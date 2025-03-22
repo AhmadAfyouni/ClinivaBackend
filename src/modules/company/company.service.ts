@@ -4,7 +4,7 @@ import {Model} from 'mongoose';
 import {Company, CompanyDocument} from './schemas/company.schema';
 import {CreateCompanyDto} from "./dto/create-company.dto";
 import {UpdateCompanyDto} from "./dto/update-company.dto";
-import { paginate } from 'src/common/utlis/paginate';
+import { ApiResponse, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Injectable()
@@ -12,10 +12,15 @@ export class CompanyService {
     constructor(@InjectModel(Company.name) private companyModel: Model<CompanyDocument>) {
     }
 
-    async create(createCompanyDto: CreateCompanyDto): Promise<Company> {
+    async create(createCompanyDto: CreateCompanyDto): Promise<ApiResponse< Company>> {
         const createdCompany = new this.companyModel(createCompanyDto);
-        return createdCompany.save();
+        const savedCompany = await createdCompany.save(); 
+        return {
+            success:true,
+            message: 'Company created successfully',
+            data: savedCompany};
     }
+
 
     async findAll(paginationDto: PaginationAndFilterDto, filters: any) {
 
@@ -29,26 +34,37 @@ export class CompanyService {
         const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
         return paginate(this.companyModel,[], page, limit, allData, filters, sort);
     }
-    async findOne(id: string): Promise<Company> {
+
+    async findOne(id: string): Promise<ApiResponse<Company>> {
         const company = await this.companyModel.findById(id).exec();
         if (!company) {
             throw new NotFoundException(`Company with ID ${id} not found`);
         }
-        return company;
+        return {
+            success:true,
+            message: 'Company retrieved successfully',
+            data:company,} ;
     }
 
-    async update(id: string, updateCompanyDto: UpdateCompanyDto): Promise<Company> {
+    async update(id: string, updateCompanyDto: UpdateCompanyDto): Promise<ApiResponse<Company>> {
         const updatedCompany = await this.companyModel.findByIdAndUpdate(id, updateCompanyDto, {new: true}).exec();
         if (!updatedCompany) {
             throw new NotFoundException(`Company with ID ${id} not found`);
         }
-        return updatedCompany;
+        return {success:true,
+             message: 'Company update successfully',
+             data:updatedCompany,};
+        
     }
 
-    async remove(id: string): Promise<void> {
+    async remove(id: string): Promise<ApiResponse<Company>> {
         const result = await this.companyModel.findByIdAndDelete(id).exec();
         if (!result) {
             throw new NotFoundException(`Company with ID ${id} not found`);
+        }
+        return {
+            success:true,
+            message: 'Company remove successfully',
         }
     }
 }

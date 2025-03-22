@@ -20,6 +20,7 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         }
 
         response.status(status).json({
+            success:false,
             statusCode: status,
             message: message,
             timestamp: new Date().toISOString(),

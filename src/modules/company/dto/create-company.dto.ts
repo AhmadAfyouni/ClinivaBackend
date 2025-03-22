@@ -32,13 +32,13 @@ export class CreateCompanyDto {
     address: string;
 
     @ApiPropertyOptional({
-        description: 'Brief introduction of the company',
+        description: 'Brief overview of the company',
         example: 'A leading healthcare provider in Saudi Arabia.',
         required: false
     })
     @IsOptional()
     @IsString()
-    intro?: string;
+    overview?: string;
 
     @ApiPropertyOptional({ description: 'Year of establishment', example: '2000-08-15', required: false })
     @IsOptional()
@@ -60,13 +60,13 @@ export class CreateCompanyDto {
     vision?: string;
 
     @ApiPropertyOptional({
-        description: 'Additional company details',
+        description: 'Additional company goals',
         example: 'We operate in multiple cities across Saudi Arabia.',
         required: false
     })
     @IsOptional()
     @IsString()
-    details?: string;
+    goals?: string;
 
     @ApiPropertyOptional({
         type: [ContactInfo],

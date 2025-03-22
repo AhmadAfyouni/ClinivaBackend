@@ -4,6 +4,7 @@ import {
     IsDate,
     IsMongoId,
     IsNotEmpty,
+    IsNumber,
     IsObject,
     IsOptional,
     IsString,
@@ -21,6 +22,7 @@ import {
     Specialization,
     WorkingHours
 } from '../../../common/utlis/helper';
+import { User } from 'src/modules/user/schemas/user.schema';
 
 export class CreateClinicCollectionDto {
     @ApiProperty({ description: 'Clinic Collection name', example: 'Saudi Clinics Group', required: true })
@@ -29,13 +31,26 @@ export class CreateClinicCollectionDto {
     name: string;
 
     @ApiProperty({
-        description: 'Brief introduction of the clinic collection',
+        description: 'Brief overview of the clinic collection',
         example: 'A leading healthcare provider in Saudi Arabia.',
         required: false
     })
     @IsOptional()
     @IsString()
-    introduction?: string;
+    overview?: string;
+
+    @IsNumber()
+    @IsOptional()
+    patientCapacity: number;  // قدرة استيعاب المرضى
+
+    @ApiProperty({
+        description: 'General policies of the clinic collection',
+        example: 'The clinic follows strict hygiene standards and ensures the safety of patients.',
+        required: false,
+    })
+    @IsOptional()
+    @IsString()
+    policies?: string;  //  حقل السياسات العامة
 
     @ApiProperty({
         description: 'Year of establishment',
@@ -70,13 +85,13 @@ export class CreateClinicCollectionDto {
     vision?: string;
 
     @ApiProperty({
-        description: 'Additional details',
+        description: 'Additional goals',
         example: 'We have over 50 branches across the country.',
         required: false
     })
     @IsOptional()
     @IsString()
-    details?: string;
+    goals?: string;
 
     @ApiProperty({
         type: [ContactInfo],

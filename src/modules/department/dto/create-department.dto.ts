@@ -18,14 +18,16 @@ export class CreateDepartmentDto {
     @IsNotEmpty()
     name: string;
 
+
+    
     @ApiProperty({
-        description: 'Brief introduction of the department',
+        description: 'Brief overview of the department',
         example: 'Specialized in heart-related treatments and procedures.',
         required: false
     })
     @IsOptional()
     @IsString()
-    introduction?: string;
+    overview?: string;
 
     @ApiProperty({
         description: 'Year of establishment',
@@ -60,13 +62,13 @@ export class CreateDepartmentDto {
     vision?: string;
 
     @ApiProperty({
-        description: 'Additional details about the department',
+        description: 'Additional goals about the department',
         example: 'Equipped with state-of-the-art cardiac surgery facilities.',
         required: false
     })
     @IsOptional()
     @IsString()
-    details?: string;
+    goals?: string;
 
     @ApiProperty({
         type: [ContactInfo],

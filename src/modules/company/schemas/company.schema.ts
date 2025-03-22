@@ -18,7 +18,7 @@ export class Company {
     name: string;
 
     @Prop()
-    intro: string;
+    overview: string;
 
     @Prop({type: Date})
     yearOfEstablishment: Date;
@@ -33,7 +33,7 @@ export class Company {
     vision: string;
 
     @Prop()
-    details: string;
+    goals: string;
 
     @Prop({type: [ContactInfo], default: []})
     ContactInfos: ContactInfo[];
