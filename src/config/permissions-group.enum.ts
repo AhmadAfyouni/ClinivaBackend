@@ -1,6 +1,6 @@
-import {PermissionsEnum} from "./permission.enum";
+import { PermissionsEnum } from './permission.enum';
 
-export const PermissionsGroupEnum = {
+export const PermissionsGroupMap: Record<string, PermissionsEnum[]> = {
     USER_MANAGEMENT: [
         PermissionsEnum.USER_VIEW,
         PermissionsEnum.USER_CREATE,
@@ -46,5 +46,49 @@ export const PermissionsGroupEnum = {
     CALL_CENTER_MANAGEMENT: [
         PermissionsEnum.CALL_CENTER_VIEW,
         PermissionsEnum.CALL_CENTER_MANAGE,
+    ],
+
+    EMPLOYEE_MANAGEMENT: [
+        PermissionsEnum.EMPLOYEE_VIEW,
+        PermissionsEnum.EMPLOYEE_CREATE,
+        PermissionsEnum.EMPLOYEE_UPDATE,
+        PermissionsEnum.EMPLOYEE_DELETE,
+    ],
+
+    COMPANY_MANAGEMENT: [
+        PermissionsEnum.COMPANY_VIEW,
+        PermissionsEnum.COMPANY_CREATE,
+        PermissionsEnum.COMPANY_UPDATE,
+        PermissionsEnum.COMPANY_DELETE,
+    ],
+
+    CLINIC_COLLECTION_MANAGEMENT: [
+        PermissionsEnum.CLINIC_COLLECTION_VIEW,
+        PermissionsEnum.CLINIC_COLLECTION_CREATE,
+        PermissionsEnum.CLINIC_COLLECTION_UPDATE,
+        PermissionsEnum.CLINIC_COLLECTION_DELETE,
+    ],
+
+    CLINIC_MANAGEMENT: [
+        PermissionsEnum.CLINIC_VIEW,
+        PermissionsEnum.CLINIC_CREATE,
+        PermissionsEnum.CLINIC_UPDATE,
+        PermissionsEnum.CLINIC_DELETE,
+    ],
+
+    DEPARTMENT_MANAGEMENT: [
+        PermissionsEnum.DEPARTMENT_VIEW,
+        PermissionsEnum.DEPARTMENT_CREATE,
+        PermissionsEnum.DEPARTMENT_UPDATE,
+        PermissionsEnum.DEPARTMENT_DELETE,
+    ],
+
+    MEDICAL_RECORD_ACCESS: [
+        PermissionsEnum.MEDICAL_RECORD_VIEW,
+        PermissionsEnum.MEDICAL_RECORD_UPDATE,
+    ],
+
+    REPORTS_ACCESS: [
+        PermissionsEnum.REPORTS_VIEW,
     ],
 };

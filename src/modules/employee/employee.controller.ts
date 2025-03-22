@@ -1,4 +1,4 @@
-import {Body, Controller, Delete, Get, Param, Post, Put, Query} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import {EmployeeService} from './employee.service';
 import {Employee} from './schemas/employee.schema';
 import {CreateEmployeeDto} from "./dto/create-employee.dto";

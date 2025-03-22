@@ -19,15 +19,6 @@ export class CreateRoleDto {
     @IsEnum(PermissionsEnum, { each: true })
     permissions?: string[];
 
-    @ApiProperty({
-        type: [String],
-        description: 'List of permission groups associated with the role',
-        required: false
-    })
-    @IsArray()
-    @IsOptional()
-    @IsString({ each: true })
-    permissionGroups?: string[];
 
     @ApiProperty({
         description: 'Role description',

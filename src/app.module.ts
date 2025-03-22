@@ -21,6 +21,7 @@ import {AppointmentModule} from './modules/appointment/appointment.module';
 import {MedicalRecordModule} from './modules/medicalrecord/medical-record.module';
 import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
+import { PermissionsGuard } from './common/guards/permissions.guard';
 
 // Security & Middleware
 
@@ -60,6 +61,10 @@ import { APP_GUARD } from '@nestjs/core';
            })();
          },
        },
+      {
+        provide: APP_GUARD,
+        useClass: PermissionsGuard,
+      },
      ],
 })
 export class AppModule {
