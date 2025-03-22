@@ -18,7 +18,7 @@ import { RoleModule } from '../role/role.module';
         }),
         MongooseModule.forFeature([{name: User.name, schema: UserSchema}]),
         UserModule, // Import the User module
-        RoleModule, //
+        RoleModule, // Import the Role module
     ],
     controllers: [AuthController],
     providers: [AuthService, JwtStrategy], // Services
