@@ -19,6 +19,8 @@ import {EmployeeModule} from './modules/employee/employee.module';
 import {PatientModule} from './modules/patient/patient.module';
 import {AppointmentModule} from './modules/appointment/appointment.module';
 import {MedicalRecordModule} from './modules/medicalrecord/medical-record.module';
+import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
+import { APP_GUARD } from '@nestjs/core';
 
 // Security & Middleware
 
@@ -43,21 +45,21 @@ import {MedicalRecordModule} from './modules/medicalrecord/medical-record.module
         AppointmentModule,
         MedicalRecordModule,
     ],
-    // providers: [
-    //   {
-    //     provide: APP_GUARD,
-    //     useFactory: () => {
-    //       return new (class extends JwtAuthGuard {
-    //         canActivate(context) {
-    //           const request = context.switchToHttp().getRequest();
-    //           // Allow /api/docs to be accessed without authentication
-    //           if (request.url.startsWith('/api/docs')) return true;
-    //           return super.canActivate(context); // Use the default JwtAuthGuard behavior
-    //         }
-    //       })();
-    //     },
-    //   },
-    // ],
+    providers: [
+       {
+         provide: APP_GUARD,
+         useFactory: () => {
+           return new (class extends JwtAuthGuard {
+             canActivate(context) {
+              const request = context.switchToHttp().getRequest();
+               // Allow /api/v1/docs to be accessed without authentication
+               if (request.url.startsWith('/api/v1/docs')) return true;
+               return super.canActivate(context); // Use the default JwtAuthGuard behavior
+             }
+           })();
+         },
+       },
+     ],
 })
 export class AppModule {
 }
