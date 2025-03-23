@@ -37,12 +37,12 @@ export class UserController {
     }
 
 
-  @Patch(':id/reset-password')
+  @Put(':id/reset-password')
   async resetPassword(@Param('id') id: string, @Body() dto: ResetPasswordDto) {
     return { message: await this.userService.resetPassword(id, dto.newPassword) };
   }
 
-  @Patch(':id/change-password')
+  @Put(':id/change-password')
   async changePassword(@Param('id') id: string, @Body() dto: ChangePasswordDto) {
     return { message: await this.userService.changePassword(id, dto.currentPassword, dto.newPassword) };
   }

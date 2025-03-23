@@ -76,9 +76,10 @@ export class AuthService {
         try {
             const payload = this.jwtService.verify(refreshToken);
 
-            const user = await this.userService.getUserById(payload.sub);
-            if (!user) throw new UnauthorizedException('User not found');
-
+            const userResponse  = await this.userService.getUserById(payload.sub);
+            const user = userResponse.data; 
+            if (!user|| Array.isArray(user)) throw new UnauthorizedException('User not found');
+               
             const newPayload = {
                 sub: user._id.toString(),
                 email: user.email,

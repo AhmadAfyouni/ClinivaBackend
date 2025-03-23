@@ -11,7 +11,7 @@ export class MedicalRecordController {
     }
 
     @Post()
-    async createMedicalRecord(@Body() createMedicalRecordDto: CreateMedicalRecordDto): Promise<MedicalRecord> {
+    async createMedicalRecord(@Body() createMedicalRecordDto: CreateMedicalRecordDto) {
         return this.medicalRecordService.createMedicalRecord(createMedicalRecordDto);
     }
 
@@ -25,17 +25,18 @@ export class MedicalRecordController {
         }
 
     @Get(':id')
-    async getMedicalRecordById(@Param('id') id: string): Promise<MedicalRecord> {
+    async getMedicalRecordById(@Param('id') id: string) {
         return this.medicalRecordService.getMedicalRecordById(id);
     }
 
     @Put(':id')
-    async updateMedicalRecord(@Param('id') id: string, @Body() updateMedicalRecordDto: UpdateMedicalRecordDto): Promise<MedicalRecord> {
+    async updateMedicalRecord(@Param('id') id: string, @Body() updateMedicalRecordDto: UpdateMedicalRecordDto) {
         return this.medicalRecordService.updateMedicalRecord(id, updateMedicalRecordDto);
     }
 
     @Delete(':id')
-    async deleteMedicalRecord(@Param('id') id: string): Promise<void> {
+    async deleteMedicalRecord(@Param('id') id: string) {
         return this.medicalRecordService.deleteMedicalRecord(id);
+        
     }
 }

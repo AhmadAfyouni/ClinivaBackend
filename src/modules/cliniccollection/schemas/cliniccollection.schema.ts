@@ -9,12 +9,17 @@ import {
     Specialization,
     WorkingHours
 } from "../../../common/utlis/helper";
-import { User } from 'src/modules/user/schemas/user.schema';
 
 export type ClinicCollectionDocument = ClinicCollection & Document;
 
-@Schema({timestamps: true})
-export class ClinicCollection {
+@Schema({timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true }})
+export class ClinicCollection   {
+
+    _id: Types.ObjectId;
+
+    @Prop({default: true})
+    isActive: boolean;
+
     @Prop({required: true})
     name: string;
 
@@ -63,7 +68,7 @@ export class ClinicCollection {
     @Prop({type: CommercialRecord})
     commercialRecord: CommercialRecord;
 
-    @Prop({type: Object})
+    @Prop({ type: { x: Number, y: Number }})
     locationGoogl: { x: number; y: number };
 
     @Prop({type: Types.ObjectId, ref: 'Company', default: null})
@@ -72,9 +77,3 @@ export class ClinicCollection {
 }
 
 export const ClinicCollectionSchema = SchemaFactory.createForClass(ClinicCollection);
-ClinicCollectionSchema.virtual('users', {
-  ref: 'User',  // النموذج المرتبط (User)
-  localField: '_id',  // الحقل المحلي في ClinicCollection
-  foreignField: 'clinicCollectionId',  // الحقل في User الذي يحتوي على المرجع (clinicCollectionId)
-  //justOne: false,  // نريد جلب أكثر من مستخدم إذا كانوا مرتبطين
-});

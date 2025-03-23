@@ -11,7 +11,7 @@ export class RoleController {
     }
 
     @Post()
-    async createRole(@Body() createRoleDto: CreateRoleDto): Promise<Role> {
+    async createRole(@Body() createRoleDto: CreateRoleDto) {
         return this.roleService.createRole(createRoleDto);
     }
 
@@ -23,17 +23,17 @@ export class RoleController {
     }
 
     @Get(':id')
-    async getRoleById(@Param('id') id: string): Promise<Role> {
+    async getRoleById(@Param('id') id: string) {
         return this.roleService.getRoleById(id);
     }
 
     @Put(':id')
-    async updateRole(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto): Promise<Role> {
+    async updateRole(@Param('id') id: string, @Body() updateRoleDto: UpdateRoleDto) {
         return this.roleService.updateRole(id, updateRoleDto);
     }
 
     @Delete(':id')
-    async deleteRole(@Param('id') id: string): Promise<void> {
+    async deleteRole(@Param('id') id: string) {
         return this.roleService.deleteRole(id);
     }
 }

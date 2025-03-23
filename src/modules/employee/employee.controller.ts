@@ -11,7 +11,7 @@ export class EmployeeController {
     }
 
     @Post()
-    async createEmployee(@Body() createEmployeeDto: CreateEmployeeDto): Promise<Employee> {
+    async createEmployee(@Body() createEmployeeDto: CreateEmployeeDto)  {
         return this.employeeService.createEmployee(createEmployeeDto);
     }
 
@@ -24,17 +24,17 @@ export class EmployeeController {
 
 
     @Get(':id')
-    async getEmployeeById(@Param('id') id: string): Promise<Employee> {
+    async getEmployeeById(@Param('id') id: string)  {
         return this.employeeService.getEmployeeById(id);
     }
 
     @Put(':id')
-    async updateEmployee(@Param('id') id: string, @Body() updateEmployeeDto: UpdateEmployeeDto): Promise<Employee> {
+    async updateEmployee(@Param('id') id: string, @Body() updateEmployeeDto: UpdateEmployeeDto)  {
         return this.employeeService.updateEmployee(id, updateEmployeeDto);
     }
 
     @Delete(':id')
-    async deleteEmployee(@Param('id') id: string): Promise<void> {
+    async deleteEmployee(@Param('id') id: string) {
         return this.employeeService.deleteEmployee(id);
     }
 }

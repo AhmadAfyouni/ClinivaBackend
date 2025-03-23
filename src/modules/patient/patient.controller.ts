@@ -11,7 +11,7 @@ export class PatientController {
     }
 
     @Post()
-    async createPatient(@Body() createPatientDto: CreatePatientDto): Promise<Patient> {
+    async createPatient(@Body() createPatientDto: CreatePatientDto) {
         return this.patientService.createPatient(createPatientDto);
     }
 
@@ -22,17 +22,17 @@ export class PatientController {
         return this.patientService.getAllPatients(paginationDto, filters);
     }
     @Get(':id')
-    async getPatientById(@Param('id') id: string): Promise<Patient> {
+    async getPatientById(@Param('id') id: string)  {
         return this.patientService.getPatientById(id);
     }
 
     @Put(':id')
-    async updatePatient(@Param('id') id: string, @Body() updatePatientDto: UpdatePatientDto): Promise<Patient> {
+    async updatePatient(@Param('id') id: string, @Body() updatePatientDto: UpdatePatientDto){
         return this.patientService.updatePatient(id, updatePatientDto);
     }
 
     @Delete(':id')
-    async deletePatient(@Param('id') id: string): Promise<void> {
+    async deletePatient(@Param('id') id: string) {
         return this.patientService.deletePatient(id);
     }
 }

@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
     IsArray,
+    IsBoolean,
     IsDate,
     IsMongoId,
     IsNotEmpty,
@@ -22,7 +23,6 @@ import {
     Specialization,
     WorkingHours
 } from '../../../common/utlis/helper';
-import { User } from 'src/modules/user/schemas/user.schema';
 
 export class CreateClinicCollectionDto {
     @ApiProperty({ description: 'Clinic Collection name', example: 'Saudi Clinics Group', required: true })
@@ -51,6 +51,15 @@ export class CreateClinicCollectionDto {
     @IsOptional()
     @IsString()
     policies?: string;  //  حقل السياسات العامة
+
+    @ApiProperty({
+        description: 'User activation status',
+        example: true,
+        required: false
+    })
+    @IsBoolean()
+    @IsOptional()
+    isActive?: boolean;
 
     @ApiProperty({
         description: 'Year of establishment',

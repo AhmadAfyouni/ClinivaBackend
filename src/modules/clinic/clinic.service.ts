@@ -17,7 +17,7 @@ export class ClinicService {
         const savedClinic = await newClinic.save(); 
         return {
             success:true,
-            message: 'Company created successfully',
+            message: 'Clinic created successfully',
             data: savedClinic};
     }
 
@@ -37,10 +37,9 @@ export class ClinicService {
     async getClinicById(id: string): Promise<ApiResponse<Clinic>> {
         const clinic = await this.clinicModel.findById(id).populate(['departmentId',  ]);
         if (!clinic) throw new NotFoundException('Clinic not found');
-    
         return {
             success:true,
-            message: 'Company retrieved successfully',
+            message: 'Clinic retrieved successfully',
             data:clinic,} ;
     }
 

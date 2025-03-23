@@ -5,17 +5,22 @@ import {Patient, PatientDocument} from './schemas/patient.schema';
 import {CreatePatientDto} from "./dto/create-patient.dto";
 import {UpdatePatientDto} from "./dto/update-patient.dto";
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { paginate } from 'src/common/utlis/paginate';
+import { ApiResponse, paginate } from 'src/common/utlis/paginate';
 
 @Injectable()
 export class PatientService {
     constructor(@InjectModel(Patient.name) private patientModel: Model<PatientDocument>) {
     }
 
-    async createPatient(createPatientDto: CreatePatientDto): Promise<Patient> {
+    async createPatient(createPatientDto: CreatePatientDto): Promise<ApiResponse<Patient>> {
         const newPatient = new this.patientModel(createPatientDto);
-        return newPatient.save();
+        const savedPatient = await newPatient.save();
+        return {
+            success:true,
+            message: 'patient created successfully',
+            data: savedPatient};
     }
+    
 
         async getAllPatients(paginationDto: PaginationAndFilterDto, filters: any) {
             let { page, limit, allData, sortBy, order } = paginationDto;
@@ -29,20 +34,29 @@ export class PatientService {
             return paginate(this.patientModel,[], page, limit, allData, filters, sort);
         }
 
-    async getPatientById(id: string): Promise<Patient> {
+    async getPatientById(id: string):  Promise<ApiResponse<Patient>>  {
         const patient = await this.patientModel.findById(id).exec();
         if (!patient) throw new NotFoundException('Patient not found');
-        return patient;
+        return {
+            success:true,
+            message: 'patient retrieved successfully',
+            data:patient,} ;
     }
 
-    async updatePatient(id: string, updatePatientDto: UpdatePatientDto): Promise<Patient> {
+    async updatePatient(id: string, updatePatientDto: UpdatePatientDto):  Promise<ApiResponse<Patient>> {
         const updatedPatient = await this.patientModel.findByIdAndUpdate(id, updatePatientDto, {new: true}).exec();
         if (!updatedPatient) throw new NotFoundException('Patient not found');
-        return updatedPatient;
+        return {success:true,
+            message: 'Patient update successfully',
+            data:updatedPatient,};
     }
 
-    async deletePatient(id: string): Promise<void> {
+    async deletePatient(id: string):  Promise<ApiResponse<Patient>> {
         const deletedPatient = await this.patientModel.findByIdAndDelete(id).exec();
         if (!deletedPatient) throw new NotFoundException('Patient not found');
+        return {
+            success:true,
+            message: 'Patient remove successfully',
+        }
     }
 }
