@@ -53,13 +53,14 @@ export class CreateClinicCollectionDto {
     policies?: string;  //  حقل السياسات العامة
 
     @ApiProperty({
-        description: 'User activation status',
+        description: 'Clinic Collection activation status',
         example: true,
-        required: false
+        required: false,
+        default: true,
     })
     @IsBoolean()
     @IsOptional()
-    isActive?: boolean;
+    isActive?: boolean = true;
 
     @ApiProperty({
         description: 'Year of establishment',

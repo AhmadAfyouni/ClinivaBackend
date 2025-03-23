@@ -31,13 +31,14 @@ export class CreateDepartmentDto {
     overview?: string;
 
     @ApiProperty({
-        description: 'User activation status',
+        description: 'Department activation status',
         example: true,
-        required: false
+        required: false,
+        default: true,
     })
     @IsBoolean()
     @IsOptional()
-    isActive?: boolean;
+    isActive?: boolean = true;
 
     @ApiProperty({
         description: 'Year of establishment',

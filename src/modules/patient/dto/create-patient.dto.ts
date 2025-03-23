@@ -119,11 +119,12 @@ export class CreatePatientDto {
     @ApiProperty({
         description: 'patient activation status',
         example: true,
-        required: false
+        required: false,
+        default: true,
     })
     @IsBoolean()
     @IsOptional()
-    isActive?: boolean;
+    isActive?: boolean = true;
 
     @ApiProperty({ description: 'Residential address', example: 'Jeddah, Saudi Arabia', required: true })
     @IsString()

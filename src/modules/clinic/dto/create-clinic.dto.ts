@@ -28,14 +28,15 @@ export class CreateClinicDto {
     @IsString()
     overview?: string;
 
-        @ApiProperty({
-            description: 'User activation status',
-            example: true,
-            required: false
-        })
-        @IsBoolean()
-        @IsOptional()
-        isActive?: boolean;
+    @ApiProperty({
+        description: 'Clinic activation status',
+        example: true,
+        required: false,
+        default: true,
+    })
+    @IsBoolean()
+    @IsOptional()
+    isActive?: boolean = true;
 
     @ApiPropertyOptional({description: 'Year of establishment', example: '2005-06-15'})
     @IsOptional()
