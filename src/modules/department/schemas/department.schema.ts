@@ -31,10 +31,9 @@ export class Department {
     @Prop()
     goals?: string;
 
-    
-        @IsNumber()
-        @IsOptional()
-        patientCapacity: number;  // قدرة استيعاب المرضى
+    @IsNumber()
+    @IsOptional()
+    patientCapacity?: number;
 
     @Prop({type: [ContactInfo], default: []})
     ContactInfos: ContactInfo[];

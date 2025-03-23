@@ -4,10 +4,10 @@ import {
     IsBoolean,
     IsDate,
     IsMongoId,
-    IsNotEmpty,
+    IsNotEmpty, IsNumber,
     IsOptional,
     IsString,
-    ValidateNested
+    ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ContactInfo } from '../../../common/utlis/helper';
@@ -19,8 +19,6 @@ export class CreateDepartmentDto {
     @IsNotEmpty()
     name: string;
 
-
-    
     @ApiProperty({
         description: 'Brief overview of the department',
         example: 'Specialized in heart-related treatments and procedures.',
@@ -95,6 +93,15 @@ export class CreateDepartmentDto {
     @Type(() => ContactInfo)
     @IsOptional()
     ContactInfos?: ContactInfo[];
+
+    @ApiProperty({
+        description: 'Maximum number of patients allowed',
+        example: 50,
+        required: false,
+    })
+    @IsNumber()
+    @IsOptional()
+    patientCapacity?: number;
 
     @ApiProperty({
         description: 'Clinic Collection ID to which the department belongs',
