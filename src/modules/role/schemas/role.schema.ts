@@ -14,9 +14,6 @@ export class Role {
     @Prop({type: [String], enum: Object.values(PermissionsEnum), default: []})
     permissions: string[]; // قائمة الصلاحيات المرتبطة بالدور
 
-    @Prop({type: [String], default: []})
-    permissionGroups: string[]; // قائمة المجموعات التي ينتمي إليها الدور
-
     @Prop()
     description?: string;
 }

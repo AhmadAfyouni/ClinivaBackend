@@ -1,4 +1,4 @@
-import {Injectable, NotFoundException} from '@nestjs/common';
+import { Injectable, NotFoundException, UnauthorizedException } from '@nestjs/common';
 import {InjectModel} from '@nestjs/mongoose';
 import {Model, Types} from 'mongoose';
 import * as bcrypt from 'bcrypt';
@@ -7,6 +7,8 @@ import {CreateUserDto} from './dto/create-user.dto';
 import {UpdateUserDto} from './dto/update-user.dto';
 import { paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
+
+
 
 @Injectable()
 export class UserService {
@@ -70,4 +72,28 @@ export class UserService {
            
           .exec();
       }
+    // Change password (requires current password)
+    async changePassword(userId: string, currentPassword: string, newPassword: string): Promise<string> {
+        const user = await this.userModel.findById(userId);
+        if (!user) throw new NotFoundException('User not found');
+
+        const isMatch = await bcrypt.compare(currentPassword, user.password);
+        if (!isMatch) throw new UnauthorizedException('Current password is incorrect');
+
+        const hashed = await bcrypt.hash(newPassword, 10);
+        user.password = hashed;
+        await user.save();
+        return 'Password changed successfully';
+    }
+
+    // Reset password (admin or token-based)
+    async resetPassword(userId: string, newPassword: string): Promise<string> {
+        const user = await this.userModel.findById(userId);
+        if (!user) throw new NotFoundException('User not found');
+
+        const hashed = await bcrypt.hash(newPassword, 10);
+        user.password = hashed;
+        await user.save();
+        return 'Password reset successfully';
+    }
 }

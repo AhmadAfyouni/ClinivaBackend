@@ -1,8 +1,9 @@
-import {Body, Controller, Delete, Get, Param, Post, Put, Query} from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put, Query } from '@nestjs/common';
 import {UserService} from './user.service';
 import {CreateUserDto} from './dto/create-user.dto';
 import {UpdateUserDto} from './dto/update-user.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
+import { ChangePasswordDto, ResetPasswordDto } from './dto/password.dto';
 
 @Controller('users')
 export class UserController {
@@ -34,4 +35,15 @@ export class UserController {
     remove(@Param('id') id: string) {
         return this.userService.deleteUser(id);
     }
+
+
+  @Patch(':id/reset-password')
+  async resetPassword(@Param('id') id: string, @Body() dto: ResetPasswordDto) {
+    return { message: await this.userService.resetPassword(id, dto.newPassword) };
+  }
+
+  @Patch(':id/change-password')
+  async changePassword(@Param('id') id: string, @Body() dto: ChangePasswordDto) {
+    return { message: await this.userService.changePassword(id, dto.currentPassword, dto.newPassword) };
+  }
 }
