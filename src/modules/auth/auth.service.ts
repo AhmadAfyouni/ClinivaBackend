@@ -6,6 +6,7 @@ import { User } from '../user/schemas/user.schema';
 import { Role, RoleDocument } from '../role/schemas/role.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { ApiResponse } from 'src/common/utlis/paginate';
 
 @Injectable()
 export class AuthService {
@@ -32,9 +33,12 @@ export class AuthService {
      * Authenticates user and returns access & refresh tokens + user data
      */
     async login(email: string, password: string): Promise<{
-        accessToken: string;
-        refreshToken: string;
-        user: any;
+        success:boolean,
+        message: string,
+        data:{        
+            accessToken: string;
+            refreshToken: string;
+            user: any;}
     }> {
         const user = await this.validateUser(email, password);
 
@@ -57,7 +61,9 @@ export class AuthService {
         const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
         return {
-            accessToken,
+             success:true,
+            message: 'user retrieved successfully',
+            data:{  accessToken,
             refreshToken,
             user: {
                 _id: user._id,
@@ -65,14 +71,14 @@ export class AuthService {
                 email: user.email,
                 roles: roles.map(r => r.name),
                 permissions: uniquePermissions,
-            },
+            },}
         };
     }
 
     /**
      * Generates a new access token from refresh token
      */
-    async refreshToken(refreshToken: string): Promise<{ accessToken: string }> {
+    async refreshToken(refreshToken: string): Promise<ApiResponse<{ accessToken: string }>> {
         try {
             const payload = this.jwtService.verify(refreshToken);
 
@@ -83,12 +89,14 @@ export class AuthService {
             const newPayload = {
                 sub: user._id.toString(),
                 email: user.email,
-
             };
 
             return {
+                success:true,
+                message: 'user retrieved successfully',
+                data:{ 
                 accessToken: this.jwtService.sign(newPayload, { expiresIn: '15m' }),
-            };
+               }   };
         } catch (error) {
             throw new UnauthorizedException('Invalid or expired refresh token');
         }

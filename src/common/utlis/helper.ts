@@ -84,7 +84,7 @@ export class Holiday {
 
 export class ContactInfo {
 
-    @Prop({required: true, enum: ['email', 'phone', 'socialMedia']})
+    @Prop({required: true, enum: ['email', 'phone', 'socialMedia','CompanyWebsite']})
     type: string;
 
     @Prop({required: true})
@@ -116,6 +116,9 @@ export class Specialization {
   
     @Prop({ required: true })
     certificationRequirements: string; // متطلبات الشهادات للتخصص
+    
+    @Prop({ required: true })
+    isActive: string; //اذا فعال
   
 }
 
