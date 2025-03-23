@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
     IsArray,
+    IsBoolean,
     IsDate,
     IsMongoId,
     IsNotEmpty,
@@ -28,6 +29,15 @@ export class CreateDepartmentDto {
     @IsOptional()
     @IsString()
     overview?: string;
+
+    @ApiProperty({
+        description: 'User activation status',
+        example: true,
+        required: false
+    })
+    @IsBoolean()
+    @IsOptional()
+    isActive?: boolean;
 
     @ApiProperty({
         description: 'Year of establishment',

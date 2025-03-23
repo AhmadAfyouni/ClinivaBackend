@@ -16,6 +16,9 @@ export type ClinicDocument = Clinic & Document;
 export class Clinic {
     _id: Types.ObjectId;
 
+    @Prop({default: true})
+    isActive: boolean;
+    
     @Prop({required: true})
     name: string;
 

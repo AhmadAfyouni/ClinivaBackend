@@ -1,5 +1,5 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {Document} from 'mongoose';
+import {Document, Types} from 'mongoose';
 import {
     BankAccount,
     CommercialRecord,
@@ -14,6 +14,8 @@ export type CompanyDocument = Company & Document;
 
 @Schema({timestamps: true})
 export class Company {
+    _id: Types.ObjectId;
+    
     @Prop({required: true})
     name: string;
 
