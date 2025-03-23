@@ -59,4 +59,16 @@ export class DepartmentService {
             message: 'Department remove successfully',
         }
     }
+
+    async getCountByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse<{ count: number }>> {
+        const count = await this.departmentModel.countDocuments({ clinicCollectionId }).exec();
+
+        return {
+            success: true,
+            message: 'Department count retrieved successfully',
+            data: { count },
+        };
+    }
+
+
 }

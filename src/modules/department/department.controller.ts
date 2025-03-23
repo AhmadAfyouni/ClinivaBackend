@@ -33,4 +33,10 @@ export class DepartmentController {
     async deleteDepartment(@Param('id') id: string) {
         return this.departmentService.deleteDepartment(id);
     }
+
+    @Get('count/by-cliniccollection/:clinicCollectionId')
+    getDepartmentCount(@Param('clinicCollectionId') clinicCollectionId: string) {
+        return this.departmentService.getCountByClinicCollectionId(clinicCollectionId);
+    }
+
 }
