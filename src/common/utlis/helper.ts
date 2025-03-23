@@ -99,11 +99,24 @@ export class ContactInfo {
 }
 
 export class Specialization {
-    @Prop({required: true})
+    @Prop({ required: true })
     name: string;
-
-    @Prop({required: true})
+  
+    @Prop({ required: true })
     description: string;
+  
+    @Prop({ required: true })
+    requiredEquipment: [String]; // المعدات المطلوبة للتخصص
+  
+    @Prop({ required: true })
+    requiredStaff: [String]; // الموظفين المطلوبين للتخصص
+  
+    @Prop({ required: true })
+    medicalProcedures: [String]; // الإجراءات الطبية المتعلقة بالتخصص
+  
+    @Prop({ required: true })
+    certificationRequirements: string; // متطلبات الشهادات للتخصص
+  
 }
 
 export class Insurance {
