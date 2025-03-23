@@ -1,15 +1,12 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PermissionsEnum } from '../../config/permission.enum';
 import { PERMISSIONS_KEY } from '../../config/permissions.decorator';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
-  constructor(private reflector: Reflector) {}
+  constructor(private reflector: Reflector) {
+  }
 
   canActivate(context: ExecutionContext): boolean {
     // Get the required permissions from the custom decorator (if any)

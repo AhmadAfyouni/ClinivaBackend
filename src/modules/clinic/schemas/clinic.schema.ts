@@ -1,74 +1,74 @@
-import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {Document, Types} from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 import {
-    BankAccount,
-    CommercialRecord,
-    ContactInfo,
-    Holiday,
-    InsuranceCompany,
-    Specialization,
-    WorkingHours
-} from "../../../common/utlis/helper";
+  BankAccount,
+  CommercialRecord,
+  ContactInfo,
+  Holiday,
+  InsuranceCompany,
+  Specialization,
+  WorkingHours,
+} from '../../../common/utlis/helper';
 
 export type ClinicDocument = Clinic & Document;
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class Clinic {
-    _id: Types.ObjectId;
+  _id: Types.ObjectId;
 
-    @Prop({default: true})
-    isActive: boolean;
-    
-    @Prop({required: true})
-    name: string;
+  @Prop({ default: true })
+  isActive: boolean;
 
-    @Prop({required: true})
-    AverageDurationOfVisit: number;
+  @Prop({ required: true })
+  name: string;
 
-    @Prop()
-    overview?: string;
+  @Prop({ required: true })
+  AverageDurationOfVisit: number;
 
-    @Prop({type: Date})
-    yearOfEstablishment?: Date;
+  @Prop()
+  overview?: string;
 
-    @Prop()
-    address: string;
+  @Prop({ type: Date })
+  yearOfEstablishment?: Date;
 
-    @Prop()
-    logo?: string;
+  @Prop()
+  address: string;
 
-    @Prop()
-    vision?: string;
+  @Prop()
+  logo?: string;
 
-    @Prop()
-    goals?: string;
+  @Prop()
+  vision?: string;
 
-    @Prop({type: [ContactInfo], default: []})
-    ContactInfos: ContactInfo[];
+  @Prop()
+  goals?: string;
 
-    @Prop({type: [Holiday], default: []})
-    holidays?: Holiday[];
+  @Prop({ type: [ContactInfo], default: [] })
+  ContactInfos: ContactInfo[];
 
-    @Prop({type: [Specialization], default: []})
-    specialization?: Specialization[];
+  @Prop({ type: [Holiday], default: [] })
+  holidays?: Holiday[];
 
-    @Prop({type: [WorkingHours], default: []})
-    WorkingHours?: WorkingHours[];
+  @Prop({ type: [Specialization], default: [] })
+  specialization?: Specialization[];
 
-    @Prop({type: [BankAccount], default: []})
-    bankAccount: BankAccount[];
+  @Prop({ type: [WorkingHours], default: [] })
+  WorkingHours?: WorkingHours[];
 
-    @Prop({type: [InsuranceCompany], default: []})
-    insuranceCompany: InsuranceCompany[];
+  @Prop({ type: [BankAccount], default: [] })
+  bankAccount: BankAccount[];
 
-    @Prop({type: CommercialRecord})
-    commercialRecord: CommercialRecord;
+  @Prop({ type: [InsuranceCompany], default: [] })
+  insuranceCompany: InsuranceCompany[];
 
-    @Prop({type: Object})
-    locationGoogl: { x: number; y: number };
+  @Prop({ type: CommercialRecord })
+  commercialRecord: CommercialRecord;
 
-    @Prop({type: Types.ObjectId, ref: 'Department', default: null})
-    departmentId?: Types.ObjectId;  // القسم الذي تتبع له العيادة (إذا وجدت)
+  @Prop({ type: Object })
+  locationGoogl: { x: number; y: number };
+
+  @Prop({ type: Types.ObjectId, ref: 'Department', default: null })
+  departmentId?: Types.ObjectId;  // القسم الذي تتبع له العيادة (إذا وجدت)
 
 }
 
