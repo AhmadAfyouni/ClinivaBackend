@@ -29,8 +29,39 @@ export class MedicalRecord {
     @Prop({default: ''})
     notes?: string;  // ملاحظات إضافية من الطبيب
 
-    @Prop({enum: ['draft', 'finalized'], default: 'draft'})
-    recordStatus: string;  // حالة السجل (مسودة أو نهائي)
+//     @Prop({enum: ['draft', 'finalized'], default: 'draft'})
+//     recordStatus: string;  // حالة السجل (مسودة أو نهائي)
+
+    
+    // @Prop({type: Number, min: 1, max: 5})
+    // patientRating?: number;  // تقييم المريض للطبيب (1-5 نجوم)
+
+    // @Prop({default: ''})
+    // patientFeedback?: string;  // ملاحظات المريض عن الخدمة
+
+    @Prop({
+        type: String,
+        enum: ['mild', 'moderate', 'severe'],
+        required: true,
+      })
+    severityLevel: string;
+
+
+    @Prop()
+    startTime?: Date;
+
+    @Prop()
+    endTime?: Date;
+
+    @Prop({ type: Date, required: false })
+    nextAppointmentDate?: Date;
+
+    @Prop({
+        type: String,
+        enum: ['routine check-up', 'follow-up', 'emergency', 'consultation', 'treatment'],
+        required: true,
+    })
+    visitType: string;
 }
 
 export const MedicalRecordSchema = SchemaFactory.createForClass(MedicalRecord);

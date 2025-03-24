@@ -62,7 +62,7 @@ export class AuthService {
 
         return {
              success:true,
-            message: 'user retrieved successfully',
+            message: 'login successfully',
             data:{  accessToken,
             refreshToken,
             user: {
@@ -93,7 +93,7 @@ export class AuthService {
 
             return {
                 success:true,
-                message: 'user retrieved successfully',
+                message: 'refresh Token successfully',
                 data:{ 
                 accessToken: this.jwtService.sign(newPayload, { expiresIn: '15m' }),
                }   };

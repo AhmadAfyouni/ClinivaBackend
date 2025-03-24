@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
     IsArray,
     IsBoolean,
+    IsDate,
     IsEmail,
     IsMongoId,
     IsNotEmpty,
@@ -10,6 +11,7 @@ import {
     MinLength
 } from 'class-validator';
 import { Types } from 'mongoose';
+import { ActivityLog, LoginHistory } from 'src/common/utlis/helper';
 
 export class CreateUserDto {
     @ApiProperty({ description: 'User name', example: 'John Doe', required: true })
@@ -93,4 +95,43 @@ export class CreateUserDto {
     @IsMongoId()
     @IsNotEmpty()
     employeeId: Types.ObjectId;
+    @ApiProperty({
+        description: 'Last login timestamp of the user',
+        example: '2025-03-01T12:00:00Z',
+        required: false
+    })
+    @IsDate()
+    @IsOptional()
+    lastLoginAt?: Date;
+
+    @ApiProperty({
+        description: 'Timestamp of the last password update',
+        example: '2025-03-01T12:00:00Z',
+        required: false
+    })
+    @IsDate()
+    @IsOptional()
+    lastPasswordUpdate?: Date;
+       LoginHistory
+    @ApiProperty({
+        type: [ActivityLog],
+        description: 'Activity log of the user',
+        example: [{ activityDate: '2025-03-01T12:00:00Z', description: 'User logged in' }],
+        required: false
+    })
+    @IsArray()
+    @IsOptional()
+    activityLog?: ActivityLog[];
+
+    @ApiProperty({
+        type: [LoginHistory],
+        description: 'Login history of the user with IP address and device',
+        example: [LoginHistory],
+        required: false
+    })
+    @IsArray()
+    @IsOptional()
+    loginHistory?: { loginDate: Date; ipAddress: string; device: string }[];
+
+
 }

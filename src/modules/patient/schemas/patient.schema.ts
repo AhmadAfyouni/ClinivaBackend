@@ -1,6 +1,6 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {Document, Types} from 'mongoose';
-import {ContactInfo, Insurance} from "../../../common/utlis/helper";
+import {ContactInfo, Insurance, MedicalTestResult} from "../../../common/utlis/helper";
 
 
 export type PatientDocument = Patient & Document;
@@ -26,9 +26,9 @@ export class Patient {
 
     @Prop({required: true})
     nationality?: string;
-
-    @Prop()
-    image?: string;
+//
+    // @Prop()
+    // image?: string;
 
     @Prop({
         type: String,
@@ -55,8 +55,6 @@ export class Patient {
     @Prop()
     notes?: string;
 
-    // @Prop()
-    // email?: string;
 
     @Prop({default: true})
     isActive: boolean;
@@ -83,6 +81,33 @@ export class Patient {
 
     @Prop({type: [Insurance], default: []})
     insurances?: Insurance[];
+
+    @Prop({type: [MedicalTestResult], default: []})
+    medicalTestResults?: MedicalTestResult[];// نتائج الاختبارات الطبية
+
+    @Prop({
+        type: [String],
+        default: [],
+      })
+      allergies: string[];//  الحساسية
+    
+      @Prop({
+        type: String,
+        default: 'Arabic',
+      })
+      preferredLanguage: string;// اللغة المفضلة 
+     
+      @Prop()
+      lifestyleFactors: string;//العوامل الحياتية (التدخين، استهلاك الكحول، ممارسة الرياضة)
+    
+      @Prop({
+        type: [String],
+        default: [],
+      })
+      familyMedicalHistory: string[]; // قائمة بالأمراض الوراثية في العائلة
+    
+
+
 }
 
 export const PatientSchema = SchemaFactory.createForClass(Patient);

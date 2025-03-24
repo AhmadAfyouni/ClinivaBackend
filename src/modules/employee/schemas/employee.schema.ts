@@ -1,6 +1,7 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {Document, Types} from 'mongoose';
-import {ContactInfo, WorkingHours,Vacation} from "../../../common/utlis/helper";
+import {ContactInfo, WorkingHours,Vacation, BreakTime} from "../../../common/utlis/helper";
+import { Certificate } from 'crypto';
 
 export type EmployeeDocument = Employee & Document;
 
@@ -39,23 +40,13 @@ export class Employee {
     @Prop({required: true})
     number_children?: number;
 
-
-
-
-
     @Prop()
     notes?: string;
-
-    // @Prop()
-    // email?: string;
 
     @Prop({required: true})
     address?: string;
 
-
-
-
-    @Prop({})
+    @Prop()
     professional_experience: string;
 
     @Prop({type: [String], default: []})
@@ -66,20 +57,37 @@ export class Employee {
 
     @Prop({type: [WorkingHours], default: []})
     workingHours: WorkingHours[];
-
-    @Prop()
-    evaluation?: number;
+// //
+//     @Prop()
+//     evaluation?: number;
 
     @Prop({
         type: String,
         enum: ['Doctor', 'Nurse', 'Technician', 'Administrative', 'Emloyee', 'Other'],
         required: true,
     })
-    employeeType: string;
+    employeeType: string;//الدور الوظيفي
 
     @Prop({ type: [Vacation], default: [] }) 
     vacationRecords: Vacation[]; // سجل الإجازات
+
+    @Prop({required: true})
+    hireDate: Date;// تاريخ التوظيف
+    
+    @Prop()
+    medicalLicenseNumber?: string;///رقم الرخصة الطبية
+    
+    @Prop({type: [Certificate], default: []})
+    certifications?: Certificate[];//الشهادات
+    
+    @Prop({ required: true, enum: ["FULL_TIME","PART_TIME"] })
+    jobType: string; //  نوع التوظيف (دوام كامل/جزئي)
+
+    @Prop({ type: [BreakTime], default: [] })
+    breakTimes: BreakTime[]; //  قائمة بأوقات الراحة// "للطبيب"
   
+    @Prop({default: true})
+    isActive: boolean;
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);

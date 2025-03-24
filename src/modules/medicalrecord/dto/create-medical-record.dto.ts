@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsArray, IsEnum, IsMongoId, IsNotEmpty, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsDate, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min, ValidateNested } from 'class-validator';
 import { Types } from 'mongoose';
 import { Medication } from 'src/common/utlis/helper';
 
@@ -20,9 +20,9 @@ export class CreateMedicalRecordDto {
         example: 'Fever, Cough, Shortness of breath',
         required: false
       })
-      @IsOptional()
-      @IsString()
-      symptoms?: string;  // الأعراض
+    @IsOptional()
+    @IsString()
+    symptoms?: string;  // الأعراض
     
       @ApiProperty({
         description: 'Treatment plan prescribed by the doctor',
@@ -75,13 +75,80 @@ export class CreateMedicalRecordDto {
     @IsString()
     notes?: string;
 
-    @ApiProperty({
-        description: 'Record status',
-        enum: ['draft', 'finalized'],
-        example: 'draft',
+    // @ApiProperty({
+    //     description: 'Record status',
+    //     enum: ['draft', 'finalized'],
+    //     example: 'draft',
+    //     required: false
+    // })
+    // @IsEnum(['draft', 'finalized'])
+    // @IsOptional()
+    // recordStatus?: string;
+
+    // @ApiProperty({
+    //      description: 'Patient rating for the doctor (1-5)',
+    //      example: 4,
+    //      required: false
+    //  })
+    //  @IsOptional()
+    //  @IsNumber()
+    //  @Min(1)
+    //  @Max(5)
+    //  patientRating?: number;
+    
+        // @ApiProperty({
+        //     description: 'Patient feedback on the service',
+        //     example: 'The doctor was very professional and helpful.',
+        //     required: false
+        // })
+        // @IsOptional()
+        // @IsString()
+        // patientFeedback?: string;
+    
+        @ApiProperty({
+          description: 'Severity level of the condition',
+          enum: ['mild', 'moderate', 'severe'],
+          example: 'moderate',
+          required: true
+      })
+      @IsEnum(['mild', 'moderate', 'severe'])
+      @IsNotEmpty()
+      severityLevel: string;
+
+      @ApiProperty({
+        description: 'Start time of the appointment',
+        example: '2025-03-24T08:00:00.000Z',
         required: false
     })
-    @IsEnum(['draft', 'finalized'])
     @IsOptional()
-    recordStatus?: string;
+    @IsDate()
+    startTime?: Date;
+
+    @ApiProperty({
+        description: 'End time of the appointment',
+        example: '2025-03-24T09:00:00.000Z',
+        required: false
+    })
+    @IsOptional()
+    @IsDate()
+    endTime?: Date;
+
+    @ApiProperty({
+      description: 'Next appointment date',
+      example: '2025-04-01T08:00:00.000Z',
+      required: false
+  })
+  @IsOptional()
+  @IsDate()
+  nextAppointmentDate?: Date;
+
+  @ApiProperty({
+    description: 'Type of visit',
+    enum: ['routine check-up', 'follow-up', 'emergency', 'consultation', 'treatment'],
+    example: 'follow-up',
+    required: true
+  })
+  @IsEnum(['routine check-up', 'follow-up', 'emergency', 'consultation', 'treatment'])
+  @IsNotEmpty()
+  visitType: string;
 }

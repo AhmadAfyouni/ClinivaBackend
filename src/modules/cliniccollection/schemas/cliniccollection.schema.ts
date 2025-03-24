@@ -2,10 +2,12 @@ import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {Document, Types} from 'mongoose';
 import {
     BankAccount,
+    CashBox,
     CommercialRecord,
     ContactInfo,
     Holiday,
     InsuranceCompany,
+    OnlinePaymentMethod,
     Specialization,
     WorkingHours
 } from "../../../common/utlis/helper";
@@ -22,22 +24,22 @@ export class ClinicCollection   {
 
     @Prop({required: true})
     name: string;
-
+//
     @Prop()
-    introduction?: string;
+    overview?: string;
 
     @Prop({type: Date})
     yearOfEstablishment?: Date;
 
     @Prop()
     address: string;
-
+//
     @Prop()
     logo?: string;
-
+//
     @Prop()
     vision?: string;
-
+//
     @Prop()
     goals?: string;
 
@@ -58,13 +60,19 @@ export class ClinicCollection   {
 
     @Prop({type: [WorkingHours], default: []})
     workingDays: WorkingHours[];
-
+//
+    @Prop({type: [CashBox], default: []})
+    cashBoxes: CashBox[];
+//
+    @Prop({type: [OnlinePaymentMethod], default: []})
+    onlinePaymentMethods: OnlinePaymentMethod[];
+//
     @Prop({type: [BankAccount], default: []})
     bankAccount: BankAccount[];
-
+//
     @Prop({type: [InsuranceCompany], default: []})
     insuranceCompany: InsuranceCompany[];
-
+//
     @Prop({type: CommercialRecord})
     commercialRecord: CommercialRecord;
 

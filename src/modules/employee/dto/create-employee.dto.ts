@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
     IsArray,
+    IsBoolean,
     IsDate,
     IsEnum,
     IsNotEmpty,
@@ -11,7 +12,7 @@ import {
     ValidateNested
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ContactInfo, WorkingHours, Vacation } from '../../../common/utlis/helper';
+import { ContactInfo, WorkingHours, Vacation, BreakTime } from '../../../common/utlis/helper';
 
 
 
@@ -168,14 +169,14 @@ export class CreateEmployeeDto {
       @Type(() => Vacation)
       vacations: Vacation[];
 
-    @ApiProperty({
-        description: 'Evaluation score (1-10)',
-        example: 8,
-        required: false
-    })
-    @IsNumber()
-    @IsOptional()
-    evaluation?: number;
+    // @ApiProperty({
+    //     description: 'Evaluation score (1-10)',
+    //     example: 8,
+    //     required: false
+    // })
+    // @IsNumber()
+    // @IsOptional()
+    // evaluation?: number;
 
     @ApiProperty({
         description: 'Employee Type',
@@ -186,4 +187,48 @@ export class CreateEmployeeDto {
     @IsEnum(['Doctor', 'Nurse', 'Technician', 'Administrative', 'Employee', 'Other'])
     @IsNotEmpty()
     employeeType: string;
+
+
+
+    @ApiProperty({ description: 'Hire Date', required: true })
+    @IsDate()
+    @IsNotEmpty()
+    hireDate: Date;
+
+    @ApiProperty({ description: 'Medical License Number', required: false })
+    @IsOptional()
+    @IsString()
+    medicalLicenseNumber?: string;
+
+    @ApiProperty({ description: 'Certifications', required: false })
+    @IsArray()
+    @IsOptional()
+    certifications?: string[];
+
+    @ApiProperty({ description: 'Job Type', enum: ['FULL_TIME', 'PART_TIME'], required: true })
+    @IsEnum(['FULL_TIME', 'PART_TIME'])
+    @IsNotEmpty()
+    jobType: string;
+
+    @ApiProperty({ type: [BreakTime], description: 'Break Times', required: false })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => BreakTime)
+    @IsOptional()
+    breakTimes?: BreakTime[];
+
+    @ApiProperty({ type: [String], description: 'Specializations', required: false })
+    @IsArray()
+    @IsOptional()
+    specializations?: string[];
+
+
+    @ApiProperty({
+        description: 'Employee activation status',
+        example: true,
+        required: false
+    })
+    @IsBoolean()
+    @IsOptional()
+    isActive?: boolean;
 }

@@ -5,6 +5,7 @@ import {
     IsDate,
     IsMongoId,
     IsNotEmpty,
+    IsNumber,
     IsOptional,
     IsString,
     ValidateNested
@@ -79,6 +80,14 @@ export class CreateDepartmentDto {
     @IsOptional()
     @IsString()
     goals?: string;
+    @ApiProperty({
+        description: 'Patient capacity of the department',
+        example: 50,
+        required: false
+    })
+    @IsOptional()
+    @IsNumber()
+    patientCapacity?: number;
 
     @ApiProperty({
         type: [ContactInfo],

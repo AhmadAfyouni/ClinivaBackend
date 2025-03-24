@@ -2,10 +2,12 @@ import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {Document, Types} from 'mongoose';
 import {
     BankAccount,
+    CashBox,
     CommercialRecord,
     ContactInfo,
     Holiday,
     InsuranceCompany,
+    OnlinePaymentMethod,
     Specialization,
     WorkingHours
 } from "../../../common/utlis/helper";
@@ -24,28 +26,28 @@ export class Clinic {
 
     @Prop({required: true})
     AverageDurationOfVisit: number;
-
+//
     @Prop()
     overview?: string;
 
     @Prop({type: Date})
     yearOfEstablishment?: Date;
-
+//
     @Prop()
     address: string;
-
+//
     @Prop()
     logo?: string;
-
+//
     @Prop()
     vision?: string;
-
+//
     @Prop()
     goals?: string;
 
     @Prop({type: [ContactInfo], default: []})
     ContactInfos: ContactInfo[];
-
+//
     @Prop({type: [Holiday], default: []})
     holidays?: Holiday[];
 
@@ -54,16 +56,22 @@ export class Clinic {
 
     @Prop({type: [WorkingHours], default: []})
     WorkingHours?: WorkingHours[];
-
+//
     @Prop({type: [BankAccount], default: []})
     bankAccount: BankAccount[];
-
+//
     @Prop({type: [InsuranceCompany], default: []})
     insuranceCompany: InsuranceCompany[];
-
+//
+    @Prop({type: [CashBox], default: []})
+    cashBoxes: CashBox[];
+//
+    @Prop({type: [OnlinePaymentMethod], default: []})
+    onlinePaymentMethods: OnlinePaymentMethod[];
+//
     @Prop({type: CommercialRecord})
     commercialRecord: CommercialRecord;
-
+//
     @Prop({type: Object})
     locationGoogl: { x: number; y: number };
 

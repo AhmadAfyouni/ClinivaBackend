@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { PermissionsEnum } from '../../../config/permission.enum';
 
 export class CreateRoleDto {
@@ -27,4 +27,13 @@ export class CreateRoleDto {
     @IsOptional()
     @IsString()
     description?: string;
+
+    @ApiProperty({
+        description: 'Role activation status',
+        example: true,
+        required: false
+    })
+    @IsBoolean()
+    @IsOptional()
+    isActive?: boolean;
 }

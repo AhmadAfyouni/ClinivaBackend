@@ -6,7 +6,6 @@ import {UpdateClinicCollectionDto} from "./dto/update-clinic-collection.dto";
 import {CreateClinicCollectionDto} from "./dto/create-clinic-collection.dto";
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ApiResponse, paginate } from 'src/common/utlis/paginate';
-import { UserService } from '../user/user.service';
 
 @Injectable()
 export class ClinicCollectionService {
@@ -19,7 +18,7 @@ export class ClinicCollectionService {
         const savedClinicCollection = await newClinicCollection.save(); 
         return {
             success:true,
-            message: 'Company created successfully',
+            message: 'clinic Collection created successfully',
             data: savedClinicCollection};
     }
 

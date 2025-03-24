@@ -27,7 +27,7 @@ export class UserService {
 
         return {
             success:true,
-            message: 'Department created successfully',
+            message: 'User created successfully',
             data: savedUser};
     
     }

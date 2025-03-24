@@ -1,5 +1,6 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {Document, Types} from 'mongoose';
+import { ActivityLog, LoginHistory } from 'src/common/utlis/helper';
 
 export type UserDocument = User & Document;
 
@@ -36,6 +37,19 @@ export class User {
 
     @Prop({type: Types.ObjectId, ref: 'Employee', required: true})
     employeeId: Types.ObjectId;  // مرجع إلى جدول الموظفين (إن كان المستخدم موظفًا)
+
+    @Prop({ type: Date, default: null })
+    lastLoginAt?: Date;
+    
+    @Prop()
+    lastPasswordUpdate?: Date; // تاريخ آخر تحديث لكلمة المرور
+
+    @Prop({ type: [ActivityLog], default: [] })
+    activityLog?: ActivityLog[]; // سجل النشاط
+
+    @Prop({ type: [LoginHistory], default: [] })
+    loginHistory?: LoginHistory[]; // تاريخ ووقت تسجيل الدخول من الأجهزة والعناوين IP
+
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

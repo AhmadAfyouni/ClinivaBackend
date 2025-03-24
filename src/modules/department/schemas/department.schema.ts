@@ -1,8 +1,6 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {Document, Types} from 'mongoose';
 import {ContactInfo} from "../../../common/utlis/helper";
-import { IsNumber, IsOptional } from 'class-validator';
-
 export type DepartmentDocument = Department & Document;
 
 @Schema({timestamps: true})
@@ -14,6 +12,9 @@ export class Department {
     name: string;
 
     @Prop()
+    Description?: string;
+//
+    @Prop()
     overview?: string;
 
     @Prop({type: Date})
@@ -21,21 +22,19 @@ export class Department {
 
     @Prop()
     address: string;
-
+//
     @Prop()
     logo: string;
-
+//
     @Prop()
     vision?: string;
-
+//
     @Prop()
     goals?: string;
-
     
-        @IsNumber()
-        @IsOptional()
-        patientCapacity: number;  // قدرة استيعاب المرضى
-
+    @Prop()
+    patientCapacity: number;  // قدرة استيعاب المرضى
+//
     @Prop({type: [ContactInfo], default: []})
     ContactInfos: ContactInfo[];
 

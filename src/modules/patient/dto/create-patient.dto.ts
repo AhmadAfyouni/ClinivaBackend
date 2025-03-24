@@ -11,7 +11,7 @@ import {
     ValidateNested
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ContactInfo, Insurance } from '../../../common/utlis/helper';
+import { ContactInfo, Insurance, MedicalTestResult } from '../../../common/utlis/helper';
 
 export class CreatePatientDto {
     @ApiProperty({ description: 'Patient name', example: 'Jane Doe', required: true })
@@ -54,14 +54,14 @@ export class CreatePatientDto {
     @IsNotEmpty()
     nationality: string;
 
-    @ApiProperty({
-        description: 'Profile image URL',
-        example: 'https://hospital.com/patients/janedoe.png',
-        required: false
-    })
-    @IsOptional()
-    @IsString()
-    image?: string;
+    // @ApiProperty({
+    //     description: 'Profile image URL',
+    //     example: 'https://hospital.com/patients/janedoe.png',
+    //     required: false
+    // })
+    // @IsOptional()
+    // @IsString()
+    // image?: string;
 
     @ApiProperty({
         description: 'Marital Status',
@@ -176,4 +176,32 @@ export class CreatePatientDto {
     @Type(() => Insurance)
     @IsOptional()
     insurances?: Insurance[];
+
+    @ApiProperty({ type: [MedicalTestResult], description: 'List of medical test results', required: false })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => MedicalTestResult)
+    @IsOptional()
+    medicalTestResults?: MedicalTestResult[];
+
+    @ApiProperty({ description: 'Allergies list', type: [String], required: false })
+    @IsArray()
+    @IsOptional()
+    allergies?: string[];
+
+    @ApiProperty({ description: 'Preferred Language', example: 'Arabic', required: false })
+    @IsString()
+    @IsOptional()
+    preferredLanguage?: string;
+
+    @ApiProperty({ description: 'Lifestyle factors (Smoking, Alcohol, Exercise)', example: 'Non-smoker, Regular exercise', required: false })
+    @IsString()
+    @IsOptional()
+    lifestyleFactors?: string;
+
+    @ApiProperty({ description: 'Family Medical History', type: [String], required: false })
+    @IsArray()
+    @IsOptional()
+    familyMedicalHistory?: string[];
+
 }

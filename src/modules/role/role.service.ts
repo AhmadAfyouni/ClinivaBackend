@@ -24,7 +24,7 @@ export class RoleService {
        
         return {
             success:true,
-            message: 'Department created successfully',
+            message: 'User created successfully',
             data: savedRole};
     }
 

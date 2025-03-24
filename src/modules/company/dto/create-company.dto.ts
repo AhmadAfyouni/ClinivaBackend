@@ -12,10 +12,12 @@ import { Type } from 'class-transformer';
 
 import {
     BankAccount,
+    CashBox,
     CommercialRecord,
     ContactInfo,
     Holiday,
     InsuranceCompany,
+    OnlinePaymentMethod,
     Specialization,
     WorkingHours
 } from '../../../common/utlis/helper';
@@ -146,6 +148,20 @@ export class CreateCompanyDto {
     @Type(() => BankAccount)
     @IsOptional()
     bankAccount?: BankAccount[];
+
+    @ApiPropertyOptional({ type: [CashBox], description: 'Company cash boxes', required: false })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CashBox)
+    @IsOptional()
+    cashBoxes?: CashBox[];
+
+    @ApiPropertyOptional({ type: [OnlinePaymentMethod], description: 'Accepted online payment methods', required: false })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => OnlinePaymentMethod)
+    @IsOptional()
+    onlinePaymentMethods?: OnlinePaymentMethod[];
 
     @ApiPropertyOptional({
         type: [InsuranceCompany],
