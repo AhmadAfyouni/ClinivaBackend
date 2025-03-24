@@ -1,9 +1,9 @@
-import {Injectable, NotFoundException} from '@nestjs/common';
-import {InjectModel} from '@nestjs/mongoose';
-import {Model} from 'mongoose';
-import {Appointment, AppointmentDocument} from './schemas/appointment.schema';
-import {CreateAppointmentDto} from "./dto/create-appointment.dto";
-import {UpdateAppointmentDto} from "./dto/update-appointment.dto";
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { Appointment, AppointmentDocument } from './schemas/appointment.schema';
+import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ApiResponse, paginate } from 'src/common/utlis/paginate';
 

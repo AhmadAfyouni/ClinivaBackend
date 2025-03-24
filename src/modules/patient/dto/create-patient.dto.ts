@@ -1,23 +1,26 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
     IsArray,
+    IsBoolean,
     IsDate,
     IsEnum,
     IsNotEmpty,
     IsNumber,
-    IsObject,IsBoolean,
+    IsObject,
     IsOptional,
     IsString,
-    ValidateNested
+    ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ContactInfo, Insurance, MedicalTestResult } from '../../../common/utlis/helper';
 
 export class CreatePatientDto {
-    @ApiProperty({ description: 'Patient name', example: 'Jane Doe', required: true })
-    @IsString()
-    @IsNotEmpty()
-    name: string;
+  @ApiProperty({ description: 'Patient name', example: 'Jane Doe', required: true })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
+
+
 
     @ApiProperty({
         type: [ContactInfo],

@@ -5,24 +5,24 @@ import {ContactInfo, Insurance, MedicalTestResult} from "../../../common/utlis/h
 
 export type PatientDocument = Patient & Document;
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class Patient {
-    _id: Types.ObjectId;
+  _id: Types.ObjectId;
 
-    @Prop({required: true})
-    name: string;
+  @Prop({ required: true })
+  name: string;
 
-    @Prop({type: [ContactInfo], default: []})
-    ContactInfos: ContactInfo[];
+  @Prop({ type: [ContactInfo], default: [] })
+  ContactInfos: ContactInfo[];
 
-    @Prop({required: true})
-    dateOfBirth: Date;
+  @Prop({ required: true })
+  dateOfBirth: Date;
 
-    @Prop({required: true, enum: ['male', 'female']})
-    gender: string;
+  @Prop({ required: true, enum: ['male', 'female'] })
+  gender: string;
 
-    @Prop({required: true, unique: true})
-    identity?: string; // National ID or Passport
+  @Prop({ required: true, unique: true })
+  identity?: string; // National ID or Passport
 
     @Prop({required: true})
     nationality?: string;
@@ -30,54 +30,54 @@ export class Patient {
     // @Prop()
     // image?: string;
 
-    @Prop({
-        type: String,
-        enum: ['Single', 'Married', 'Divorced', 'Widowed'], // القيم المسموحة فقط
-        default: 'Single', // القيمة الافتراضية
-    })
-    marital_status?: string;
+  @Prop({
+    type: String,
+    enum: ['Single', 'Married', 'Divorced', 'Widowed'], // القيم المسموحة فقط
+    default: 'Single', // القيمة الافتراضية
+  })
+  marital_status?: string;
 
-    @Prop({required: true})
-    number_children: number;
+  @Prop({ required: true })
+  number_children: number;
 
-    @Prop({
-        type: String,
-        enum: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'], // القيم المسموحة فقط
-    })
-    blood_type?: string;
+  @Prop({
+    type: String,
+    enum: ['A+', 'A-', 'B+', 'B-', 'O+', 'O-', 'AB+', 'AB-'], // القيم المسموحة فقط
+  })
+  blood_type?: string;
 
-    @Prop()
-    height?: number; // in cm
+  @Prop()
+  height?: number; // in cm
 
-    @Prop()
-    weight?: number; // in kg
+  @Prop()
+  weight?: number; // in kg
 
-    @Prop()
-    notes?: string;
+  @Prop()
+  notes?: string;
 
 
-    @Prop({default: true})
-    isActive: boolean;
+  @Prop({ default: true })
+  isActive: boolean;
 
-    @Prop({required: true})
-    address?: string;
+  @Prop({ required: true })
+  address?: string;
 
-    @Prop({
-        type: {
-            name: {type: String, required: true},
-            phone: {type: String, required: true},
-            relationToPatient: {type: String, required: true},
-        },
-        required: false, // Emergency contact is optional
-    })
-    emergencyContact?: {
-        name: string;
-        phone: string;
-        relationToPatient: string;
-    };
+  @Prop({
+    type: {
+      name: { type: String, required: true },
+      phone: { type: String, required: true },
+      relationToPatient: { type: String, required: true },
+    },
+    required: false, // Emergency contact is optional
+  })
+  emergencyContact?: {
+    name: string;
+    phone: string;
+    relationToPatient: string;
+  };
 
-    @Prop({type: [{disease_name: String}], default: []})
-    ChronicDiseases?: { disease_name: string }[];
+  @Prop({ type: [{ disease_name: String }], default: [] })
+  ChronicDiseases?: { disease_name: string }[];
 
     @Prop({type: [Insurance], default: []})
     insurances?: Insurance[];

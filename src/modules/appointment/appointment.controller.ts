@@ -1,14 +1,14 @@
-import {Body, Controller, Delete, Get, Param, Post, Put, Query} from '@nestjs/common';
-import {AppointmentService} from './appointment.service';
-import {Appointment} from './schemas/appointment.schema';
-import {CreateAppointmentDto} from "./dto/create-appointment.dto";
-import {UpdateAppointmentDto} from "./dto/update-appointment.dto";
+import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { AppointmentService } from './appointment.service';
+import { Appointment } from './schemas/appointment.schema';
+import { CreateAppointmentDto } from './dto/create-appointment.dto';
+import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Controller('appointments')
 export class AppointmentController {
-    constructor(private readonly appointmentService: AppointmentService) {
-    }
+  constructor(private readonly appointmentService: AppointmentService) {
+  }
 
     @Post()
     async create(@Body() createAppointmentDto: CreateAppointmentDto)  {

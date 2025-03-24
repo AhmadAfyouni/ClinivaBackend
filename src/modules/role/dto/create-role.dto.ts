@@ -3,21 +3,21 @@ import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'cl
 import { PermissionsEnum } from '../../../config/permission.enum';
 
 export class CreateRoleDto {
-    @ApiProperty({ description: 'Role name', example: 'Admin', required: true })
-    @IsString()
-    @IsNotEmpty()
-    name: string;
+  @ApiProperty({ description: 'Role name', example: 'Admin', required: true })
+  @IsString()
+  @IsNotEmpty()
+  name: string;
 
-    @ApiProperty({
-        type: [String],
-        enum: Object.values(PermissionsEnum),
-        description: 'List of permissions associated with the role',
-        required: false
-    })
-    @IsArray()
-    @IsOptional()
-    @IsEnum(PermissionsEnum, { each: true })
-    permissions?: string[];
+  @ApiProperty({
+    type: [String],
+    enum: Object.values(PermissionsEnum),
+    description: 'List of permissions associated with the role',
+    required: false,
+  })
+  @IsArray()
+  @IsOptional()
+  @IsEnum(PermissionsEnum, { each: true })
+  permissions?: string[];
 
 
     @ApiProperty({

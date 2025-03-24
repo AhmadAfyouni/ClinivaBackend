@@ -1,5 +1,5 @@
-import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {Document, Types} from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 import {
     BankAccount,
     CashBox,
@@ -14,13 +14,13 @@ import {
 
 export type ClinicCollectionDocument = ClinicCollection & Document;
 
-@Schema({timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true }})
-export class ClinicCollection   {
+@Schema({ timestamps: true, toJSON: { virtuals: true }, toObject: { virtuals: true } })
+export class ClinicCollection {
 
-    _id: Types.ObjectId;
+  _id: Types.ObjectId;
 
-    @Prop({default: true})
-    isActive: boolean;
+  @Prop({ default: true })
+  isActive: boolean;
 
     @Prop({required: true})
     name: string;
@@ -28,8 +28,8 @@ export class ClinicCollection   {
     @Prop()
     overview?: string;
 
-    @Prop({type: Date})
-    yearOfEstablishment?: Date;
+  @Prop({ type: Date })
+  yearOfEstablishment?: Date;
 
     @Prop()
     address: string;
@@ -43,20 +43,20 @@ export class ClinicCollection   {
     @Prop()
     goals?: string;
 
-    @Prop()
-    patientCapacity: number;  // قدرة استيعاب المرضى
+  @Prop()
+  patientCapacity: number;  // قدرة استيعاب المرضى
 
-    @Prop({ type: String, required: false })
-    policies: string;  //  حقل السياسات العامة
+  @Prop({ type: String, required: false })
+  policies: string;  //  حقل السياسات العامة
 
-    @Prop({type: [ContactInfo], default: []})
-    ContactInfos: ContactInfo[];
+  @Prop({ type: [ContactInfo], default: [] })
+  ContactInfos: ContactInfo[];
 
-    @Prop({type: [Holiday], default: []})
-    holidays: Holiday[];
+  @Prop({ type: [Holiday], default: [] })
+  holidays: Holiday[];
 
-    @Prop({type: [Specialization], default: []})
-    specialization: Specialization[];
+  @Prop({ type: [Specialization], default: [] })
+  specialization: Specialization[];
 
     @Prop({type: [WorkingHours], default: []})
     workingDays: WorkingHours[];
@@ -76,11 +76,11 @@ export class ClinicCollection   {
     @Prop({type: CommercialRecord})
     commercialRecord: CommercialRecord;
 
-    @Prop({ type: { x: Number, y: Number }})
-    locationGoogl: { x: number; y: number };
+  @Prop({ type: { x: Number, y: Number } })
+  locationGoogl: { x: number; y: number };
 
-    @Prop({type: Types.ObjectId, ref: 'Company', default: null})
-    companyId?: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'Company', default: null })
+  companyId?: Types.ObjectId;
 
 }
 

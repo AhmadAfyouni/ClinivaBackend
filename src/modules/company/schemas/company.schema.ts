@@ -1,5 +1,5 @@
-import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {Document, Types} from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 import {
     BankAccount,
     CashBox,
@@ -14,30 +14,27 @@ import {
 
 export type CompanyDocument = Company & Document;
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class Company {
-    _id: Types.ObjectId;
-    
-    @Prop({required: true})
-    name: string;
+  _id: Types.ObjectId;
 
-    @Prop()
-    overview: string;
+  @Prop({ required: true })
+  name: string;
 
-    @Prop({type: Date})
-    yearOfEstablishment: Date;
+  @Prop()
+  overview: string;
 
-    @Prop()
-    address: string;
+  @Prop({ type: Date })
+  yearOfEstablishment: Date;
 
-    @Prop()
-    logo: string;
+  @Prop()
+  address: string;
 
-    @Prop()
-    vision: string;
+  @Prop()
+  logo: string;
 
-    @Prop()
-    goals: string;
+  @Prop()
+  vision: string;
 
     @Prop({type: [ContactInfo], default: []})
     ContactInfos: ContactInfo[];
@@ -50,9 +47,10 @@ export class Company {
 //
     @Prop({type: [WorkingHours], default: []})
     workingDays: WorkingHours[];
+  @Prop()
+  goals: string;
 
-    @Prop({type: [BankAccount], default: []})
-    bankAccount: BankAccount[];
+
 
     @Prop({type: [CashBox], default: []})
     cashBoxes: CashBox[];
@@ -62,12 +60,15 @@ export class Company {
 
     @Prop({type: [InsuranceCompany], default: []})
     insuranceCompany: InsuranceCompany[];
+  @Prop({ type: [BankAccount], default: [] })
+  bankAccount: BankAccount[];
 
-    @Prop({type: CommercialRecord})
-    commercialRecord: CommercialRecord;
 
-    @Prop({type: Object})
-    locationGoogl: { x: number; y: number };
+  @Prop({ type: CommercialRecord })
+  commercialRecord: CommercialRecord;
+
+  @Prop({ type: Object })
+  locationGoogl: { x: number; y: number };
 
 }
 

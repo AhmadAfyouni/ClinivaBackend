@@ -10,95 +10,100 @@ import { ApiResponse } from 'src/common/utlis/paginate';
 
 @Injectable()
 export class AuthService {
-    constructor(
-      private readonly userService: UserService,
-      private readonly jwtService: JwtService,
-      @InjectModel(Role.name) private roleModel: Model<RoleDocument>
-    ) {}
+  constructor(
+    private readonly userService: UserService,
+    private readonly jwtService: JwtService,
+    @InjectModel(Role.name) private roleModel: Model<RoleDocument>,
+  ) {
+  }
 
-    /**
-     * Validates a user by email and password
-     */
-    async validateUser(email: string, password: string): Promise<User | null> {
-        const user = await this.userService.getUserByEmail(email);
-        if (!user) throw new UnauthorizedException('Invalid email or password');
+  /**
+   * Validates a user by email and password
+   */
+  async validateUser(email: string, password: string): Promise<User | null> {
+    const user = await this.userService.getUserByEmail(email);
+    if (!user) throw new UnauthorizedException('Invalid email or password');
 
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) throw new UnauthorizedException('Invalid email or password');
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) throw new UnauthorizedException('Invalid email or password');
 
-        return user;
+    return user;
+  }
+
+  /**
+   * Authenticates user and returns access & refresh tokens + user data
+   */
+  async login(email: string, password: string): Promise<{
+    success: boolean,
+    message: string,
+    data: {
+      accessToken: string;
+      refreshToken: string;
+      user: any;
+    }
+  }> {
+    const user = await this.validateUser(email, password);
+
+    if (!user || !user._id) {
+      throw new UnauthorizedException('Invalid user');
     }
 
-    /**
-     * Authenticates user and returns access & refresh tokens + user data
-     */
-    async login(email: string, password: string): Promise<{
-        success:boolean,
-        message: string,
-        data:{        
-            accessToken: string;
-            refreshToken: string;
-            user: any;}
-    }> {
-        const user = await this.validateUser(email, password);
+    // Get all permissions from user's roles
+    const roles = await this.roleModel.find({ _id: { $in: user.roleIds } }).lean();
+    const permissions = roles.flatMap(role => role.permissions || []);
+    const uniquePermissions = [...new Set(permissions)];
 
-        if (!user || !user._id) {
-            throw new UnauthorizedException('Invalid user');
-        }
+    // Create JWT payload
+    const payload = {
+      sub: user._id.toString(),
+      email: user.email,
+    };
 
-        // Get all permissions from user's roles
-        const roles = await this.roleModel.find({ _id: { $in: user.roleIds } }).lean();
-        const permissions = roles.flatMap(role => role.permissions || []);
-        const uniquePermissions = [...new Set(permissions)];
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
-        // Create JWT payload
-        const payload = {
-            sub: user._id.toString(),
-            email: user.email,
-        };
+    return {
+      success: true,
+      message: 'user retrieved successfully',
+      data: {
+        accessToken,
+        refreshToken,
+        user: {
+          _id: user._id,
+          name: user.name,
+          email: user.email,
+          roles: roles.map(r => r.name),
+          permissions: uniquePermissions,
+        },
+      },
+    };
+  }
 
-        const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
-        const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+  /**
+   * Generates a new access token from refresh token
+   */
+  async refreshToken(refreshToken: string): Promise<ApiResponse<{ accessToken: string }>> {
+    try {
+      const payload = this.jwtService.verify(refreshToken);
 
-        return {
-             success:true,
-            message: 'login successfully',
-            data:{  accessToken,
-            refreshToken,
-            user: {
-                _id: user._id,
-                name: user.name,
-                email: user.email,
-                roles: roles.map(r => r.name),
-                permissions: uniquePermissions,
-            },}
-        };
+      const userResponse = await this.userService.getUserById(payload.sub);
+      const user = userResponse.data;
+      if (!user || Array.isArray(user)) throw new UnauthorizedException('User not found');
+
+      const newPayload = {
+        sub: user._id.toString(),
+        email: user.email,
+      };
+
+      return {
+        success: true,
+        message: 'user retrieved successfully',
+        data: {
+          accessToken: this.jwtService.sign(newPayload, { expiresIn: '15m' }),
+        },
+      };
+    } catch (error) {
+      throw new UnauthorizedException('Invalid or expired refresh token');
     }
-
-    /**
-     * Generates a new access token from refresh token
-     */
-    async refreshToken(refreshToken: string): Promise<ApiResponse<{ accessToken: string }>> {
-        try {
-            const payload = this.jwtService.verify(refreshToken);
-
-            const userResponse  = await this.userService.getUserById(payload.sub);
-            const user = userResponse.data; 
-            if (!user|| Array.isArray(user)) throw new UnauthorizedException('User not found');
-               
-            const newPayload = {
-                sub: user._id.toString(),
-                email: user.email,
-            };
-
-            return {
-                success:true,
-                message: 'refresh Token successfully',
-                data:{ 
-                accessToken: this.jwtService.sign(newPayload, { expiresIn: '15m' }),
-               }   };
-        } catch (error) {
-            throw new UnauthorizedException('Invalid or expired refresh token');
-        }
-    }
+  }
 }

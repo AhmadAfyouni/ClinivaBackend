@@ -1,5 +1,5 @@
-import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {Document, Types} from 'mongoose';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 import {
     BankAccount,
     CashBox,
@@ -14,15 +14,12 @@ import {
 
 export type ClinicDocument = Clinic & Document;
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class Clinic {
-    _id: Types.ObjectId;
+  _id: Types.ObjectId;
 
-    @Prop({default: true})
-    isActive: boolean;
-    
-    @Prop({required: true})
-    name: string;
+  @Prop({ default: true })
+  isActive: boolean;
 
     @Prop({required: true})
     AverageDurationOfVisit: number;
@@ -50,9 +47,10 @@ export class Clinic {
 //
     @Prop({type: [Holiday], default: []})
     holidays?: Holiday[];
+  @Prop({ required: true })
+  name: string;
 
-    @Prop({type: [Specialization], default: []})
-    specialization?: Specialization[];
+
 
     @Prop({type: [WorkingHours], default: []})
     WorkingHours?: WorkingHours[];
@@ -75,8 +73,10 @@ export class Clinic {
     @Prop({type: Object})
     locationGoogl: { x: number; y: number };
 
-    @Prop({type: Types.ObjectId, ref: 'Department', default: null})
-    departmentId?: Types.ObjectId;  // القسم الذي تتبع له العيادة (إذا وجدت)
+
+
+  @Prop({ type: Types.ObjectId, ref: 'Department', default: null })
+  departmentId?: Types.ObjectId;  // القسم الذي تتبع له العيادة (إذا وجدت)
 
 }
 

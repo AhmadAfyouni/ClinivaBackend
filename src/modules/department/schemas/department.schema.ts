@@ -3,13 +3,13 @@ import {Document, Types} from 'mongoose';
 import {ContactInfo} from "../../../common/utlis/helper";
 export type DepartmentDocument = Department & Document;
 
-@Schema({timestamps: true})
+@Schema({ timestamps: true })
 export class Department {
-    @Prop({default: true})
-    isActive: boolean;
+  @Prop({ default: true })
+  isActive: boolean;
 
-    @Prop({required: true})
-    name: string;
+  @Prop({ required: true })
+  name: string;
 
     @Prop()
     Description?: string;
@@ -17,8 +17,8 @@ export class Department {
     @Prop()
     overview?: string;
 
-    @Prop({type: Date})
-    yearOfEstablishment?: Date;
+  @Prop({ type: Date })
+  yearOfEstablishment?: Date;
 
     @Prop()
     address: string;
@@ -38,8 +38,8 @@ export class Department {
     @Prop({type: [ContactInfo], default: []})
     ContactInfos: ContactInfo[];
 
-    @Prop({type: Types.ObjectId, ref: 'ClinicCollection', required: true})
-    clinicCollectionId: Types.ObjectId;
+  @Prop({ type: Types.ObjectId, ref: 'ClinicCollection', required: true })
+  clinicCollectionId: Types.ObjectId;
 }
 
 export const DepartmentSchema = SchemaFactory.createForClass(Department);
