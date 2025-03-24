@@ -31,11 +31,13 @@ export class EmployeeService {
 
     const sortField: string = sortBy ?? 'createdAt';
     const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
-    return paginate(this.employeeModel, [], page, limit, allData, filters, sort);
+    return paginate(this.employeeModel, ['companyId', 'clinicCollectionId', 'departmentId',
+      'clinics'], page, limit, allData, filters, sort);
   }
 
   async getEmployeeById(id: string): Promise<ApiResponse<Employee>> {
-    const employee = await this.employeeModel.findById(id).exec();
+    const employee = await this.employeeModel.findById(id).populate(['companyId', 'clinicCollectionId', 'departmentId',
+      'clinics']).exec();
     if (!employee) throw new NotFoundException('Employee not found');
     return {
       success: true,

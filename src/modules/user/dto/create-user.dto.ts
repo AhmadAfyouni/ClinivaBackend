@@ -49,44 +49,6 @@ export class CreateUserDto {
   @IsNotEmpty()
   roleIds: Types.ObjectId[];
 
-  @ApiProperty({
-    description: 'Company ID where the user works',
-    example: '60f7c7b84f1a2c001c8b4568',
-    required: false,
-  })
-  @IsMongoId()
-  @IsOptional()
-  companyId?: Types.ObjectId;
-
-  @ApiProperty({
-    description: 'Clinic Collection ID where the user works',
-    example: '60f7c7b84f1a2c001c8b4569',
-    required: false,
-  })
-  @IsMongoId()
-  @IsOptional()
-  clinicCollectionId?: Types.ObjectId;
-
-  @ApiProperty({
-    description: 'Department ID where the user works',
-    example: '60f7c7b84f1a2c001c8b4570',
-    required: false,
-  })
-  @IsMongoId()
-  @IsOptional()
-  departmentId?: Types.ObjectId;
-
-  @ApiProperty({
-    type: [String],
-    description: 'List of clinic IDs where the user works',
-    example: ['60f7c7b84f1a2c001c8b4571'],
-    required: false,
-  })
-  @IsArray()
-  @IsMongoId({ each: true })
-  @IsOptional()
-  clinics?: Types.ObjectId[];
-
     @ApiProperty({
         description: 'Employee ID',
         example: '60f7c7b84f1a2c001c8b4572',
@@ -112,7 +74,7 @@ export class CreateUserDto {
     @IsDate()
     @IsOptional()
     lastPasswordUpdate?: Date;
-       LoginHistory
+       
     @ApiProperty({
         type: [ActivityLog],
         description: 'Activity log of the user',

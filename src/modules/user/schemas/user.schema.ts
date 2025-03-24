@@ -23,18 +23,6 @@ export class User {
   @Prop({ type: [Types.ObjectId], ref: 'Role', required: true })
   roleIds: Types.ObjectId[];  // قائمة بمعرفات الأدوار المرتبطة بالمستخدم
 
-  @Prop({ type: Types.ObjectId, ref: 'Company', default: null })
-  companyId?: Types.ObjectId;  // الشركة التي يعمل بها الموظف (إن وجد)
-
-  @Prop({ type: Types.ObjectId, ref: 'ClinicCollection', default: null })
-  clinicCollectionId?: Types.ObjectId;  // مجموعة العيادات التي يعمل بها الموظف (إن وجد)
-
-  @Prop({ type: Types.ObjectId, ref: 'Department', default: null })
-  departmentId?: Types.ObjectId;  // القسم الذي يعمل به الطبيب أو الموظف (إن وجد)
-
-  @Prop({ type: [Types.ObjectId], ref: 'Clinic', default: [] })
-  clinics: Types.ObjectId[]; // العيادات التي يعمل بها الطبيب أو الموظف (يمكن أن يعمل في أكثر من عيادة)
-
     @Prop({type: Types.ObjectId, ref: 'Employee', required: true})
     employeeId: Types.ObjectId;  // مرجع إلى جدول الموظفين (إن كان المستخدم موظفًا)
 
