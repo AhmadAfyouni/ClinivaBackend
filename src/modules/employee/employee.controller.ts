@@ -37,8 +37,8 @@ export class EmployeeController {
     return this.employeeService.deleteEmployee(id);
   }
 
-    @Get('count-doctor/by-cliniccollection/:clinicCollectionId')
+    /*@Get('count-doctor/by-cliniccollection/:clinicCollectionId')
     getDepartmentCount(@Param('clinicCollectionId') clinicCollectionId: string) {
       return this.employeeService.getCountDoctorByClinicCollectionId(clinicCollectionId);
-    }
+    }*/
   }
