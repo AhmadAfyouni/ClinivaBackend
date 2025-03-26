@@ -13,7 +13,7 @@ export class Patient {
   name: string;
 
   @Prop({ type: [ContactInfo], default: [] })
-  ContactInfos: ContactInfo[];
+  contactInfos: ContactInfo[];
 
   @Prop({ required: true })
   dateOfBirth: Date;
@@ -22,7 +22,7 @@ export class Patient {
   gender: string;
 
   @Prop({ required: true, unique: true })
-  identity?: string; // National ID or Passport
+  identity: string; // National ID or Passport
 
     @Prop({required: true})
     nationality?: string;

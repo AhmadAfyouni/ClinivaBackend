@@ -14,11 +14,13 @@ import {
 import { Type } from 'class-transformer';
 import {
     BankAccount,
+    CashBox,
     CommercialRecord,
     ContactInfo,
     Holiday,
     InsuranceCompany,
-    Specialization,
+    OnlinePaymentMethod,
+
     WorkingHours,
 } from '../../../common/utlis/helper';
 import { Types } from 'mongoose';
@@ -79,7 +81,7 @@ export class CreateClinicDto {
   @ValidateNested({ each: true })
   @Type(() => ContactInfo)
   @IsOptional()
-  ContactInfos?: ContactInfo[];
+  contactInfos?: ContactInfo[];
 
   @ApiPropertyOptional({ type: [Holiday], description: 'Clinic holidays' })
   @IsArray()
@@ -88,12 +90,7 @@ export class CreateClinicDto {
   @IsOptional()
   holidays?: Holiday[];
 
-  @ApiPropertyOptional({ type: [Specialization], description: 'Clinic specializations' })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => Specialization)
-  @IsOptional()
-  specialization?: Specialization[];
+
 
   @ApiPropertyOptional({ type: [WorkingHours], description: 'Working hours of the clinic' })
   @IsArray()
@@ -108,6 +105,20 @@ export class CreateClinicDto {
   @Type(() => BankAccount)
   @IsOptional()
   bankAccount?: BankAccount[];
+
+      @ApiPropertyOptional({ type: [CashBox], description: 'Company cash boxes', required: false })
+      @IsArray()
+      @ValidateNested({ each: true })
+      @Type(() => CashBox)
+      @IsOptional()
+      cashBoxes?: CashBox[];
+
+    @ApiPropertyOptional({ type: [OnlinePaymentMethod], description: 'Accepted online payment methods', required: false })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => OnlinePaymentMethod)
+    @IsOptional()
+    onlinePaymentMethods?: OnlinePaymentMethod[];
 
   @ApiPropertyOptional({ type: [InsuranceCompany], description: 'Accepted insurance companies' })
   @IsArray()
@@ -131,4 +142,16 @@ export class CreateClinicDto {
   @IsOptional()
   @IsMongoId()
   departmentId?: Types.ObjectId;
+
+
+
+  @ApiProperty({
+    description: 'List of specialization IDs associated with the clinic ',
+    example: ['60f7c7b84f1a2c001c8b4567', '60f7c7b84f1a2c001c8b4568'],
+    required: true,
+  })
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsNotEmpty()
+  specializations: Types.ObjectId[];
 }

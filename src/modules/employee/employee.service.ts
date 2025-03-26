@@ -32,12 +32,12 @@ export class EmployeeService {
     const sortField: string = sortBy ?? 'createdAt';
     const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
     return paginate(this.employeeModel, ['companyId', 'clinicCollectionId', 'departmentId',
-      'clinics'], page, limit, allData, filters, sort);
+      'clinics','specializations'], page, limit, allData, filters, sort);
   }
 
   async getEmployeeById(id: string): Promise<ApiResponse<Employee>> {
     const employee = await this.employeeModel.findById(id).populate(['companyId', 'clinicCollectionId', 'departmentId',
-      'clinics']).exec();
+      'clinics','specializations']).exec();
     if (!employee) throw new NotFoundException('Employee not found');
     return {
       success: true,
@@ -65,4 +65,34 @@ export class EmployeeService {
       message: 'Employee remove successfully',
     };
   }
+   async getCountDoctorByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse< {count: number}>> {
+      const employees = await this.employeeModel.find().
+      populate({path:"clinics" ,select:"clinics",populate:{path:'departmentId',select:"clinicCollectionId", match: { clinicCollectionId: clinicCollectionId },}}).where('employeeType').equals('Doctor').lean();
+      const count = employees.filter(clinic => clinic.departmentId !== null).length;
+  console.log(employees)
+     /*  const counts = await this.employeeModel
+     .countDocuments({
+        'employeeType': 'Doctor', // تصفية الموظفين الذين نوعهم "Doctor"
+        'clinics.departmentId.clinicCollectionId': clinicCollectionId, // تصفية العيادات المرتبطة بالمجمع
+      });*/
+      return {
+        success: true,
+        message: 'Doctor count in Clinic Collection retrieved successfully',
+        data: { count },
+      };
+    }
+   async getCountByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse< {count: number}>> {
+      const clinics = await this.employeeModel.find().
+      populate({path:"clinics" ,select:"clinics",
+        populate:{path:'departmentId',select:"clinicCollectionId", match: { clinicCollectionId: clinicCollectionId },}})
+        .where('employeeType').ne('Doctor').lean();
+      const count = clinics.filter(clinic => clinic.departmentId !== null).length;
+  
+  
+      return {
+        success: true,
+        message: 'employee count in Clinic Collection retrieved successfully',
+        data: { count },
+      };
+    }
 }

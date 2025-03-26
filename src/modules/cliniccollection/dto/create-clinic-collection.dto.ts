@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
@@ -16,11 +16,12 @@ import { Types } from 'mongoose';
 
 import {
   BankAccount,
+  CashBox,
   CommercialRecord,
   ContactInfo,
   Holiday,
   InsuranceCompany,
-  Specialization,
+  OnlinePaymentMethod,
   WorkingHours,
 } from '../../../common/utlis/helper';
 
@@ -120,7 +121,7 @@ export class CreateClinicCollectionDto {
   @ValidateNested({ each: true })
   @Type(() => ContactInfo)
   @IsOptional()
-  ContactInfos?: ContactInfo[];
+  contactInfos?: ContactInfo[];
 
   @ApiProperty({
     type: [Holiday],
@@ -136,27 +137,15 @@ export class CreateClinicCollectionDto {
   @IsOptional()
   holidays?: Holiday[];
 
-  @ApiProperty({
-    type: [Specialization],
-    description: 'Specializations available in the clinic collection',
-    required: false,
-    example: [
-      { name: 'Cardiology', description: 'Heart and vascular care' },
-      { name: 'Dermatology', description: 'Skin and cosmetic treatments' },
-    ],
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => Specialization)
-  @IsOptional()
-  specialization?: Specialization[];
+
+
 
   @ApiProperty({
     type: [WorkingHours],
     description: 'Working hours of the clinic collection',
     required: false,
     example: [
-      { day: 'Monday', timeSlots: [{ startTime: '09:00 AM', endTime: '05:00 PM' }] },
+      { day: 'Monday', startTime: '09:00 AM', endTime: '05:00 PM'  },
     ],
   })
   @IsArray()
@@ -215,6 +204,20 @@ export class CreateClinicCollectionDto {
   @Type(() => CommercialRecord)
   commercialRecord?: CommercialRecord;
 
+    @ApiPropertyOptional({ type: [CashBox], description: 'Company cash boxes', required: false })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CashBox)
+    @IsOptional()
+    cashBoxes?: CashBox[];
+ 
+    @ApiPropertyOptional({ type: [OnlinePaymentMethod], description: 'Accepted online payment methods', required: false })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => OnlinePaymentMethod)
+    @IsOptional()
+    onlinePaymentMethods?: OnlinePaymentMethod[];
+
   @ApiProperty({
     description: 'Google Maps location coordinates',
     required: false,
@@ -232,4 +235,14 @@ export class CreateClinicCollectionDto {
   @IsOptional()
   @IsMongoId()
   companyId?: Types.ObjectId;
+
+  @ApiProperty({
+    description: 'List of specialization IDs associated with the clinic collection',
+    example: ['60f7c7b84f1a2c001c8b4567', '60f7c7b84f1a2c001c8b4568'],
+    required: true,
+  })
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsNotEmpty()
+  specializations: Types.ObjectId[];
 }

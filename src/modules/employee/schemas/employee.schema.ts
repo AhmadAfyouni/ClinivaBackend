@@ -13,7 +13,7 @@ export class Employee {
   name: string;
 
   @Prop({ type: [ContactInfo], default: [] })
-  ContactInfos: ContactInfo[];
+  contactInfos: ContactInfo[];
 
   @Prop({ required: true })
   dateOfBirth: Date;
@@ -61,8 +61,8 @@ export class Employee {
   @Prop({ type: [WorkingHours], default: [] })
   workingHours: WorkingHours[];
 
-  @Prop()
-  evaluation?: number;
+  // @Prop()
+  // evaluation?: number;
 
   @Prop({
     type: String,
@@ -105,6 +105,9 @@ export class Employee {
     @Prop({ type: [Types.ObjectId], ref: 'Clinic', default: [] })
     clinics: Types.ObjectId[]; // العيادات التي يعمل بها الطبيب أو الموظف (يمكن أن يعمل في أكثر من عيادة)
     
+    @Prop({ type: [Types.ObjectId], ref: 'Specialization', required: true })
+    specializations: Types.ObjectId[];  // قائمة بمعرفات الاختصاصات المرتبطة بالعيادة
+  
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);

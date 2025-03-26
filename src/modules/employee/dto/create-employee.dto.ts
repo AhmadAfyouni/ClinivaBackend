@@ -15,6 +15,7 @@ import {
 import { Type } from 'class-transformer';
 import { ContactInfo, WorkingHours, Vacation, BreakTime } from '../../../common/utlis/helper';
 import { Types } from 'mongoose';
+import { Certificate } from 'crypto';
 
 
 
@@ -37,7 +38,7 @@ export class CreateEmployeeDto {
     @ValidateNested({ each: true })
     @Type(() => ContactInfo)
     @IsOptional()
-    ContactInfos?: ContactInfo[];
+    contactInfos?: ContactInfo[];
 
     @ApiProperty({ description: 'Date of Birth', example: '1985-06-15', required: true })
     @IsDate()
@@ -146,8 +147,8 @@ export class CreateEmployeeDto {
         description: 'Working hours',
         required: true,
         example: [
-            { day: 'Monday', timeSlots: [{ startTime: '08:00 AM', endTime: '04:00 PM' }] },
-            { day: 'Wednesday', timeSlots: [{ startTime: '08:00 AM', endTime: '04:00 PM' }] }
+            { day: 'Monday', startTime: '08:00 AM', endTime: '04:00 PM' },
+            { day: 'Wednesday', startTime: '08:00 AM', endTime: '04:00 PM'  }
         ]
     })
     @IsArray()
@@ -169,7 +170,7 @@ export class CreateEmployeeDto {
       @IsArray()
       @ValidateNested({ each: true })
       @Type(() => Vacation)
-      vacations: Vacation[];
+      vacationRecords: Vacation[];
 
     // @ApiProperty({
     //     description: 'Evaluation score (1-10)',
@@ -205,7 +206,7 @@ export class CreateEmployeeDto {
     @ApiProperty({ description: 'Certifications', required: false })
     @IsArray()
     @IsOptional()
-    certifications?: string[];
+    certifications?: Certificate[];
 
     @ApiProperty({ description: 'Job Type', enum: ['FULL_TIME', 'PART_TIME'], required: true })
     @IsEnum(['FULL_TIME', 'PART_TIME'])
@@ -218,12 +219,6 @@ export class CreateEmployeeDto {
     @Type(() => BreakTime)
     @IsOptional()
     breakTimes?: BreakTime[];
-
-    @ApiProperty({ type: [String], description: 'Specializations', required: false })
-    @IsArray()
-    @IsOptional()
-    specializations?: string[];
-
 
     @ApiProperty({
         description: 'Employee activation status',
@@ -273,4 +268,13 @@ export class CreateEmployeeDto {
       @IsOptional()
       clinics?: Types.ObjectId[];
     
+      @ApiProperty({
+        description: 'List of specialization IDs associated with the clinic',
+        example: ['60f7c7b84f1a2c001c8b4567', '60f7c7b84f1a2c001c8b4568'],
+        required: true,
+      })
+      @IsArray()
+      @IsMongoId({ each: true })
+      @IsNotEmpty()
+      specializations: Types.ObjectId[];      
 }

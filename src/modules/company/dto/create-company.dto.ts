@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { IsArray, IsDate, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
+import { IsArray, IsDate, IsMongoId, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 import {
@@ -10,9 +10,9 @@ import {
     Holiday,
     InsuranceCompany,
     OnlinePaymentMethod,
-    Specialization,
     WorkingHours
 } from '../../../common/utlis/helper';
+import { Types } from 'mongoose';
 
 export class CreateCompanyDto {
     @ApiProperty({ description: 'Company name', example: 'Saudi Health Group', required: true })
@@ -75,7 +75,7 @@ export class CreateCompanyDto {
     @ValidateNested({ each: true })
     @Type(() => ContactInfo)
     @IsOptional()
-    ContactInfos?: ContactInfo[];
+    contactInfos?: ContactInfo[];
 
     @ApiPropertyOptional({
         type: [Holiday],
@@ -92,28 +92,14 @@ export class CreateCompanyDto {
     @IsOptional()
     holidays?: Holiday[];
 
-    @ApiPropertyOptional({
-        type: [Specialization],
-        description: 'Company specializations',
-        required: false,
-        example: [
-            { name: 'Cardiology', description: 'Heart-related treatments' },
-            { name: 'Pediatrics', description: 'Children healthcare services' }
-        ]
-    })
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => Specialization)
-    @IsOptional()
-    specialization?: Specialization[];
 
     @ApiPropertyOptional({
         type: [WorkingHours],
         description: 'Working hours of the company',
         required: false,
         example: [
-            { day: 'Monday', timeSlots: [{ startTime: '08:00 AM', endTime: '05:00 PM' }] },
-            { day: 'Tuesday', timeSlots: [{ startTime: '08:00 AM', endTime: '05:00 PM' }] }
+            { day: 'Monday',  startTime: '08:00 AM', endTime: '05:00 PM'  },
+            { day: 'Tuesday',startTime: '08:00 AM', endTime: '05:00 PM'  }
         ]
     })
     @IsArray()

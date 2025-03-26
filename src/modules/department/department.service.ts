@@ -32,11 +32,11 @@ export class DepartmentService {
 
     const sortField: string = sortBy ?? 'createdAt';
     const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
-    return paginate(this.departmentModel, ['clinicCollectionId'], page, limit, allData, filters, sort);
+    return paginate(this.departmentModel, ['clinicCollectionId','specializations'], page, limit, allData, filters, sort);
   }
 
   async getDepartmentById(id: string): Promise<ApiResponse<Department>> {
-    const department = await this.departmentModel.findById(id).populate(['clinicCollectionId']);
+    const department = await this.departmentModel.findById(id).populate(['clinicCollectionId','specializations']);
     if (!department) throw new NotFoundException('Department not found');
     return {
       success: true,

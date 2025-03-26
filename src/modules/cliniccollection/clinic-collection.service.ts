@@ -32,11 +32,11 @@ export class ClinicCollectionService {
     const sortField: string = sortBy ?? 'createdAt';
     const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
 
-    return paginate(this.clinicCollectionModel, ['companyId'], page, limit, allData, filters, sort);
+    return paginate(this.clinicCollectionModel, ['companyId',"specializations"], page, limit, allData, filters, sort);
   }
 
   async getClinicCollectionById(id: string): Promise<any> {
-    const clinicCollection = await this.clinicCollectionModel.findById(id).populate('companyId').exec();
+    const clinicCollection = await this.clinicCollectionModel.findById(id).populate(['companyId',"specializations"]).exec();
     if (!clinicCollection) throw new NotFoundException('Clinic Collection not found');
     return {
       success: true,

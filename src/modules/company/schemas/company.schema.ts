@@ -8,7 +8,7 @@ import {
     Holiday,
     InsuranceCompany,
     OnlinePaymentMethod,
-    Specialization,
+
     WorkingHours
 } from "../../../common/utlis/helper";
 
@@ -37,13 +37,10 @@ export class Company {
   vision: string;
 
     @Prop({type: [ContactInfo], default: []})
-    ContactInfos: ContactInfo[];
+    contactInfos: ContactInfo[];
 //
     @Prop({type: [Holiday], default: []})
     holidays: Holiday[];
-//
-    @Prop({type: [Specialization], default: []})
-    specialization: Specialization[];
 //
     @Prop({type: [WorkingHours], default: []})
     workingDays: WorkingHours[];
@@ -63,13 +60,11 @@ export class Company {
   @Prop({ type: [BankAccount], default: [] })
   bankAccount: BankAccount[];
 
-
   @Prop({ type: CommercialRecord })
   commercialRecord: CommercialRecord;
 
   @Prop({ type: Object })
   locationGoogl: { x: number; y: number };
-
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);

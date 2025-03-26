@@ -21,6 +21,15 @@ export class CreateDepartmentDto {
   name: string;
 
   @ApiProperty({
+    description: 'Department description',
+    example: 'This department focuses on cardiology and heart-related treatments.',
+    required: false,
+})
+@IsOptional()
+@IsString()
+description?: string;
+
+  @ApiProperty({
     description: 'Brief overview of the department',
     example: 'Specialized in heart-related treatments and procedures.',
     required: false,
@@ -94,7 +103,16 @@ export class CreateDepartmentDto {
     @IsNumber()
     patientCapacity?: number;
 
-
+  @ApiProperty({
+      description: 'List of contact information for the department',
+      type: [ContactInfo],
+      required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ContactInfo)
+  contactInfos?: ContactInfo[];
 
   @ApiProperty({
     description: 'Clinic Collection ID to which the department belongs',
@@ -104,4 +122,24 @@ export class CreateDepartmentDto {
   @IsMongoId()
   @IsNotEmpty()
   clinicCollectionId: Types.ObjectId;
+
+  @ApiProperty({
+    description: 'List of required staff roles for the department',
+    example: ['Cardiologist', 'Nurse', 'Anesthesiologist'],
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  requiredStaff?: string[]; // الكادر المطلوب
+
+  @ApiProperty({
+    description: 'List of specialization IDs associated with the department ',
+    example: ['60f7c7b84f1a2c001c8b4567', '60f7c7b84f1a2c001c8b4568'],
+    required: true,
+  })
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsNotEmpty()
+  specializations: Types.ObjectId[];
 }

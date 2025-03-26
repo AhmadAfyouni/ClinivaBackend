@@ -35,4 +35,9 @@ export class ClinicController {
   async deleteClinic(@Param('id') id: string) {
     return this.clinicService.deleteClinic(id);
   }
+
+    @Get('count/by-cliniccollection/:clinicCollectionId')
+    getDepartmentCount(@Param('clinicCollectionId') clinicCollectionId: string) {
+      return this.clinicService.getCountByClinicCollectionId(clinicCollectionId);
+    }
 }

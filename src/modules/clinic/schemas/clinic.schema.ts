@@ -8,7 +8,7 @@ import {
     Holiday,
     InsuranceCompany,
     OnlinePaymentMethod,
-    Specialization,
+
     WorkingHours
 } from "../../../common/utlis/helper";
 
@@ -43,7 +43,7 @@ export class Clinic {
     goals?: string;
 
     @Prop({type: [ContactInfo], default: []})
-    ContactInfos: ContactInfo[];
+    contactInfos: ContactInfo[];
 //
     @Prop({type: [Holiday], default: []})
     holidays?: Holiday[];
@@ -77,6 +77,9 @@ export class Clinic {
 
   @Prop({ type: Types.ObjectId, ref: 'Department', default: null })
   departmentId?: Types.ObjectId;  // القسم الذي تتبع له العيادة (إذا وجدت)
+
+  @Prop({ type: [Types.ObjectId], ref: 'Specialization', required: true })
+  specializations: Types.ObjectId[];  // قائمة بمعرفات الاختصاصات المرتبطة بالعيادة
 
 }
 

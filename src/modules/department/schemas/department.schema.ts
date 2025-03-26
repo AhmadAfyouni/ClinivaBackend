@@ -5,6 +5,8 @@ export type DepartmentDocument = Department & Document;
 
 @Schema({ timestamps: true })
 export class Department {
+  _id: Types.ObjectId;
+
   @Prop({ default: true })
   isActive: boolean;
 
@@ -12,7 +14,7 @@ export class Department {
   name: string;
 
     @Prop()
-    Description?: string;
+    description?: string;
 //
     @Prop()
     overview?: string;
@@ -36,10 +38,17 @@ export class Department {
     patientCapacity: number;  // قدرة استيعاب المرضى
 //
     @Prop({type: [ContactInfo], default: []})
-    ContactInfos: ContactInfo[];
+    contactInfos: ContactInfo[];
 
   @Prop({ type: Types.ObjectId, ref: 'ClinicCollection', required: true })
   clinicCollectionId: Types.ObjectId;
+
+  @Prop({ type: [String], default: [] })
+  requiredStaff: string[];//  الكادر المطلوب  
+
+  @Prop({ type: [Types.ObjectId], ref: 'Specialization', required: true })
+  specializations: Types.ObjectId[];  // قائمة بمعرفات الاختصاصات المرتبطة بالقسم
+
 }
 
 export const DepartmentSchema = SchemaFactory.createForClass(Department);

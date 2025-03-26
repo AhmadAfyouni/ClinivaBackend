@@ -36,4 +36,9 @@ export class EmployeeController {
   async deleteEmployee(@Param('id') id: string) {
     return this.employeeService.deleteEmployee(id);
   }
-}
+
+    @Get('count-doctor/by-cliniccollection/:clinicCollectionId')
+    getDepartmentCount(@Param('clinicCollectionId') clinicCollectionId: string) {
+      return this.employeeService.getCountDoctorByClinicCollectionId(clinicCollectionId);
+    }
+  }

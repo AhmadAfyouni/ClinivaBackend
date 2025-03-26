@@ -35,7 +35,7 @@ export class CreatePatientDto {
     @ValidateNested({ each: true })
     @Type(() => ContactInfo)
     @IsOptional()
-    ContactInfos?: ContactInfo[];
+    contactInfos?: ContactInfo[];
 
     @ApiProperty({ description: 'Date of Birth', example: '1990-05-20', required: true })
     @IsDate()
