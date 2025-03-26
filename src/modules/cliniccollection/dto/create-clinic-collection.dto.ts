@@ -24,6 +24,7 @@ import {
   OnlinePaymentMethod,
   WorkingHours,
 } from '../../../common/utlis/helper';
+import { BankAccountDTO, CashBoxDTO, CommercialRecordDTO, ContactInfoDTO, HolidayDTO, InsuranceCompanyDTO, OnlinePaymentMethodDTO, WorkingHoursDTO } from 'src/common/utlis/helper.dto';
 
 export class CreateClinicCollectionDto {
   @ApiProperty({ description: 'Clinic Collection name', example: 'Saudi Clinics Group', required: true })
@@ -32,7 +33,7 @@ export class CreateClinicCollectionDto {
   name: string;
 
   @ApiProperty({
-    description: 'Brief overview of the clinic collection',
+    description: 'Brief overview of the clinic collection (اذا مافي شركة)',
     example: 'A leading healthcare provider in Saudi Arabia.',
     required: false,
   })
@@ -82,7 +83,7 @@ export class CreateClinicCollectionDto {
   address: string;
 
   @ApiProperty({
-    description: 'Logo URL',
+    description: 'Logo URL  (اذا مافي شركة)',
     example: 'https://clinic.com/logo.png',
     required: false,
   })
@@ -91,7 +92,7 @@ export class CreateClinicCollectionDto {
   logo?: string;
 
   @ApiProperty({
-    description: 'Vision statement',
+    description: 'Vision statement (اذا مافي شركة)',
     example: 'Providing the best medical care in the region.',
     required: false,
   })
@@ -100,7 +101,7 @@ export class CreateClinicCollectionDto {
   vision?: string;
 
   @ApiProperty({
-    description: 'Additional goals',
+    description: 'Additional goals  (اذا مافي شركة)',
     example: 'We have over 50 branches across the country.',
     required: false,
   })
@@ -109,114 +110,91 @@ export class CreateClinicCollectionDto {
   goals?: string;
 
   @ApiProperty({
-    type: [ContactInfo],
-    description: 'Contact information of the clinic collection',
+    type: [ContactInfoDTO],
+    description: 'Contact information of the clinic collection ',
     required: false,
-    example: [
-      { type: 'phone', value: '+966123456789', isPublic: true, subType: 'work' },
-      { type: 'email', value: 'info@clinicgroup.com', isPublic: true, subType: 'corporate' },
-    ],
+  
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => ContactInfo)
+  @Type(() => ContactInfoDTO)
   @IsOptional()
-  contactInfos?: ContactInfo[];
+  contactInfos?: ContactInfoDTO[];
 
   @ApiProperty({
-    type: [Holiday],
+    type: [HolidayDTO],
     description: 'Clinic collection holidays',
     required: false,
-    example: [
-      { name: 'Eid Al-Fitr', date: '2025-04-21', reason: 'Public holiday' },
-    ],
+  
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => Holiday)
+  @Type(() => HolidayDTO)
   @IsOptional()
-  holidays?: Holiday[];
+  holidays?: HolidayDTO[];
 
 
 
 
   @ApiProperty({
-    type: [WorkingHours],
+    type: [WorkingHoursDTO],
     description: 'Working hours of the clinic collection',
     required: false,
-    example: [
-      { day: 'Monday', startTime: '09:00 AM', endTime: '05:00 PM'  },
-    ],
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => WorkingHours)
+  @Type(() => WorkingHoursDTO)
   @IsOptional()
-  workingDays?: WorkingHours[];
+  workingDays?: WorkingHoursDTO[];
 
   @ApiProperty({
-    type: [BankAccount],
-    description: 'Bank accounts associated with the clinic collection',
+    type: [BankAccountDTO],
+    description: 'Bank accounts associated with the clinic collection  (اذا مافي شركة)',
     required: false,
-    example: [
-      {
-        accountName: 'Clinic Main Account',
-        swiftCode: 'SA123456',
-        bankName: 'Al Rajhi Bank',
-        accountNumber: '1234567890',
-      },
-    ],
+
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => BankAccount)
+  @Type(() => BankAccountDTO)
   @IsOptional()
-  bankAccount?: BankAccount[];
+  bankAccount?: BankAccountDTO[];
 
   @ApiProperty({
-    type: [InsuranceCompany],
-    description: 'Accepted insurance companies',
+    type: [InsuranceCompanyDTO],
+    description: 'Accepted insurance companies  (اذا مافي شركة)',
     required: false,
-    example: [
-      { companyName: 'Bupa Arabia', companyPhone: '+9661122334455', companyEmail: 'support@bupa.com.sa' },
-    ],
+   
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => InsuranceCompany)
+  @Type(() => InsuranceCompanyDTO)
   @IsOptional()
-  insuranceCompany?: InsuranceCompany[];
+  insuranceCompany?: InsuranceCompanyDTO[];
 
   @ApiProperty({
-    type: CommercialRecord,
-    description: 'Commercial record of the clinic collection',
+    type: CommercialRecordDTO,
+    description: 'Commercial record of the clinic collection  (اذا مافي شركة)',
     required: false,
-    example: {
-      recordNumber: '1234567890',
-      grantDate: '2015-06-15',
-      issueDate: '2015-06-15',
-      expirationDate: '2030-06-15',
-      taxNumber: '9876543210',
-    },
+  
   })
   @IsOptional()
   @ValidateNested()
-  @Type(() => CommercialRecord)
-  commercialRecord?: CommercialRecord;
+  @Type(() => CommercialRecordDTO)
+  commercialRecord?: CommercialRecordDTO;
 
-    @ApiPropertyOptional({ type: [CashBox], description: 'Company cash boxes', required: false })
+    @ApiPropertyOptional({ type: [CashBoxDTO], description: 'Company cash boxes  (اذا مافي شركة)', required: false })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => CashBox)
+    @Type(() => CashBoxDTO)
     @IsOptional()
-    cashBoxes?: CashBox[];
+    cashBoxes?: CashBoxDTO[];
  
-    @ApiPropertyOptional({ type: [OnlinePaymentMethod], description: 'Accepted online payment methods', required: false })
+    @ApiPropertyOptional({ type: [OnlinePaymentMethodDTO], description: 'Accepted online payment methods  (اذا مافي شركة)', required: false })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => OnlinePaymentMethod)
+    @Type(() => OnlinePaymentMethodDTO)
     @IsOptional()
-    onlinePaymentMethods?: OnlinePaymentMethod[];
+    onlinePaymentMethods?: OnlinePaymentMethodDTO[];
 
   @ApiProperty({
     description: 'Google Maps location coordinates',

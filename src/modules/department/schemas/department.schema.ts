@@ -15,30 +15,30 @@ export class Department {
 
     @Prop()
     description?: string;
-//
-    @Prop()
-    overview?: string;
+// //
+//     @Prop()
+//     overview?: string;
 
   @Prop({ type: Date })
   yearOfEstablishment?: Date;
 
     @Prop()
     address: string;
-//
-    @Prop()
-    logo: string;
-//
-    @Prop()
-    vision?: string;
-//
-    @Prop()
-    goals?: string;
+// //
+//     @Prop()
+//     logo: string;
+// //
+//     @Prop()
+//     vision?: string;
+// //
+//     @Prop()
+//     goals?: string;
     
     @Prop()
     patientCapacity: number;  // قدرة استيعاب المرضى
-//
-    @Prop({type: [ContactInfo], default: []})
-    contactInfos: ContactInfo[];
+// //
+//     @Prop({type: [ContactInfo], default: []})
+//     contactInfos: ContactInfo[];
 
   @Prop({ type: Types.ObjectId, ref: 'ClinicCollection', required: true })
   clinicCollectionId: Types.ObjectId;

@@ -12,18 +12,8 @@ import {
     ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import {
-    BankAccount,
-    CashBox,
-    CommercialRecord,
-    ContactInfo,
-    Holiday,
-    InsuranceCompany,
-    OnlinePaymentMethod,
-
-    WorkingHours,
-} from '../../../common/utlis/helper';
 import { Types } from 'mongoose';
+import { BankAccountDTO, CashBoxDTO, CommercialRecordDTO, ContactInfoDTO, HolidayDTO, InsuranceCompanyDTO, OnlinePaymentMethodDTO, WorkingHoursDTO } from 'src/common/utlis/helper.dto';
 
 export class CreateClinicDto {
   @ApiProperty({ description: 'Clinic name', example: 'Al Noor Clinic' })
@@ -36,7 +26,7 @@ export class CreateClinicDto {
   @IsNumber()
   AverageDurationOfVisit: number;
 
-  @ApiPropertyOptional({ description: 'Brief overview of the clinic' })
+  @ApiPropertyOptional({ description: 'Brief overview of the clinic (اذا مافي شركة)' })
   @IsOptional()
   @IsString()
   overview?: string;
@@ -56,84 +46,84 @@ export class CreateClinicDto {
   @IsDate()
   yearOfEstablishment?: Date;
 
-  @ApiProperty({ description: 'Clinic address', example: '123 Main Street, Riyadh, Saudi Arabia' })
+  @ApiProperty({ description: 'Clinic address', example: '123 Main Street, Riyadh, Saudi Arabia  (اذا مافي شركة)' })
   @IsString()
   @IsNotEmpty()
   address: string;
 
-  @ApiPropertyOptional({ description: 'Clinic logo URL' })
+  @ApiPropertyOptional({ description: 'Clinic logo URL  (اذا مافي شركة)' })
   @IsOptional()
   @IsString()
   logo?: string;
 
-  @ApiPropertyOptional({ description: 'Clinic vision statement' })
+  @ApiPropertyOptional({ description: 'Clinic vision statement  (اذا مافي شركة)' })
   @IsOptional()
   @IsString()
   vision?: string;
 
-  @ApiPropertyOptional({ description: 'Additional goals about the clinic' })
+  @ApiPropertyOptional({ description: 'Additional goals about the clinic  (اذا مافي شركة)' })
   @IsOptional()
   @IsString()
   goals?: string;
 
-  @ApiPropertyOptional({ type: [ContactInfo], description: 'Contact information of the clinic' })
+  @ApiPropertyOptional({ type: [ContactInfoDTO], description: 'Contact information of the clinic' })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => ContactInfo)
+  @Type(() => ContactInfoDTO)
   @IsOptional()
-  contactInfos?: ContactInfo[];
+  contactInfos?: ContactInfoDTO[];
 
-  @ApiPropertyOptional({ type: [Holiday], description: 'Clinic holidays' })
+  @ApiPropertyOptional({ type: [HolidayDTO], description: 'Clinic holidays  (اذا مافي مجمع)' })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => Holiday)
+  @Type(() => HolidayDTO)
   @IsOptional()
-  holidays?: Holiday[];
+  holidays?: HolidayDTO[];
 
 
 
-  @ApiPropertyOptional({ type: [WorkingHours], description: 'Working hours of the clinic' })
+  @ApiPropertyOptional({ type: [WorkingHoursDTO], description: 'Working hours of the clinic  (اذا مافي مجمع)' })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => WorkingHours)
+  @Type(() => WorkingHoursDTO)
   @IsOptional()
-  WorkingHours?: WorkingHours[];
+  WorkingHours?: WorkingHoursDTO[];
 
-  @ApiPropertyOptional({ type: [BankAccount], description: 'Bank accounts of the clinic' })
+  @ApiPropertyOptional({ type: [BankAccountDTO], description: 'Bank accounts of the clinic (اذا مافي شركة)' })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => BankAccount)
+  @Type(() => BankAccountDTO)
   @IsOptional()
-  bankAccount?: BankAccount[];
+  bankAccount?: BankAccountDTO[];
 
-      @ApiPropertyOptional({ type: [CashBox], description: 'Company cash boxes', required: false })
+      @ApiPropertyOptional({ type: [CashBoxDTO], description: 'Company cash boxes (اذا مافي شركة)', required: false })
       @IsArray()
       @ValidateNested({ each: true })
-      @Type(() => CashBox)
+      @Type(() => CashBoxDTO)
       @IsOptional()
-      cashBoxes?: CashBox[];
+      cashBoxes?: CashBoxDTO[];
 
-    @ApiPropertyOptional({ type: [OnlinePaymentMethod], description: 'Accepted online payment methods', required: false })
+    @ApiPropertyOptional({ type: [OnlinePaymentMethodDTO], description: 'Accepted online payment methods (اذا مافي شركة)', required: false })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => OnlinePaymentMethod)
+    @Type(() => OnlinePaymentMethodDTO)
     @IsOptional()
-    onlinePaymentMethods?: OnlinePaymentMethod[];
+    onlinePaymentMethods?: OnlinePaymentMethodDTO[];
 
-  @ApiPropertyOptional({ type: [InsuranceCompany], description: 'Accepted insurance companies' })
+  @ApiPropertyOptional({ type: [InsuranceCompanyDTO], description: 'Accepted insurance companies (اذا مافي شركة)' })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => InsuranceCompany)
+  @Type(() => InsuranceCompanyDTO)
   @IsOptional()
-  insuranceCompany?: InsuranceCompany[];
+  insuranceCompany?: InsuranceCompanyDTO[];
 
-  @ApiPropertyOptional({ type: CommercialRecord, description: 'Commercial record of the clinic' })
+  @ApiPropertyOptional({ type: CommercialRecordDTO, description: 'Commercial record of the clinic  (اذا مافي شركة)' })
   @IsOptional()
   @ValidateNested()
-  @Type(() => CommercialRecord)
-  commercialRecord?: CommercialRecord;
+  @Type(() => CommercialRecordDTO)
+  commercialRecord?: CommercialRecordDTO;
 
-  @ApiPropertyOptional({ description: 'Google Maps location coordinates', example: { x: 24.7136, y: 46.6753 } })
+  @ApiPropertyOptional({ description: 'Google Maps location coordinates  (اذا مافي شركة)', example: { x: 24.7136, y: 46.6753 } })
   @IsOptional()
   @IsObject()
   locationGoogl?: { x: number; y: number };
@@ -142,8 +132,6 @@ export class CreateClinicDto {
   @IsOptional()
   @IsMongoId()
   departmentId?: Types.ObjectId;
-
-
 
   @ApiProperty({
     description: 'List of specialization IDs associated with the clinic ',

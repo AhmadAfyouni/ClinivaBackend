@@ -13,9 +13,9 @@ import {
     ValidateNested
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ContactInfo, WorkingHours, Vacation, BreakTime } from '../../../common/utlis/helper';
 import { Types } from 'mongoose';
 import { Certificate } from 'crypto';
+import { BreakTimeDTO, ContactInfoDTO, VacationDTO, WorkingHoursDTO } from 'src/common/utlis/helper.dto';
 
 
 
@@ -26,19 +26,16 @@ export class CreateEmployeeDto {
     name: string;
 
     @ApiProperty({
-        type: [ContactInfo],
+        type: [ContactInfoDTO],
         description: 'List of contact information',
         required: false,
-        example: [
-            { type: 'phone', value: '+966501234567', isPublic: true, subType: 'work' },
-            { type: 'email', value: 'johndoe@hospital.com', isPublic: true, subType: 'corporate' }
-        ]
+      
     })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => ContactInfo)
+    @Type(() => ContactInfoDTO)
     @IsOptional()
-    contactInfos?: ContactInfo[];
+    contactInfos?: ContactInfoDTO[];
 
     @ApiProperty({ description: 'Date of Birth', example: '1985-06-15', required: true })
     @IsDate()
@@ -143,34 +140,26 @@ export class CreateEmployeeDto {
     Languages?: string[];
 
     @ApiProperty({
-        type: [WorkingHours],
+        type: [WorkingHoursDTO],
         description: 'Working hours',
         required: true,
-        example: [
-            { day: 'Monday', startTime: '08:00 AM', endTime: '04:00 PM' },
-            { day: 'Wednesday', startTime: '08:00 AM', endTime: '04:00 PM'  }
-        ]
     })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => WorkingHours)
-    workingHours: WorkingHours[];
+    @Type(() => WorkingHoursDTO)
+    workingHours: WorkingHoursDTO[];
 
 
 
     @ApiProperty({ 
-        type: [Vacation], 
+        type: [VacationDTO], 
         description: 'List of leaves', 
         required: true,
-        example: [
-          { leaveStartDate: '2025-03-20', leaveEndDate: '2025-03-25', leaveType: 'Sick Leave', status: 'Pending' },
-          { leaveStartDate: '2025-04-10', leaveEndDate: '2025-04-15', leaveType: 'Vacation', status: 'Approved' }
-        ]
       })
       @IsArray()
       @ValidateNested({ each: true })
-      @Type(() => Vacation)
-      vacationRecords: Vacation[];
+      @Type(() => VacationDTO)
+      vacationRecords: VacationDTO[];
 
     // @ApiProperty({
     //     description: 'Evaluation score (1-10)',
@@ -213,12 +202,12 @@ export class CreateEmployeeDto {
     @IsNotEmpty()
     jobType: string;
 
-    @ApiProperty({ type: [BreakTime], description: 'Break Times', required: false })
+    @ApiProperty({ type: [BreakTimeDTO], description: 'Break Times', required: false })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => BreakTime)
+    @Type(() => BreakTimeDTO)
     @IsOptional()
-    breakTimes?: BreakTime[];
+    breakTimes?: BreakTimeDTO[];
 
     @ApiProperty({
         description: 'Employee activation status',

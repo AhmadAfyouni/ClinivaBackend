@@ -61,8 +61,8 @@ export class CreateAppointmentDto {
 
  
     @ApiProperty({
-        description: 'سبب إلغاء الحجز',
-        example: 'المريض غير قادر على الحضور',
+      description: 'Reason for cancellation',
+      example: 'The patient is unable to attend',
         required: false,
       })
       @IsOptional()

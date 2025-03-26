@@ -12,7 +12,7 @@ import {
     ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ContactInfo, Insurance, MedicalTestResult } from '../../../common/utlis/helper';
+import { ContactInfoDTO, InsuranceDTO, MedicalTestResultDTO } from 'src/common/utlis/helper.dto';
 
 export class CreatePatientDto {
   @ApiProperty({ description: 'Patient name', example: 'Jane Doe', required: true })
@@ -23,19 +23,15 @@ export class CreatePatientDto {
 
 
     @ApiProperty({
-        type: [ContactInfo],
+        type: [ContactInfoDTO],
         description: 'List of contact information',
         required: false,
-        example: [
-            { type: 'phone', value: '+966501234567', isPublic: true, subType: 'work' },
-            { type: 'email', value: 'jane.doe@hospital.com', isPublic: true, subType: 'corporate' }
-        ]
     })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => ContactInfo)
+    @Type(() => ContactInfoDTO)
     @IsOptional()
-    contactInfos?: ContactInfo[];
+    contactInfos?: ContactInfoDTO[];
 
     @ApiProperty({ description: 'Date of Birth', example: '1990-05-20', required: true })
     @IsDate()
@@ -161,33 +157,25 @@ export class CreatePatientDto {
     ChronicDiseases?: { disease_name: string }[];
 
     @ApiProperty({
-        type: [Insurance],
+        type: [InsuranceDTO],
         description: 'List of insurance details',
         required: false,
-        example: [
-            {
-                insuranceProvider: 'Bupa Arabia',
-                insuranceNumber: 'INS12345678',
-                coveragePercentage: 80,
-                expiryDate: '2026-05-20',
-                insuranceType: 'private'
-            }
-        ]
+
     })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => Insurance)
+    @Type(() => InsuranceDTO)
     @IsOptional()
-    insurances?: Insurance[];
+    insurances?: InsuranceDTO[];
 
-    @ApiProperty({ type: [MedicalTestResult], description: 'List of medical test results', required: false })
+    @ApiProperty({ type: [MedicalTestResultDTO], description: 'List of medical test results', required: false })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => MedicalTestResult)
+    @Type(() => MedicalTestResultDTO)
     @IsOptional()
-    medicalTestResults?: MedicalTestResult[];
+    medicalTestResults?: MedicalTestResultDTO[];
 
-    @ApiProperty({ description: 'Allergies list', type: [String], required: false })
+    @ApiProperty({ description: 'Allergies list',example: 'Peanuts', type: [String], required: false })
     @IsArray()
     @IsOptional()
     allergies?: string[];
@@ -202,7 +190,12 @@ export class CreatePatientDto {
     @IsOptional()
     lifestyleFactors?: string;
 
-    @ApiProperty({ description: 'Family Medical History', type: [String], required: false })
+    @ApiProperty({ description: 'Family Medical History',  example: [
+        'Diabetes',
+        'Hypertension',
+        'Heart Disease',
+        'Cancer',
+      ], type: [String], required: false })
     @IsArray()
     @IsOptional()
     familyMedicalHistory?: string[];

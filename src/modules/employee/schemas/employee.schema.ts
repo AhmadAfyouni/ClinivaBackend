@@ -1,8 +1,6 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {Document, Types} from 'mongoose';
-import {ContactInfo, WorkingHours,Vacation, BreakTime} from "../../../common/utlis/helper";
-import { Certificate } from 'crypto';
-
+import {ContactInfo,Certificate, WorkingHours,Vacation, BreakTime} from "../../../common/utlis/helper";
 export type EmployeeDocument = Employee & Document;
 
 @Schema({ timestamps: true })

@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 import {
     IsArray,
     IsBoolean,
@@ -8,10 +9,11 @@ import {
     IsNotEmpty,
     IsOptional,
     IsString,
-    MinLength
+    MinLength,
+    ValidateNested
 } from 'class-validator';
 import { Types } from 'mongoose';
-import { ActivityLog, LoginHistory } from 'src/common/utlis/helper';
+import { ActivityLogDTO, LoginHistoryDTO } from 'src/common/utlis/helper.dto';
 
 export class CreateUserDto {
   @ApiProperty({ description: 'User name', example: 'John Doe', required: true })
@@ -74,26 +76,30 @@ export class CreateUserDto {
     @IsDate()
     @IsOptional()
     lastPasswordUpdate?: Date;
-       
-    @ApiProperty({
-        type: [ActivityLog],
-        description: 'Activity log of the user',
-        example: [{ activityDate: '2025-03-01T12:00:00Z', description: 'User logged in' }],
-        required: false
-    })
-    @IsArray()
-    @IsOptional()
-    activityLog?: ActivityLog[];
 
     @ApiProperty({
-        type: [LoginHistory],
+        type: [ActivityLogDTO],  // استخدام ActivityLogDTO هنا
+        description: 'List of activity logs for the employee',
+        required: false,
+      })
+      @IsArray()
+      @ValidateNested({ each: true })
+      @Type(() => ActivityLogDTO)
+      @IsOptional()  // يجعل الخاصية اختيارية
+      activityLogs?: ActivityLogDTO[];  // استخدام ActivityLogDTO كمصفوفة
+    
+    
+    @ApiProperty({
+        type: [LoginHistoryDTO],
         description: 'Login history of the user with IP address and device',
-        example: [LoginHistory],
         required: false
     })
     @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => LoginHistoryDTO)
     @IsOptional()
-    loginHistory?: { loginDate: Date; ipAddress: string; device: string }[];
+    loginHistory?: LoginHistoryDTO[];
+
 
 
 }

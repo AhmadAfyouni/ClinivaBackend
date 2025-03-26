@@ -2,16 +2,6 @@ import { Prop } from '@nestjs/mongoose';
 
 
 
-export class WorkingHours {
-  @Prop({ required: true, enum: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] })
-  day: string; // اليوم
-
-  @Prop({ required: true })
-  startTime: string; // وقت بدء العمل (مثال: "04:00 PM")
-
-  @Prop({ required: true })
-  endTime: string; // وقت انتهاء العمل (مثال: "08:00 PM")
-}
 
 export enum DayOfWeek {
   Monday = 'Monday',
@@ -21,6 +11,17 @@ export enum DayOfWeek {
   Friday = 'Friday',
   Saturday = 'Saturday',
   Sunday = 'Sunday',
+}
+
+export class WorkingHours {
+  @Prop({ required: true, enum: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] })
+  day: string; // اليوم
+
+  @Prop({ required: true })
+  startTime: string; // وقت بدء العمل (مثال: "04:00 PM")
+
+  @Prop({ required: true })
+  endTime: string; // وقت انتهاء العمل (مثال: "08:00 PM")
 }
 
 export class InsuranceCompany {
@@ -111,6 +112,12 @@ export class CashBox {
     @Prop({ type: [{ date: Date, amount: Number, description: String }], default: [] })
     transactionHistory: { date: Date; amount: number; description: string }[]; // سجل المعاملات
 }
+
+
+
+
+
+
 
 export class OnlinePaymentMethod {
     @Prop({ required: true })
@@ -226,6 +233,9 @@ export class Insurance {
 }
 
 
+
+
+
 export class WorkingDays {
   @Prop({
     required: true,
@@ -274,12 +284,12 @@ export class Medication {
 
   export class MedicalTestResult {
   
-    @Prop({ required: true, type: String })
+ /*   @Prop({ required: true, type: String })
     fileType: string; // نوع الملف (PDF، JPEG، DICOM)
-  
+  */
     @Prop({ required: true, type: String })
     filePath: string; // مسار الملف المحمل في النظام
-  
+  /*
     @Prop({ required: true, type: String })
     testType: string; // نوع الفحص (مثل فحص دم، فحص أشعة، إلخ)
   
@@ -288,6 +298,7 @@ export class Medication {
   
     @Prop({ required: true, type: String })
     labName: string; // اسم المختبر
+    */
   }
 
 

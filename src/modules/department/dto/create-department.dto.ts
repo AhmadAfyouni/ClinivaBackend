@@ -11,8 +11,8 @@ import {
     ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ContactInfo } from '../../../common/utlis/helper';
 import { Types } from 'mongoose';
+import { ContactInfoDTO } from 'src/common/utlis/helper.dto';
 
 export class CreateDepartmentDto {
   @ApiProperty({ description: 'Department name', example: 'Cardiology Department', required: true })
@@ -24,19 +24,19 @@ export class CreateDepartmentDto {
     description: 'Department description',
     example: 'This department focuses on cardiology and heart-related treatments.',
     required: false,
-})
-@IsOptional()
-@IsString()
-description?: string;
-
-  @ApiProperty({
-    description: 'Brief overview of the department',
-    example: 'Specialized in heart-related treatments and procedures.',
-    required: false,
   })
   @IsOptional()
   @IsString()
-  overview?: string;
+  description?: string;
+
+  // @ApiProperty({
+  //   description: 'Brief overview of the department',
+  //   example: 'Specialized in heart-related treatments and procedures.',
+  //   required: false,
+  // })
+  // @IsOptional()
+  // @IsString()
+  // overview?: string;
 
   @ApiProperty({
     description: 'Department activation status',
@@ -65,7 +65,7 @@ description?: string;
   @IsString()
   @IsNotEmpty()
   address: string;
-
+/*
   @ApiProperty({
     description: 'Department logo URL',
     example: 'https://hospital.com/dept-logo.png',
@@ -92,7 +92,7 @@ description?: string;
   @IsOptional()
   @IsString()
   goals?: string;
-
+*/
 
     @ApiProperty({
         description: 'Patient capacity of the department',
@@ -102,17 +102,17 @@ description?: string;
     @IsOptional()
     @IsNumber()
     patientCapacity?: number;
-
+/*
   @ApiProperty({
       description: 'List of contact information for the department',
-      type: [ContactInfo],
+      type: [ContactInfoDTO],
       required: false,
   })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => ContactInfo)
-  contactInfos?: ContactInfo[];
+  @Type(() => ContactInfoDTO)
+  contactInfos?: ContactInfoDTO[];*/
 
   @ApiProperty({
     description: 'Clinic Collection ID to which the department belongs',

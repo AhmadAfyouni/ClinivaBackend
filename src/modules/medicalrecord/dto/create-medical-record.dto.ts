@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
 import { IsArray, IsDate, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min, ValidateNested } from 'class-validator';
 import { Types } from 'mongoose';
-import { Medication } from 'src/common/utlis/helper';
+import { MedicationDTO } from 'src/common/utlis/helper.dto';
 
 export class CreateMedicalRecordDto {
   @ApiProperty({
@@ -44,18 +44,15 @@ export class CreateMedicalRecordDto {
   diagnosis: string;
 
   @ApiProperty({
-    type: [Medication],
+    type: [MedicationDTO],
     description: 'قائمة الأدوية الموصوفة',
-    required: true,
-    example: [
-      { name: 'Paracetamol', dosage: '500mg' },
-      { name: 'Ibuprofen', dosage: '200mg' },
-    ],
+    required: false,
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => Medication)
-  medications: Medication[];
+  @Type(() => MedicationDTO)
+  @IsOptional()  // يجعل الخاصية اختيارية
+  medications: MedicationDTO[];
   
   @ApiProperty({
     type: [String],

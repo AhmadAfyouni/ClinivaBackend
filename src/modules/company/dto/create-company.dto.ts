@@ -2,17 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsArray, IsDate, IsMongoId, IsNotEmpty, IsObject, IsOptional, IsString, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
-import {
-    BankAccount,
-    CashBox,
-    CommercialRecord,
-    ContactInfo,
-    Holiday,
-    InsuranceCompany,
-    OnlinePaymentMethod,
-    WorkingHours
-} from '../../../common/utlis/helper';
-import { Types } from 'mongoose';
+import { BankAccountDTO, CashBoxDTO, CommercialRecordDTO, ContactInfoDTO, InsuranceCompanyDTO, OnlinePaymentMethodDTO } from 'src/common/utlis/helper.dto';
 
 export class CreateCompanyDto {
     @ApiProperty({ description: 'Company name', example: 'Saudi Health Group', required: true })
@@ -63,20 +53,17 @@ export class CreateCompanyDto {
     goals?: string;
 
     @ApiPropertyOptional({
-        type: [ContactInfo],
+        type: [ContactInfoDTO],
         description: 'Contact information of the company',
-        required: false,
-        example: [
-            { type: 'phone', value: '+966501234567', isPublic: true, subType: 'work' },
-            { type: 'email', value: 'contact@saudihealthgroup.com', isPublic: true, subType: 'corporate' }
-        ]
+        required: true,
+      
     })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => ContactInfo)
+    @Type(() => ContactInfoDTO)
     @IsOptional()
-    contactInfos?: ContactInfo[];
-
+    contactInfos?: ContactInfoDTO[];
+/*
     @ApiPropertyOptional({
         type: [Holiday],
         description: 'Company holidays',
@@ -107,70 +94,52 @@ export class CreateCompanyDto {
     @Type(() => WorkingHours)
     @IsOptional()
     workingDays?: WorkingHours[];
-
+*/
     @ApiPropertyOptional({
-        type: [BankAccount],
-        description: 'Bank accounts associated with the company',
-        required: false,
-        example: [
-            {
-                accountName: 'Main Company Account',
-                swiftCode: 'SA987654321',
-                bankName: 'Al Rajhi Bank',
-                accountNumber: '9876543210'
-            }
-        ]
+        type: [BankAccountDTO],
+        description: 'Bank accounts associated with the company ',
+        required: true,  
     })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => BankAccount)
+    @Type(() => BankAccountDTO)
     @IsOptional()
-    bankAccount?: BankAccount[];
+    bankAccount?: BankAccountDTO[];
 
-    @ApiPropertyOptional({ type: [CashBox], description: 'Company cash boxes', required: false })
+    @ApiPropertyOptional({ type: [CashBoxDTO], description: 'Company cash boxes', required: true })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => CashBox)
+    @Type(() => CashBoxDTO)
     @IsOptional()
-    cashBoxes?: CashBox[];
+    cashBoxes?: CashBoxDTO[];
 
-    @ApiPropertyOptional({ type: [OnlinePaymentMethod], description: 'Accepted online payment methods', required: false })
+    @ApiPropertyOptional({ type: [OnlinePaymentMethodDTO], description: 'Accepted online payment methods', required: true })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => OnlinePaymentMethod)
+    @Type(() => OnlinePaymentMethodDTO)
     @IsOptional()
-    onlinePaymentMethods?: OnlinePaymentMethod[];
+    onlinePaymentMethods?: OnlinePaymentMethodDTO[];
 
     @ApiPropertyOptional({
-        type: [InsuranceCompany],
+        type: [InsuranceCompanyDTO],
         description: 'Accepted insurance companies',
-        required: false,
-        example: [
-            { companyName: 'Bupa Arabia', companyPhone: '+9661122334455', companyEmail: 'support@bupa.com.sa' }
-        ]
+        required: true,
     })
     @IsArray()
     @ValidateNested({ each: true })
-    @Type(() => InsuranceCompany)
+    @Type(() => InsuranceCompanyDTO)
     @IsOptional()
-    insuranceCompany?: InsuranceCompany[];
+    insuranceCompany?: InsuranceCompanyDTO[];
 
     @ApiPropertyOptional({
-        type: CommercialRecord,
+        type: CommercialRecordDTO,
         description: 'Commercial record of the company',
-        required: false,
-        example: {
-            recordNumber: 'CR1234567890',
-            grantDate: '2015-05-10',
-            issueDate: '2015-05-10',
-            expirationDate: '2030-05-10',
-            taxNumber: 'TAX987654321'
-        }
+        required: true,
     })
     @IsOptional()
     @ValidateNested()
-    @Type(() => CommercialRecord)
-    commercialRecord?: CommercialRecord;
+    @Type(() => CommercialRecordDTO)
+    commercialRecord?: CommercialRecordDTO;
 
     @ApiPropertyOptional({
         description: 'Google Maps location coordinates',
