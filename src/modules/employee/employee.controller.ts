@@ -38,7 +38,12 @@ export class EmployeeController {
   }
 
     @Get('count-doctor/by-cliniccollection/:clinicCollectionId')
-    getDepartmentCount(@Param('clinicCollectionId') clinicCollectionId: string) {
+    getDoctorCount(@Param('clinicCollectionId') clinicCollectionId: string) {
       return this.employeeService.getCountDoctorByClinicCollectionId(clinicCollectionId);
+    }
+
+    @Get('count-employee/by-cliniccollection/:clinicCollectionId')
+    getEmployeeCount(@Param('clinicCollectionId') clinicCollectionId: string) {
+      return this.employeeService.getCounetEmployeeByClinicCollectionId(clinicCollectionId);
     }
   }

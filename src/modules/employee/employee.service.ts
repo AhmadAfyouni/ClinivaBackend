@@ -7,6 +7,7 @@ import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { ApiResponse, paginate } from '../../common/utlis/paginate';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
 
+
 @Injectable()
 export class EmployeeService {
   constructor(@InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>) {
@@ -65,4 +66,56 @@ export class EmployeeService {
       message: 'Employee remove successfully',
     };
   }
+  async getCountDoctorByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse< {count: any}>> {
+    
+    const employees = await this.employeeModel
+    .find().select("clinics employeeType").where('employeeType').equals('Doctor')
+    .populate({
+      path: 'clinics',
+      select:"departmentId" ,
+      populate: {
+        path: 'departmentId',
+        select:"clinicCollectionId" ,
+        match: { clinicCollectionId: clinicCollectionId }, },
+    })
+    .exec();
+  
+    const filteredEmployees = employees.filter(emp => emp.clinics?.some(clinic => (clinic as any ).departmentId?.clinicCollectionId))
+    
+    const uniqueEmployeeIds = new Set(
+     filteredEmployees.map(emp => emp._id.toString()) // تحويل _id إلى string لمنع التكرار
+   );
+    return {
+      success: true,
+      message: 'Doctor count in Clinic Collection retrieved successfully',
+      data: { count:uniqueEmployeeIds.size },
+    };
+  }
+
+  async getCounetEmployeeByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse< {count: number}>> {
+    const employees = await this.employeeModel
+    .find().select("clinics employeeType").where('employeeType').ne('Doctor')
+    .populate({
+      path: 'clinics',
+      select:"departmentId" ,
+      populate: {
+        path: 'departmentId',
+        select:"clinicCollectionId" ,
+        match: { clinicCollectionId: clinicCollectionId }, },
+    })
+    .exec();
+  
+    const filteredEmployees = employees.filter(emp => emp.clinics?.some(clinic => (clinic as any ).departmentId?.clinicCollectionId))
+    
+    const uniqueEmployeeIds = new Set(
+     filteredEmployees.map(emp => emp._id.toString()) // 
+   );
+   //يجب اضافة الموظفين الذين يعملون ب قسم ومجمع
+   console.log(uniqueEmployeeIds)
+     return {
+       success: true,
+       message: 'employee count in Clinic Collection retrieved successfully',
+       data: { count:uniqueEmployeeIds.size },
+      };
+   }
 }

@@ -11,7 +11,7 @@ import {
     IsString,
     ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { Types } from 'mongoose';
 import { BankAccountDTO, CashBoxDTO, CommercialRecordDTO, ContactInfoDTO, HolidayDTO, InsuranceCompanyDTO, OnlinePaymentMethodDTO, WorkingHoursDTO } from 'src/common/utlis/helper.dto';
 
@@ -131,6 +131,8 @@ export class CreateClinicDto {
   @ApiPropertyOptional({ description: 'Department ID that the clinic belongs to', example: '60f7c7b84f1a2c001c8b4567' })
   @IsOptional()
   @IsMongoId()
+  @Transform(({ value }) => new Types.ObjectId(value))
+
   departmentId?: Types.ObjectId;
 
   @ApiProperty({

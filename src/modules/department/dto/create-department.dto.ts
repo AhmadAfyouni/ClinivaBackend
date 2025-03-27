@@ -10,7 +10,7 @@ import {
     IsString,
     ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { Types } from 'mongoose';
 import { ContactInfoDTO } from 'src/common/utlis/helper.dto';
 
@@ -120,7 +120,8 @@ export class CreateDepartmentDto {
     required: true,
   })
   @IsMongoId()
-  @IsNotEmpty()
+  @IsNotEmpty() 
+  @Transform(({ value }) => new Types.ObjectId(value))
   clinicCollectionId: Types.ObjectId;
 
   @ApiProperty({

@@ -12,7 +12,7 @@ import {
     IsString,
     ValidateNested
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { Types } from 'mongoose';
 import { Certificate } from 'crypto';
 import { BreakTimeDTO, ContactInfoDTO, VacationDTO, WorkingHoursDTO } from 'src/common/utlis/helper.dto';
@@ -254,6 +254,7 @@ export class CreateEmployeeDto {
       })
       @IsArray()
       @IsMongoId({ each: true })
+      @Transform(({ value }) => value.map((id: string) => new Types.ObjectId(id)))
       @IsOptional()
       clinics?: Types.ObjectId[];
     

@@ -6,11 +6,16 @@ import { UpdateClinicCollectionDto } from './dto/update-clinic-collection.dto';
 import { CreateClinicCollectionDto } from './dto/create-clinic-collection.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ApiResponse, paginate } from 'src/common/utlis/paginate';
+import { DepartmentService } from '../department/department.service';
+import { ClinicService } from '../clinic/clinic.service';
 
 @Injectable()
 export class ClinicCollectionService {
   constructor(
-    @InjectModel(ClinicCollection.name) private clinicCollectionModel: Model<ClinicCollectionDocument>) {
+    @InjectModel(ClinicCollection.name) private clinicCollectionModel: Model<ClinicCollectionDocument>,
+    private readonly departmentService: DepartmentService,
+    private readonly clinicService: ClinicService,
+  ) {
   }
 
     async createClinicCollection(createClinicCollectionDto: CreateClinicCollectionDto): Promise<ApiResponse<ClinicCollection>> {
@@ -31,17 +36,46 @@ export class ClinicCollectionService {
 
     const sortField: string = sortBy ?? 'createdAt';
     const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
-
+   /* const clinicCollections = await this.clinicCollectionModel
+    .find()
+    .populate(['companyId', 'specializations'])
+    .exec();
+  if (!clinicCollections || clinicCollections.length === 0) {
+    throw new NotFoundException('No clinic collections found');
+  }
+     const results = [];
+   for (const clinicCollection of clinicCollections) {
+      const depCount = await this.departmentService.getCountByClinicCollectionId(clinicCollection._id.toString())
+      const clinicCount = await this.clinicService.getCountByClinicCollectionId(clinicCollection._id.toString());
+      const result = {
+        ...clinicCollection.toObject(),
+        countDepartment: depCount?.data?.count ?? 0,
+        countclinic: clinicCount?.data?.count ?? 0
+      };
+      results.push(result);
+    }
+*/
     return paginate(this.clinicCollectionModel, ['companyId',"specializations"], page, limit, allData, filters, sort);
   }
 
   async getClinicCollectionById(id: string): Promise<any> {
     const clinicCollection = await this.clinicCollectionModel.findById(id).populate(['companyId',"specializations"]).exec();
     if (!clinicCollection) throw new NotFoundException('Clinic Collection not found');
+    
+    const depCount=await this.departmentService.getCountByClinicCollectionId(id)
+    const clinicCount=await this.clinicService.getCountByClinicCollectionId(id)
+    
+  
+    const result = {
+      ...clinicCollection.toObject(),
+      countDepartment: depCount?.data?.count ?? 0,
+      countclinic: clinicCount?.data?.count ?? 0
+    };
+  
     return {
       success: true,
       message: 'clinic Collection retrieved successfully',
-      data: clinicCollection,
+      data: result,
     };
   }
 

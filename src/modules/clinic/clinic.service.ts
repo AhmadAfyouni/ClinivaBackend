@@ -63,7 +63,7 @@ export class ClinicService {
       message: 'Clinic remove successfully',
     };
   }
-  async getCountByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse< {count: number}>> {
+  async getCountByClinicCollectionId(clinicCollectionId: string): Promise<any> {
     const clinics = await this.clinicModel.find().populate({path:'departmentId',select:"clinicCollectionId", match: { clinicCollectionId: clinicCollectionId },}).lean();
     const count = clinics.filter(clinic => clinic.departmentId !== null).length;
 

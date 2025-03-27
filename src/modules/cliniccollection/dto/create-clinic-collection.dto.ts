@@ -11,7 +11,7 @@ import {
   IsString,
   ValidateNested,
 } from 'class-validator';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { Types } from 'mongoose';
 
 import {
@@ -212,6 +212,7 @@ export class CreateClinicCollectionDto {
   })
   @IsOptional()
   @IsMongoId()
+  @Transform(({ value }) => new Types.ObjectId(value))
   companyId?: Types.ObjectId;
 
   @ApiProperty({

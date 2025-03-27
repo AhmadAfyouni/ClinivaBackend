@@ -64,7 +64,7 @@ export class DepartmentService {
     };
   }
 
-  async getCountByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse<{ count: number }>> {
+  async getCountByClinicCollectionId(clinicCollectionId: string): Promise<any> {
     const count = await this.departmentModel.countDocuments({ clinicCollectionId }).exec();
 
     return {
