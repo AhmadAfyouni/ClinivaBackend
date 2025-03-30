@@ -45,7 +45,7 @@ export class CreateMedicalRecordDto {
 
   @ApiProperty({
     type: [MedicationDTO],
-    description: 'قائمة الأدوية الموصوفة',
+    description: 'Prescribed Medication List',
     required: false,
   })
   @IsArray()
@@ -64,15 +64,24 @@ export class CreateMedicalRecordDto {
   @IsOptional()
   labTests?: string[];
 
-    // @ApiProperty({
-    //     description: 'Record status',
-    //     enum: ['draft', 'finalized'],
-    //     example: 'draft',
-    //     required: false
-    // })
-    // @IsEnum(['draft', 'finalized'])
-    // @IsOptional()
-    // recordStatus?: string;
+  @ApiProperty({
+    description: 'Treatment status (ongoing, completed, referred)',
+    enum: ['ongoing', 'completed', 'referred'],
+    example: 'ongoing',
+    required: true,
+  })
+  @IsEnum(['ongoing', 'completed', 'referred'])
+  @IsNotEmpty()
+  treatmentStatus: string;
+
+  @ApiProperty({
+    description: 'Additional notes regarding the treatment',
+    example: 'The patient is responding well to medication',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  notes?: string;
 
     // @ApiProperty({
     //      description: 'Patient rating for the doctor (1-5)',
@@ -105,7 +114,7 @@ export class CreateMedicalRecordDto {
       severityLevel: string;
 
       @ApiProperty({
-        description: 'Start time of the appointment',
+        description: 'Start time of the Visit',
         example: '2025-03-24T08:00:00.000Z',
         required: false
     })
@@ -114,7 +123,7 @@ export class CreateMedicalRecordDto {
     startTime?: Date;
 
     @ApiProperty({
-        description: 'End time of the appointment',
+        description: 'End time of the Visit',
         example: '2025-03-24T09:00:00.000Z',
         required: false
     })
@@ -131,13 +140,5 @@ export class CreateMedicalRecordDto {
   @IsDate()
   nextAppointmentDate?: Date;
 
-  @ApiProperty({
-    description: 'Type of visit',
-    enum: ['routine check-up', 'follow-up', 'emergency', 'consultation', 'treatment'],
-    example: 'follow-up',
-    required: true
-  })
-  @IsEnum(['routine check-up', 'follow-up', 'emergency', 'consultation', 'treatment'])
-  @IsNotEmpty()
-  visitType: string;
+
 }

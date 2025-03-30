@@ -56,16 +56,55 @@ export class CreateAppointmentDto {
     required: false,
   })
   @IsOptional()
-  @IsEnum(['scheduled', 'completed', 'cancelled'])
+  @IsEnum(['scheduled', 'completed', 'cancelled','Rescheduled'])
   status?: string;
 
  
+  @ApiProperty({
+    description: 'Reason for cancellation',
+    example: 'The patient is unable to attend',
+      required: false,
+    })
+    @IsOptional()
+    @IsString()
+    cancellationReason?: string;  // سبب إلغاء الحجز
+
     @ApiProperty({
-      description: 'Reason for cancellation',
-      example: 'The patient is unable to attend',
-        required: false,
-      })
-      @IsOptional()
-      @IsString()
-      cancellationReason?: string;  // سبب إلغاء الحجز
-}
+      description: 'Cancellation date of the appointment or treatment',
+      example: '2025-04-01T10:30:00.000Z',
+      required: false,
+    })
+    @IsDate()
+    @IsNotEmpty()
+    cancellationDate: Date;
+
+    @ApiProperty({
+      description: 'Type of appointment (examination, follow-up, consultation, session, general checkup, monitoring)',
+      enum: ['examination', 'follow-up', 'consultation', 'session', 'general checkup', 'monitoring'],
+      example: 'consultation',
+      required: true,
+    })
+    @IsEnum(['examination', 'follow-up', 'consultation', 'session', 'general checkup', 'monitoring'])
+    @IsNotEmpty()
+    appointmentType: string;
+  
+    @ApiProperty({
+      description: 'Priority level (routine, urgent, emergency)',
+      enum: ['routine', 'urgent', 'emergency'],
+      example: 'urgent',
+      required: true,
+    })
+    @IsEnum(['routine', 'urgent', 'emergency'])
+    @IsNotEmpty()
+    priorityLevel: string;
+  
+    @ApiProperty({
+      description: 'Additional notes regarding the appointment',
+      example: 'The patient has high blood pressure and needs monitoring',
+      required: false,
+    })
+    @IsOptional()
+    @IsString()
+    notes?: string;
+
+  }

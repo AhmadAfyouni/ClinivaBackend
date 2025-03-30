@@ -12,7 +12,7 @@ import {
     ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ContactInfoDTO, InsuranceDTO, MedicalTestResultDTO } from 'src/common/utlis/helper.dto';
+import { ContactInfoDTO, InsuranceDTO, MedicalTestResultDTO, StatusEntryDTO } from 'src/common/utlis/helper.dto';
 
 export class CreatePatientDto {
   @ApiProperty({ description: 'Patient name', example: 'Jane Doe', required: true })
@@ -199,5 +199,17 @@ export class CreatePatientDto {
     @IsArray()
     @IsOptional()
     familyMedicalHistory?: string[];
+    
+    
+    @ApiProperty({
+      type: [StatusEntryDTO],
+      description: 'History of status changes',
+      required: true,
+    })
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => StatusEntryDTO)
+    statusHistory: StatusEntryDTO[];
+      
 
 }

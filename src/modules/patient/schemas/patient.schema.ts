@@ -1,6 +1,6 @@
 import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
 import {Document, Types} from 'mongoose';
-import {ContactInfo, Insurance, MedicalTestResult} from "../../../common/utlis/helper";
+import {ContactInfo, Insurance, MedicalTestResult,StatusEntry} from "../../../common/utlis/helper";
 
 
 export type PatientDocument = Patient & Document;
@@ -106,7 +106,8 @@ export class Patient {
       })
       familyMedicalHistory: string[]; // قائمة بالأمراض الوراثية في العائلة
     
-
+      @Prop({ type: [StatusEntry], default: [] })
+      statusHistory: StatusEntry[];
 
 }
 

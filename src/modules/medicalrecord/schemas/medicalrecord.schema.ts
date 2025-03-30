@@ -15,7 +15,7 @@ export class MedicalRecord {
   diagnosis: string;  // التشخيص الطبي
 
   @Prop()
-  Symptoms?: string;  //  الاعراض
+  symptoms?: string;  //  الاعراض
 
   @Prop()
   treatmentPlan?: string;  //  خطة العلاج
@@ -23,9 +23,11 @@ export class MedicalRecord {
   @Prop({ type: [Medication], default: [] })
   medications: Medication[]; // قائمة الأدوية مع الجرعة
 
-//     @Prop({enum: ['draft', 'finalized'], default: 'draft'})
-//     recordStatus: string;  // حالة السجل (مسودة أو نهائي)
+  @Prop({ type: String, enum: ['ongoing', 'completed', 'referred'], required: true })
+  treatmentStatus: string;  // حالة العلاج (جاري، مكتمل، محوّل)
 
+  @Prop({ type: String, default: '' })
+  notes?: string;  // ملاحظات إضافية حول العلاج
     
     // @Prop({type: Number, min: 1, max: 5})
     // patientRating?: number;  // تقييم المريض للطبيب (1-5 نجوم)
@@ -50,20 +52,14 @@ export class MedicalRecord {
     @Prop({ type: Date, required: false })
     nextAppointmentDate?: Date;
 
-    @Prop({
-        type: String,
-        enum: ['routine check-up', 'follow-up', 'emergency', 'consultation', 'treatment'],
-        required: true,
-    })
-    visitType: string;
+
+
   @Prop({ type: [String], default: [] })
   labTests: string[];  // التحاليل المطلوبة
 
-  @Prop({ default: '' })
-  notes?: string;  // ملاحظات إضافية من الطبيب
+  // @Prop({ default: '' })
+  // notes?: string;  // ملاحظات إضافية من الطبيب
 
-  @Prop({ enum: ['draft', 'finalized'], default: 'draft' })
-  recordStatus: string;  // حالة السجل (مسودة أو نهائي)
-}
+  }
 
 export const MedicalRecordSchema = SchemaFactory.createForClass(MedicalRecord);

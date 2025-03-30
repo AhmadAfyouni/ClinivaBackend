@@ -18,10 +18,10 @@ export class WorkingHours {
   day: string; // اليوم
 
   @Prop({ required: true })
-  startTime: string; // وقت بدء العمل (مثال: "04:00 PM")
+  startTime:Date; // وقت بدء العمل (مثال: "04:00 PM")
 
   @Prop({ required: true })
-  endTime: string; // وقت انتهاء العمل (مثال: "08:00 PM")
+  endTime: Date; // وقت انتهاء العمل (مثال: "08:00 PM")
 }
 
 export class InsuranceCompany {
@@ -284,12 +284,12 @@ export class Medication {
 
   export class MedicalTestResult {
   
- /*   @Prop({ required: true, type: String })
+  @Prop({ required: false, type: String })
     fileType: string; // نوع الملف (PDF، JPEG، DICOM)
-  */
+  
     @Prop({ required: true, type: String })
     filePath: string; // مسار الملف المحمل في النظام
-  /*
+  
     @Prop({ required: true, type: String })
     testType: string; // نوع الفحص (مثل فحص دم، فحص أشعة، إلخ)
   
@@ -298,7 +298,7 @@ export class Medication {
   
     @Prop({ required: true, type: String })
     labName: string; // اسم المختبر
-    */
+  
   }
 
 
@@ -340,4 +340,12 @@ export class LoginHistory {
 
     @Prop({ type: String, required: true })
     device: string;
+}
+
+export class StatusEntry {
+  @Prop({ type: String, enum: ['active', 'inactive'], required: true })
+  status: string;
+
+  @Prop({ type: Date, default: Date.now })
+  changedAt: Date;
 }

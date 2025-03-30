@@ -21,12 +21,25 @@ export class Appointment {
 
     @Prop()
     reason: string;
-
-    @Prop({enum: ['scheduled', 'completed', 'cancelled'], default: 'scheduled'})
+   
+    @Prop({enum: ['scheduled', 'completed', 'cancelled','Rescheduled'], default: 'scheduled'})
     status: string;
  
     @Prop()
     cancellationReason?: string; // سبب الإلغاء في حالة كان status = 'cancelled'
+  
+  @Prop({ type: Date })
+  cancellationDate: Date;  // تاريخ الإلغاء
+  
+    @Prop({ type: String, enum: ['examination', 'follow-up', 'consultation', 'session', 'general checkup', 'monitoring'], required: true })
+  appointmentType: string;  // نوع الموعد
+
+  @Prop({ type: String, enum: ['routine', 'urgent', 'emergency'], required: true })
+  priorityLevel: string;  // مستوى الأهمية
+
+  @Prop({ type: String, default: '' })
+  notes?: string;  // ملاحظات إضافية
+
   
 }
 
