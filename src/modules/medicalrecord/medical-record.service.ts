@@ -63,4 +63,20 @@ export class MedicalRecordService {
       message: 'Medical Record remove successfully',
     };
   }
+
+  async getMedicalRecordByPatientId (patientId: string): Promise<ApiResponse<MedicalRecord[]>> {
+    const medicalRecords = await this.medicalRecordModel.find({})
+      .populate({
+        path: 'appointment',
+        match: { patient: patientId },  
+      })
+      .exec();
+  
+    const filteredMedicalRecords = medicalRecords.filter(record => record.appointment);
+    return {
+      success: true,
+      message: 'Patient by medical record retrieved successfully',
+      data: filteredMedicalRecords,
+    };
+  }
 }

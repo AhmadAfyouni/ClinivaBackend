@@ -74,4 +74,57 @@ export class ClinicService {
       data: { count },
     };
   }
+ 
+  async getClinicsByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse<Clinic[]>> {
+    const clinics = await this.clinicModel.find()
+      .populate({
+        path: 'departmentId',
+        select: 'clinicCollectionId',
+        match: { clinicCollectionId: clinicCollectionId },
+      })
+      .lean();
+  
+    const filteredClinics = clinics.filter(clinic => clinic.departmentId !== null);
+  
+    return {
+      success: true,
+      message: 'clinics in Clinic Collection retrieved successfully',
+      data: filteredClinics,
+    };
+  }
+  
+
+  async getCountByDepartmentId(departmentId: string): Promise<ApiResponse<{ count: number }>> {
+    const count = await this.clinicModel.countDocuments({ departmentId });
+  
+    return {
+      success: true,
+      message: 'clinic count in Department retrieved successfully',
+      data: { count },
+    };
+  }
+
+  async getClinicsBySpecializationId(specializationId: string): Promise<ApiResponse<Clinic[]>> {
+    const clinics = await this.clinicModel.find({
+      specializations: specializationId,  // يبحث تلقائياً داخل المصفوفة
+    }).lean();
+  
+    return {
+      success: true,
+      message: 'Clinics in Specialization retrieved successfully',
+      data: clinics,
+    };
+  }
+
+//get all 
+  async getClinicsByDepartmentId(departmentId: string): Promise<ApiResponse<Clinic[]>> {
+    const clinics = await this.clinicModel.find({ departmentId }).lean();
+  
+    return {
+      success: true,
+      message: 'clinics in Department retrieved successfully',
+      data: clinics,
+    };
+  }
+  
 }

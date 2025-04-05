@@ -37,7 +37,28 @@ export class ClinicController {
   }
 
     @Get('count/by-cliniccollection/:clinicCollectionId')
-    getDepartmentCount(@Param('clinicCollectionId') clinicCollectionId: string) {
+    getClinicsCount(@Param('clinicCollectionId') clinicCollectionId: string) {
       return this.clinicService.getCountByClinicCollectionId(clinicCollectionId);
     }
+
+    
+  @Get('by-collection/:clinicCollectionId')
+  async getClinicsByClinicCollectionId(@Param('clinicCollectionId') clinicCollectionId: string) {
+    return this.clinicService.getClinicsByClinicCollectionId(clinicCollectionId);
+  }
+
+  @Get('count-by-department/:departmentId')
+  async getCountByDepartmentId(@Param('departmentId') departmentId: string) {
+    return this.clinicService.getCountByDepartmentId(departmentId);
+  }
+
+  @Get('by-specialization/:specializationId')
+  async getClinicsBySpecializationId(@Param('specializationId') specializationId: string) {
+    return this.clinicService.getClinicsBySpecializationId(specializationId);
+  }
+
+  @Get('by-department/:departmentId')
+  async getClinicsByDepartmentId(@Param('departmentId') departmentId: string) {
+    return this.clinicService.getClinicsByDepartmentId(departmentId);
+  }
 }

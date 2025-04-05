@@ -73,5 +73,18 @@ export class DepartmentService {
       data: { count },
     };
   }
-
+/*
+ممكن استخدام get all
+  async getDepartmentsByClinicCollection(clinicCollectionId: string): Promise<ApiResponse<Department[]>> {
+    const departments = await this.departmentModel
+      .find({ clinicCollectionId })
+      .exec();
+  
+    return {
+      success: true,
+      message: 'Departments in Clinic Collection retrieved successfully',
+      data: departments,
+    };
+  }
+*/
 }

@@ -66,33 +66,188 @@ export class EmployeeService {
       message: 'Employee remove successfully',
     };
   }
-  async getCountDoctorByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse< {count: any}>> {
-    
-    const employees = await this.employeeModel
-    .find().select("clinics employeeType").where('employeeType').equals('Doctor')
-    .populate({
-      path: 'clinics',
-      select:"departmentId" ,
-      populate: {
+  async getCounetEmployeeByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse<{ count: number }>> {
+
+    const employees = await this.employeeModel.find({ employeeType: { $ne: 'Doctor' } })
+      .populate({
+        path: 'clinics',
+        select: 'departmentId',
+        populate: {
+          path: 'departmentId',
+          select: 'clinicCollectionId',
+        },
+      })
+      .populate({
         path: 'departmentId',
-        select:"clinicCollectionId" ,
-        match: { clinicCollectionId: clinicCollectionId }, },
-    })
-    .exec();
+        select: 'clinicCollectionId',
+      })
+      .exec();
   
-    const filteredEmployees = employees.filter(emp => emp.clinics?.some(clinic => (clinic as any ).departmentId?.clinicCollectionId))
-    
-    const uniqueEmployeeIds = new Set(
-     filteredEmployees.map(emp => emp._id.toString()) // تحويل _id إلى string لمنع التكرار
-   );
+    const filteredEmployees = employees.filter(emp => {
+  
+      const hasClinicInCollection = emp.clinics?.some(clinic =>
+        (clinic as any)?.departmentId?.clinicCollectionId?.toString() === clinicCollectionId
+      );
+  
+      const hasDepartmentInCollection = (emp.departmentId as any)?.clinicCollectionId?.toString() === clinicCollectionId;
+  
+      const hasDirectCollection = emp.clinicCollectionId?.toString() === clinicCollectionId;
+  
+      return hasClinicInCollection || hasDepartmentInCollection || hasDirectCollection;
+    });
+  
+    const uniqueEmployeeIds = new Set(filteredEmployees.map(emp => emp._id.toString()));
+  
+    return {
+      success: true,
+      message: 'Employee count in Clinic Collection retrieved successfully',
+      data: { count: uniqueEmployeeIds.size },
+    };
+  }
+  
+
+  async getCountDoctorByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse<{ count: number }>> {
+  
+    const employees = await this.employeeModel.find({ employeeType: 'Doctor' })
+      .populate({
+        path: 'clinics',
+        select: 'departmentId',
+        populate: {
+          path: 'departmentId',
+          select: 'clinicCollectionId',
+        },
+      })
+      .populate({
+        path: 'departmentId',
+        select: 'clinicCollectionId',
+      })
+      .exec();
+  
+    const filteredEmployees = employees.filter(emp => {
+      
+      const hasClinicInCollection = emp.clinics?.some(clinic =>
+        (clinic as any )?.departmentId?.clinicCollectionId?.toString() === clinicCollectionId
+      );
+  
+      const hasDepartmentInCollection = (emp.departmentId as any )?.clinicCollectionId?.toString() === clinicCollectionId;
+  
+      const hasDirectCollection = emp.clinicCollectionId?.toString() === clinicCollectionId;
+  
+      return hasClinicInCollection || hasDepartmentInCollection || hasDirectCollection;
+    });
+  
+    const uniqueEmployeeIds = new Set(filteredEmployees.map(emp => emp._id.toString()));
+  
     return {
       success: true,
       message: 'Doctor count in Clinic Collection retrieved successfully',
-      data: { count:uniqueEmployeeIds.size },
+      data: { count: uniqueEmployeeIds.size },
     };
   }
+  
+  async getEmployeesWithoutDoctorByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse<{ employees: Employee[] }>> {
 
-  async getCounetEmployeeByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse< {count: number}>> {
+    const employees = await this.employeeModel.find({ employeeType: { $ne: 'Doctor' } })
+      .populate({
+        path: 'clinics',
+        select: 'departmentId',
+        populate: {
+          path: 'departmentId',
+          select: 'clinicCollectionId',
+        },
+      })
+      .populate({
+        path: 'departmentId',
+        select: 'clinicCollectionId',
+      })
+      .exec();
+  
+    const filteredEmployees = employees.filter(emp => {
+  
+      const hasClinicInCollection = emp.clinics?.some(clinic =>
+        (clinic as any)?.departmentId?.clinicCollectionId?.toString() === clinicCollectionId
+      );
+  
+      const hasDepartmentInCollection = (emp.departmentId as any)?.clinicCollectionId?.toString() === clinicCollectionId;
+  
+      const hasDirectCollection = emp.clinicCollectionId?.toString() === clinicCollectionId;
+  
+      return hasClinicInCollection || hasDepartmentInCollection || hasDirectCollection;
+    });
+  
+    return {
+      success: true,
+      message: 'Employees (excluding doctors) retrieved successfully',
+      data: { employees: filteredEmployees },
+    };
+  }
+  
+  async getDoctorsByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse<{ doctors: Employee[] }>> {
+
+    const doctors = await this.employeeModel.find({ employeeType: 'Doctor' })
+      .populate({
+        path: 'clinics',
+        select: 'departmentId',
+        populate: {
+          path: 'departmentId',
+          select: 'clinicCollectionId',
+        },
+      })
+      .populate({
+        path: 'departmentId',
+        select: 'clinicCollectionId',
+      })
+      .exec();
+  
+    const filteredDoctors = doctors.filter(doctor => {
+  
+      const hasClinicInCollection = doctor.clinics?.some(clinic =>
+        (clinic as any)?.departmentId?.clinicCollectionId?.toString() === clinicCollectionId
+      );
+  
+      const hasDepartmentInCollection = (doctor.departmentId as any)?.clinicCollectionId?.toString() === clinicCollectionId;
+  
+      const hasDirectCollection = doctor.clinicCollectionId?.toString() === clinicCollectionId;
+  
+      return hasClinicInCollection || hasDepartmentInCollection || hasDirectCollection;
+    });
+  
+    return {
+      success: true,
+      message: 'Doctors retrieved successfully',
+      data: { doctors: filteredDoctors },
+    };
+  }
+  
+
+
+  // async getCountDoctorByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse< {count: any}>> {
+    
+  //   const employees = await this.employeeModel
+  //   .find().select("clinics employeeType").where('employeeType').equals('Doctor')
+  //   .populate({
+  //     path: 'clinics',
+  //     select:"departmentId" ,
+  //     populate: {
+  //       path: 'departmentId',
+  //       select:"clinicCollectionId" ,
+  //       match: { clinicCollectionId: clinicCollectionId }, },
+  //   })
+  //   .exec();
+  
+  //   const filteredEmployees = employees.filter(emp => emp.clinics?.some(clinic => (clinic as any ).departmentId?.clinicCollectionId))
+    
+  //   const uniqueEmployeeIds = new Set(
+  //    filteredEmployees.map(emp => emp._id.toString()) // تحويل _id إلى string لمنع التكرار
+  //  );
+  //   return {
+  //     success: true,
+  //     message: 'Doctor count in Clinic Collection retrieved successfully',
+  //     data: { count:uniqueEmployeeIds.size },
+  //   };
+  // }
+
+ /* async getCounetEmployeeByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse< {count: number}>> {
     const employees = await this.employeeModel
     .find().select("clinics employeeType").where('employeeType').ne('Doctor')
     .populate({
@@ -117,5 +272,47 @@ export class EmployeeService {
        message: 'employee count in Clinic Collection retrieved successfully',
        data: { count:uniqueEmployeeIds.size },
       };
-   }
+   }*/
+
+   async getCountDoctorBySpecializationId(specializationId: string): Promise<ApiResponse<{ count: number }>> {
+    const count = await this.employeeModel.countDocuments({
+      employeeType: 'Doctor',
+      specializations: specializationId, 
+    });
+  
+    return {
+      success: true,
+      message: 'Doctor count in Specialization retrieved successfully',
+      data: { count },
+    };
+  }
+  
+
+  async getDoctorsByClinicId(clinicId: string): Promise<ApiResponse<Employee[]>> {
+    const doctors = await this.employeeModel.find({
+      employeeType: 'Doctor',
+      clinics: clinicId, 
+    }).exec();
+  
+    return {
+      success: true,
+      message: 'Doctors in Clinic retrieved successfully',
+      data: doctors,
+    };
+  }
+  
+  async getEmployeesByClinicId(clinicId: string): Promise<ApiResponse<Employee[]>> {
+    const employees = await this.employeeModel.find({
+      employeeType: { $ne: 'Doctor' }, // ليس Doctor
+      clinics: clinicId, // يبحث داخل مصفوفة clinics
+    }).exec();
+  
+    return {
+      success: true,
+      message: 'Employees in Clinic retrieved successfully',
+      data: employees,
+    };
+  }
+  
+
 }

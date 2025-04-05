@@ -36,4 +36,22 @@ export class AppointmentController {
     async remove(@Param('id') id: string) {
         return this.appointmentService.deleteAppointment(id);
     }
+
+      // الحصول على المواعيد حسب الـ Clinic
+  @Get('by-clinic/:clinicId')
+  async getAppointmentsByClinicId(@Param('clinicId') clinicId: string) {
+    return this.appointmentService.getAppointmentsByClinicId(clinicId);
+  }
+
+  // الحصول على المواعيد حسب الـ Doctor
+  @Get('by-doctor/:doctorId')
+  async getAppointmentsByDoctorId(@Param('doctorId') doctorId: string) {
+    return this.appointmentService.getAppointmentsByDoctorId(doctorId);
+  }
+
+  // الحصول على المواعيد حسب الـ Patient
+  @Get('by-patient/:patientId')
+  async getAppointmentsByPatientId(@Param('patientId') patientId: string) {
+    return this.appointmentService.getAppointmentsByPatientId(patientId);
+  }
 }

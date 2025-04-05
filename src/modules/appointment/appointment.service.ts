@@ -58,4 +58,80 @@ export class AppointmentService {
             message: 'Appointment remove successfully',
         }
     }
+
+    async getAppointmentsByClinicId(clinicId: string): Promise<ApiResponse<{ pastAppointments: Appointment[], upcomingAppointments: Appointment[] }>> {
+  
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);  // بداية اليوم الساعة 00:00
+      
+        const appointments = await this.appointmentModel.find({
+          clinic: clinicId,
+        }).populate(['doctor','patient']).sort({ datetime: 1 }).exec();
+      
+        const pastAppointments = appointments.filter(app => app.datetime < today);
+        
+        const upcomingAppointments = appointments.filter(app => app.datetime >= today);
+      
+        return {
+          success: true,
+          message: 'Appointments retrieved successfully',
+          data: {
+            pastAppointments,
+            upcomingAppointments,
+          },
+        };
+      }
+
+    
+      async getAppointmentsByDoctorId(doctorId: string): Promise<ApiResponse<{ pastAppointments: Appointment[], upcomingAppointments: Appointment[] }>> {
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);  // بداية اليوم
+      
+        const appointments = await this.appointmentModel.find({
+          doctor: doctorId,
+        }).populate(['clinic','patient'])
+        .sort({ datetime: 1 })
+        .exec();
+      
+        const pastAppointments = appointments.filter(app => app.datetime < today);
+
+        const upcomingAppointments = appointments.filter(app => app.datetime >= today);
+        return {
+          success: true,
+          message: 'Doctor Appointments retrieved successfully',
+          data: {
+            pastAppointments,
+            upcomingAppointments,
+          },
+        };
+      }
+
+      async getAppointmentsByPatientId(patientId: string): Promise<ApiResponse<{ pastAppointments: Appointment[], upcomingAppointments: Appointment[] }>> {
+
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);  // بداية اليوم
+      
+        const appointments = await this.appointmentModel.find({
+          patient: patientId,  // البحث حسب المريض
+        }).populate(['clinic','doctor'])
+
+        .sort({ datetime: 1 }) // ترتيب حسب الوقت
+        .exec();
+      
+        const pastAppointments = appointments.filter(app => app.datetime < today);
+      
+        const upcomingAppointments = appointments.filter(app => app.datetime >= today);
+      
+        return {
+          success: true,
+          message: 'Patient Appointments retrieved successfully',
+          data: {
+            pastAppointments,
+            upcomingAppointments,
+          },
+        };
+      }
+      
+           
 }

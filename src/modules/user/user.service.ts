@@ -42,11 +42,11 @@ export class UserService {
 
     const sortField: string = sortBy ?? 'createdAt';
     const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
-    return paginate(this.userModel, ['roleIds', ], page, limit, allData, filters, sort);
+    return paginate(this.userModel, ['roleIds',"employeeId" ], page, limit, allData, filters, sort);
   }
 
   async getUserById(id: string): Promise<ApiResponse<User>> {
-    const user = await this.userModel.findById(id).populate(['roleIds',]).exec();
+    const user = await this.userModel.findById(id).populate(['roleIds',"employeeId"]).exec();
 
 
     if (!user) throw new NotFoundException('User not found');
