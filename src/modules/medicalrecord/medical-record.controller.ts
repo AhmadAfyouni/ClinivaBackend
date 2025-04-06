@@ -37,4 +37,40 @@ export class MedicalRecordController {
     return this.medicalRecordService.deleteMedicalRecord(id);
 
   }
+
+  @Get('by-patient/:patientId')
+  async getMedicalRecordByPatientId(
+    @Param('patientId') patientId: string,
+  ) {
+    return this.medicalRecordService.getMedicalRecordByPatientId(patientId);
+  }
+
+  @Get('last-visit/:patientId')
+  async getLastVisit(@Param('patientId') patientId: string) {
+    return  this.medicalRecordService.getLastVisitByPatientId(patientId);
+  }
+
+  
+  @Get('count-patients/:doctorId')
+  async getCountPatientsByDoctorId(
+    @Param('doctorId') doctorId: string
+  ) {
+    return this.medicalRecordService.getCountPatientsByDoctorId(doctorId);
+  }
+
+  @Get('patients-by-doctor/:doctorId')
+
+  async getPatientsByDoctorId(
+    @Param('doctorId') doctorId: string
+  ) {
+    return this.medicalRecordService.getPatientsByDoctorId(doctorId);
+  }
+
+    // نقطة النهاية لجلب المرضى بناءً على departmentId
+    @Get('Count-by-department/:departmentId')
+    async getPatientsByDepartmentId(
+      @Param('departmentId') departmentId: string,
+    ){
+      return this.medicalRecordService.getPatientsCountByDepartment(departmentId);
+    }
 }

@@ -46,4 +46,40 @@ export class EmployeeController {
     getEmployeeCount(@Param('clinicCollectionId') clinicCollectionId: string) {
       return this.employeeService.getCounetEmployeeByClinicCollectionId(clinicCollectionId);
     }
+ 
+  @Get('without-doctor/:clinicCollectionId')
+  async getEmployeesWithoutDoctorByClinicCollectionId(
+    @Param('clinicCollectionId') clinicCollectionId: string,
+  ) {
+    return this.employeeService.getEmployeesWithoutDoctorByClinicCollectionId(clinicCollectionId);
+  }
+
+  @Get('doctors/by-clinic-collection/:clinicCollectionId')
+  async getDoctorsByClinicCollectionId(
+    @Param('clinicCollectionId') clinicCollectionId: string,
+  ) {
+    return this.employeeService.getDoctorsByClinicCollectionId(clinicCollectionId);
+  }
+
+  @Get('doctors/count/by-specialization/:specializationId')
+  async getCountDoctorBySpecializationId(
+    @Param('specializationId') specializationId: string,
+  ) {
+    return this.employeeService.getCountDoctorBySpecializationId(specializationId);
+  }
+
+  @Get('doctors/by-clinic/:clinicId')
+  async getDoctorsByClinicId(
+    @Param('clinicId') clinicId: string,
+  ) {
+    return this.employeeService.getDoctorsByClinicId(clinicId);
+  }
+
+  @Get('by-clinic/:clinicId')
+  async getEmployeesByClinicId(
+    @Param('clinicId') clinicId: string,
+  ) {
+    return this.employeeService.getEmployeesByClinicId(clinicId);
+  }
+  
   }

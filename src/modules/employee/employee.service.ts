@@ -221,6 +221,47 @@ export class EmployeeService {
   
 
 
+  async getCountDoctorBySpecializationId(specializationId: string): Promise<ApiResponse<{ count: number }>> {
+    const count = await this.employeeModel.countDocuments({
+      employeeType: 'Doctor',
+      specializations: specializationId, 
+    });
+  
+    return {
+      success: true,
+      message: 'Doctor count in Specialization retrieved successfully',
+      data: { count },
+    };
+  }
+  
+
+  async getDoctorsByClinicId(clinicId: string): Promise<ApiResponse<Employee[]>> {
+    const doctors = await this.employeeModel.find({
+      employeeType: 'Doctor',
+      clinics: clinicId, 
+    }).exec();
+  
+    return {
+      success: true,
+      message: 'Doctors in Clinic retrieved successfully',
+      data: doctors,
+    };
+  }
+  
+  async getEmployeesByClinicId(clinicId: string): Promise<ApiResponse<Employee[]>> {
+    const employees = await this.employeeModel.find({
+      employeeType: { $ne: 'Doctor' }, // ليس Doctor
+      clinics: clinicId, // يبحث داخل مصفوفة clinics
+    }).exec();
+  
+    return {
+      success: true,
+      message: 'Employees in Clinic retrieved successfully',
+      data: employees,
+    };
+  }
+  
+
   // async getCountDoctorByClinicCollectionId(clinicCollectionId: string): Promise<ApiResponse< {count: any}>> {
     
   //   const employees = await this.employeeModel
@@ -274,45 +315,5 @@ export class EmployeeService {
       };
    }*/
 
-   async getCountDoctorBySpecializationId(specializationId: string): Promise<ApiResponse<{ count: number }>> {
-    const count = await this.employeeModel.countDocuments({
-      employeeType: 'Doctor',
-      specializations: specializationId, 
-    });
-  
-    return {
-      success: true,
-      message: 'Doctor count in Specialization retrieved successfully',
-      data: { count },
-    };
-  }
-  
-
-  async getDoctorsByClinicId(clinicId: string): Promise<ApiResponse<Employee[]>> {
-    const doctors = await this.employeeModel.find({
-      employeeType: 'Doctor',
-      clinics: clinicId, 
-    }).exec();
-  
-    return {
-      success: true,
-      message: 'Doctors in Clinic retrieved successfully',
-      data: doctors,
-    };
-  }
-  
-  async getEmployeesByClinicId(clinicId: string): Promise<ApiResponse<Employee[]>> {
-    const employees = await this.employeeModel.find({
-      employeeType: { $ne: 'Doctor' }, // ليس Doctor
-      clinics: clinicId, // يبحث داخل مصفوفة clinics
-    }).exec();
-  
-    return {
-      success: true,
-      message: 'Employees in Clinic retrieved successfully',
-      data: employees,
-    };
-  }
-  
 
 }
