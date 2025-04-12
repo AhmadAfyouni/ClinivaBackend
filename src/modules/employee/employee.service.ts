@@ -9,10 +9,13 @@ import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto'
 
 @Injectable()
 export class EmployeeService {
-  constructor(@InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>) {
-  }
+  constructor(
+    @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
+  ) {}
 
-  async createEmployee(createEmployeeDto: CreateEmployeeDto): Promise<ApiResponse<Employee>> {
+  async createEmployee(
+    createEmployeeDto: CreateEmployeeDto,
+  ): Promise<ApiResponse<Employee>> {
     const newEmployee = new this.employeeModel(createEmployeeDto);
     const savedEmployee = await newEmployee.save();
     return {
@@ -30,14 +33,64 @@ export class EmployeeService {
     limit = Number(limit) || 10;
 
     const sortField: string = sortBy ?? 'createdAt';
-    const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
-    return paginate(this.employeeModel, ['companyId', 'clinicCollectionId', 'departmentId',
-      'clinics','specializations'], page, limit, allData, filters, sort);
+    const sort: Record<string, number> = {
+      [sortField]: order === 'asc' ? 1 : -1,
+    };
+
+    const searchConditions: any[] = [];
+
+    // Handle flexible text-based search
+    if (filters.search) {
+      const regex = new RegExp(filters.search, 'i'); // case-insensitive
+
+      searchConditions.push(
+        { name: regex },
+        { employeeType: regex },
+        { identity: regex },
+        { nationality: regex },
+        { address: regex },
+        { specialties: { $in: [regex] } },
+        { Languages: { $in: [regex] } },
+        { professional_experience: regex },
+      );
+    }
+
+    // Remove search key from filters before passing it down
+    delete filters.search;
+
+    const finalFilter = {
+      ...filters,
+      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+    };
+
+    return paginate(
+      this.employeeModel,
+      [
+        'companyId',
+        'clinicCollectionId',
+        'departmentId',
+        'clinics',
+        'specializations',
+      ],
+      page,
+      limit,
+      allData,
+      finalFilter,
+      sort,
+    );
   }
 
   async getEmployeeById(id: string): Promise<ApiResponse<Employee>> {
-    const employee = await this.employeeModel.findById(id).populate(['companyId', 'clinicCollectionId', 'departmentId',
-      'clinics','specializations']).exec();
+    const employee = await this.employeeModel
+      .findById(id)
+      .populate([
+        'companyId',
+        'clinicCollectionId',
+        'departmentId',
+        'clinics',
+        'specializations',
+      ])
+      .exec();
     if (!employee) throw new NotFoundException('Employee not found');
     return {
       success: true,
@@ -46,8 +99,13 @@ export class EmployeeService {
     };
   }
 
-  async updateEmployee(id: string, updateEmployeeDto: UpdateEmployeeDto): Promise<ApiResponse<Employee>> {
-    const updatedEmployee = await this.employeeModel.findByIdAndUpdate(id, updateEmployeeDto, { new: true }).exec();
+  async updateEmployee(
+    id: string,
+    updateEmployeeDto: UpdateEmployeeDto,
+  ): Promise<ApiResponse<Employee>> {
+    const updatedEmployee = await this.employeeModel
+      .findByIdAndUpdate(id, updateEmployeeDto, { new: true })
+      .exec();
     if (!updatedEmployee) throw new NotFoundException('Employee not found');
 
     return {
@@ -58,7 +116,9 @@ export class EmployeeService {
   }
 
   async deleteEmployee(id: string): Promise<ApiResponse<Employee>> {
-    const deletedEmployee = await this.employeeModel.findByIdAndDelete(id).exec();
+    const deletedEmployee = await this.employeeModel
+      .findByIdAndDelete(id)
+      .exec();
     if (!deletedEmployee) throw new NotFoundException('Employee not found');
     return {
       success: true,

@@ -14,8 +14,7 @@ export class AuthService {
     private readonly userService: UserService,
     private readonly jwtService: JwtService,
     @InjectModel(Role.name) private roleModel: Model<RoleDocument>,
-  ) {
-  }
+  ) {}
 
   /**
    * Validates a user by email and password
@@ -25,7 +24,8 @@ export class AuthService {
     if (!user) throw new UnauthorizedException('Invalid email or password');
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) throw new UnauthorizedException('Invalid email or password');
+    if (!isPasswordValid)
+      throw new UnauthorizedException('Invalid email or password');
 
     return user;
   }
@@ -33,14 +33,17 @@ export class AuthService {
   /**
    * Authenticates user and returns access & refresh tokens + user data
    */
-  async login(email: string, password: string): Promise<{
-    success: boolean,
-    message: string,
+  async login(
+    email: string,
+    password: string,
+  ): Promise<{
+    success: boolean;
+    message: string;
     data: {
       accessToken: string;
       refreshToken: string;
       user: any;
-    }
+    };
   }> {
     const user = await this.validateUser(email, password);
 
@@ -49,8 +52,10 @@ export class AuthService {
     }
 
     // Get all permissions from user's roles
-    const roles = await this.roleModel.find({ _id: { $in: user.roleIds } }).lean();
-    const permissions = roles.flatMap(role => role.permissions || []);
+    const roles = await this.roleModel
+      .find({ _id: { $in: user.roleIds } })
+      .lean();
+    const permissions = roles.flatMap((role) => role.permissions || []);
     const uniquePermissions = [...new Set(permissions)];
 
     // Create JWT payload
@@ -59,7 +64,7 @@ export class AuthService {
       email: user.email,
     };
 
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '30m' });
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '30d' });
     const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
 
     return {
@@ -72,7 +77,7 @@ export class AuthService {
           _id: user._id,
           name: user.name,
           email: user.email,
-          roles: roles.map(r => r.name),
+          roles: roles.map((r) => r.name),
           permissions: uniquePermissions,
         },
       },
@@ -82,13 +87,16 @@ export class AuthService {
   /**
    * Generates a new access token from refresh token
    */
-  async refreshToken(refreshToken: string): Promise<ApiResponse<{ accessToken: string }>> {
+  async refreshToken(
+    refreshToken: string,
+  ): Promise<ApiResponse<{ accessToken: string }>> {
     try {
       const payload = this.jwtService.verify(refreshToken);
 
       const userResponse = await this.userService.getUserById(payload.sub);
       const user = userResponse.data;
-      if (!user || Array.isArray(user)) throw new UnauthorizedException('User not found');
+      if (!user || Array.isArray(user))
+        throw new UnauthorizedException('User not found');
 
       const newPayload = {
         sub: user._id.toString(),
