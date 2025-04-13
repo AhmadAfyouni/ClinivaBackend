@@ -4,15 +4,16 @@ import { Model } from 'mongoose';
 import { Role, RoleDocument } from './schemas/role.schema';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { ApiResponse, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Injectable()
 export class RoleService {
-  constructor(@InjectModel(Role.name) private roleModel: Model<RoleDocument>) {
-  }
+  constructor(@InjectModel(Role.name) private roleModel: Model<RoleDocument>) {}
 
-  async createRole(createRoleDto: CreateRoleDto): Promise<ApiResponse<Role>> {
+  async createRole(
+    createRoleDto: CreateRoleDto,
+  ): Promise<ApiGetResponse<Role>> {
     const { name, permissions = [] } = createRoleDto;
 
     const uniquePermissions = Array.from(new Set(permissions));
@@ -37,12 +38,14 @@ export class RoleService {
     limit = Number(limit) || 10;
 
     const sortField = sortBy ?? 'createdAt';
-    const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
+    const sort: Record<string, number> = {
+      [sortField]: order === 'asc' ? 1 : -1,
+    };
 
     return paginate(this.roleModel, [], page, limit, allData, filters, sort);
   }
 
-  async getRoleById(id: string): Promise<ApiResponse<Role>> {
+  async getRoleById(id: string): Promise<ApiGetResponse<Role>> {
     const role = await this.roleModel.findById(id);
     if (!role) throw new NotFoundException('Role not found');
     return {
@@ -52,7 +55,10 @@ export class RoleService {
     };
   }
 
-  async updateRole(id: string, updateRoleDto: UpdateRoleDto): Promise<ApiResponse<Role>> {
+  async updateRole(
+    id: string,
+    updateRoleDto: UpdateRoleDto,
+  ): Promise<ApiGetResponse<Role>> {
     const role = await this.roleModel.findById(id).exec();
     if (!role) throw new NotFoundException('Role not found');
 
@@ -65,14 +71,14 @@ export class RoleService {
       message: 'Role update successfully',
       data: savedRole,
     };
-
   }
 
-  async deleteRole(id: string): Promise<ApiResponse<Role>> {
+  async deleteRole(id: string): Promise<ApiGetResponse<Role>> {
     await this.roleModel.findByIdAndDelete(id);
     return {
       success: true,
       message: 'Role remove successfully',
+      data: {} as Role,
     };
   }
 }

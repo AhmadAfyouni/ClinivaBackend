@@ -6,7 +6,7 @@ import { User } from '../user/schemas/user.schema';
 import { Role, RoleDocument } from '../role/schemas/role.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ApiResponse } from 'src/common/utlis/paginate';
+import { ApiGetResponse } from 'src/common/utlis/paginate';
 
 @Injectable()
 export class AuthService {
@@ -89,7 +89,7 @@ export class AuthService {
    */
   async refreshToken(
     refreshToken: string,
-  ): Promise<ApiResponse<{ accessToken: string }>> {
+  ): Promise<ApiGetResponse<{ accessToken: string }>> {
     try {
       const payload = this.jwtService.verify(refreshToken);
 
