@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { Employee, EmployeeDocument } from './schemas/employee.schema';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { ApiResponse, paginate } from '../../common/utlis/paginate';
+import { ApiGetResponse, paginate } from '../../common/utlis/paginate';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
 
 @Injectable()
@@ -15,7 +15,7 @@ export class EmployeeService {
 
   async createEmployee(
     createEmployeeDto: CreateEmployeeDto,
-  ): Promise<ApiResponse<Employee>> {
+  ): Promise<ApiGetResponse<Employee>> {
     const newEmployee = new this.employeeModel(createEmployeeDto);
     const savedEmployee = await newEmployee.save();
     return {
@@ -80,7 +80,7 @@ export class EmployeeService {
     );
   }
 
-  async getEmployeeById(id: string): Promise<ApiResponse<Employee>> {
+  async getEmployeeById(id: string): Promise<ApiGetResponse<Employee>> {
     const employee = await this.employeeModel
       .findById(id)
       .populate([
@@ -102,7 +102,7 @@ export class EmployeeService {
   async updateEmployee(
     id: string,
     updateEmployeeDto: UpdateEmployeeDto,
-  ): Promise<ApiResponse<Employee>> {
+  ): Promise<ApiGetResponse<Employee>> {
     const updatedEmployee = await this.employeeModel
       .findByIdAndUpdate(id, updateEmployeeDto, { new: true })
       .exec();
@@ -115,7 +115,7 @@ export class EmployeeService {
     };
   }
 
-  async deleteEmployee(id: string): Promise<ApiResponse<Employee>> {
+  async deleteEmployee(id: string): Promise<ApiGetResponse<Employee>> {
     const deletedEmployee = await this.employeeModel
       .findByIdAndDelete(id)
       .exec();
@@ -123,6 +123,7 @@ export class EmployeeService {
     return {
       success: true,
       message: 'Employee remove successfully',
+      data: {} as Employee,
     };
   }
 }

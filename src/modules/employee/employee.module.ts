@@ -5,10 +5,13 @@ import { EmployeeController } from './employee.controller';
 import { Employee, EmployeeSchema } from './schemas/employee.schema';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Employee.name, schema: EmployeeSchema }])],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Employee.name, schema: EmployeeSchema },
+    ]),
+  ],
   controllers: [EmployeeController],
   providers: [EmployeeService],
   exports: [EmployeeService], // تصدير الخدمة لاستخدامها في وحدات أخرى إذا لزم الأمر
 })
-export class EmployeeModule {
-}
+export class EmployeeModule {}
