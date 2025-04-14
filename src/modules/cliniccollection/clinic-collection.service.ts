@@ -9,12 +9,18 @@ import { UpdateClinicCollectionDto } from './dto/update-clinic-collection.dto';
 import { CreateClinicCollectionDto } from './dto/create-clinic-collection.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { Employee, EmployeeDocument } from '../employee/schemas/employee.schema';
+import { Department, DepartmentDocument } from '../department/schemas/department.schema';
 
 @Injectable()
 export class ClinicCollectionService {
   constructor(
     @InjectModel(ClinicCollection.name)
     private clinicCollectionModel: Model<ClinicCollectionDocument>,
+    @InjectModel(Employee.name)
+    private employeeModel: Model<EmployeeDocument>,
+    @InjectModel(Department.name)
+    private departmentModel: Model<DepartmentDocument>,
   ) {}
 
   async createClinicCollection(
@@ -46,7 +52,7 @@ export class ClinicCollectionService {
       [sortField]: order === 'asc' ? 1 : -1,
     };
 
-    return paginate(
+    const result = await paginate(
       this.clinicCollectionModel,
       ['companyId', 'specializations'],
       page,
@@ -55,9 +61,40 @@ export class ClinicCollectionService {
       filters,
       sort,
     );
+
+    // Add employee count for each clinic collection
+    if (result.data) {
+      const clinicCollections = result.data;
+      const updatedClinicCollections = await Promise.all(clinicCollections.map(async (clinicCollection) => {
+        const [employeeCount, departmentCount] = await Promise.all([
+          this.employeeModel.countDocuments({
+            clinicCollectionId: clinicCollection._id.toString()
+          }),
+          this.departmentModel.countDocuments({
+            clinicCollectionId: clinicCollection._id.toString()
+          })
+        ]);
+
+        // console.log(`Clinic ${clinicCollection.name} (${clinicCollection._id}):`)
+        console.log(`- Employees: ${employeeCount}`)
+        // console.log(`- Departments: ${departmentCount}`)
+
+        // Create a new object with all the original properties plus counts
+        return {
+          ...clinicCollection.toObject(),
+          employeeCount,
+          departmentCount
+        };
+      }));
+
+      // Update the result data with the new array containing employeeCount
+      result.data = updatedClinicCollections;
+    }
+
+    return result;
   }
 
-  async getClinicCollectionById(id: string): Promise<any> {
+  async getClinicCollectionById(id: string): Promise<ApiGetResponse<ClinicCollection>> {
     const clinicCollection = await this.clinicCollectionModel
       .findById(id)
       .populate(['companyId', 'specializations'])
