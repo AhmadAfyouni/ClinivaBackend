@@ -6,13 +6,17 @@ import {
   ClinicCollection,
   ClinicCollectionSchema,
 } from './schemas/cliniccollection.schema';
-import { UserModule } from '../user/user.module'; // 👈 Import UserModule
+import { UserModule } from '../user/user.module';
 import { EmployeeModule } from '../employee/employee.module';
+import { Employee, EmployeeSchema } from '../employee/schemas/employee.schema';
+import { Department, DepartmentSchema } from '../department/schemas/department.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: ClinicCollection.name, schema: ClinicCollectionSchema },
+      { name: Employee.name, schema: EmployeeSchema },
+      { name: Department.name, schema: DepartmentSchema },
     ]),
     UserModule,
     EmployeeModule,
