@@ -7,7 +7,7 @@ import { AppointmentModule } from '../appointment/appointment.module';
 import { MedicalRecordModule } from '../medicalrecord/medical-record.module';
 import { EmployeeModule } from '../employee/employee.module';
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Patient.name, schema: PatientSchema }]),AppointmentModule,MedicalRecordModule],
+  imports: [MongooseModule.forFeature([{ name: Patient.name, schema: PatientSchema }]),AppointmentModule,MedicalRecordModule,EmployeeModule],
   controllers: [PatientController],
   providers: [PatientService],
   exports: [PatientService], // يمكن استخدامها في وحدات أخرى
