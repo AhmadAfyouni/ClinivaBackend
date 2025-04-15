@@ -7,13 +7,11 @@ import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
 import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
-import { MedicalRecordDocument,MedicalRecord } from '../medicalrecord/schemas/medicalrecord.schema';
 @Injectable()
 export class PatientService {
   constructor(
     @InjectModel(Patient.name) private patientModel: Model<PatientDocument>,
     @InjectModel(Appointment.name) private appointmentModel: Model<AppointmentDocument>,
-    @InjectModel(MedicalRecord.name) private medicalRecordModel: Model<MedicalRecordDocument>,
   ) {}
 
   async createPatient(
@@ -71,34 +69,21 @@ export class PatientService {
       const patients = result.data;
       const updatedPatients = await Promise.all(
         patients.map(async (patient) => {
-          // جلب آخر زيارة للمريض
+          // جلب آخر زيارة للمريض من جدول المواعيد
           const lastAppointment = await this.appointmentModel
-            .findOne({ patientId: patient._id.toString() })
-            .sort({ datetime: -1 })
-            .populate('doctor', 'name')
+            .findOne({ patientId: patient._id.toString })
+            .sort({ datetime: -1 })  // ترتيب حسب تاريخ ووقت الزيارة من الأحدث إلى الأقدم
+            .populate('doctor', 'name')  // ربط معرف الطبيب مع اسم الطبيب
             .exec();
-      
-          // جلب كل المواعيد الخاصة بالمريض
-          const appointments = await this.appointmentModel.find({ patientId: patient._id.toString }).select('_id');
-          const appointmentIds = appointments.map(app => app._id);
-      
-          // جلب سجلات العلاج المرتبطة بهذه المواعيد
-          const medicalRecords = await this.medicalRecordModel
-            .find({ appointmentId: { $in: appointmentIds } })
-            .select('treatmentPlan');
-      
-          // استخراج جميع خطط العلاج
-          const treatmentPlans = medicalRecords.map(record => record.treatmentPlan);
-      
+  
+          // إضافة آخر زيارة مع اسم الطبيب إلى بيانات المريض
           return {
             ...patient.toObject(),
             lastVisit: lastAppointment ? lastAppointment.datetime : null,
-            // doctorName: lastAppointment?.doctor?.name || 'null',
-            treatmentPlans: treatmentPlans, // أضف خطط العلاج هنا
+         //   doctorName: lastAppointment?.doctor?.name || 'null', // تحقق من وجود الطبيب قبل الوصول إلى اسمه
           };
         })
       );
-      
       result.data = updatedPatients;
     }
   
