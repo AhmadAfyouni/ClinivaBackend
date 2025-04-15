@@ -96,23 +96,23 @@ export class DepartmentService {
     });
   
     // جلب عدد المرضى في العيادات المرتبطة بالقسم
-    const patientCount = await this.appointmentModel.aggregate([
-      {
-        $match: {
-          clinicId: { $in: department.clinicCollectionId.map((clinic: any) => clinic._id) },
-        },
-      },
-      {
-        $group: {
-          _id: "$patientId", // تجميع المواعيد بناءً على معرف المريض
-        },
-      },
-      {
-        $count: "totalPatients", // حساب عدد المرضى الفريدين
-      },
-    ]);
+    // const patientCount = await this.appointmentModel.aggregate([
+    //   {
+    //     $match: {
+    //       clinicId: { $in: department.clinicCollectionId.map((clinic: any) => clinic._id) },
+    //     },
+    //   },
+    //   {
+    //     $group: {
+    //       _id: "$patientId", // تجميع المواعيد بناءً على معرف المريض
+    //     },
+    //   },
+    //   {
+    //     $count: "totalPatients", // حساب عدد المرضى الفريدين
+    //   },
+    // ]);
   
-    const totalPatients = patientCount.length > 0 ? patientCount[0].totalPatients : 0;
+    // const totalPatients = patientCount.length > 0 ? patientCount[0].totalPatients : 0;
   
     return {
       ...department.toObject?.() ?? department,
