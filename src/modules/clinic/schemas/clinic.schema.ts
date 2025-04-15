@@ -12,7 +12,7 @@ import {
     WorkingHours
 } from "../../../common/utlis/helper";
 
-export type ClinicDocument = Clinic & Document;
+export type ClinicDocument = Clinic & Document & { _patientCount?: number };
 
 @Schema({ timestamps: true })
 export class Clinic {
@@ -84,3 +84,6 @@ export class Clinic {
 }
 
 export const ClinicSchema = SchemaFactory.createForClass(Clinic);
+
+ClinicSchema.set('toObject', { virtuals: true });
+ClinicSchema.set('toJSON', { virtuals: true });
