@@ -117,7 +117,7 @@ export class DepartmentService {
     return {
       ...department.toObject?.() ?? department,
       clinicCount,
-      totalPatients, // إضافة عدد المرضى
+    //  totalPatients, // إضافة عدد المرضى
     };
   }
   
