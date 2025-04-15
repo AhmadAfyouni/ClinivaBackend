@@ -51,6 +51,38 @@ export class ClinicCollectionService {
     const sort: Record<string, number> = {
       [sortField]: order === 'asc' ? 1 : -1,
     };
+     
+    const searchConditions: any[] = [];
+
+    if (filters.search) {
+      const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
+  
+      searchConditions.push(
+        { name: regex },
+        { overview: regex },
+        { address: regex },
+        { vision: regex },
+        { goals: regex },
+        { policies: regex },
+        { details: regex } 
+      );
+  
+     
+      searchConditions.push(
+        { specializations: { $in: [regex] } },
+        { contactInfos: { $elemMatch: { value: regex } } },
+        { insuranceCompany: { $elemMatch: { name: regex } } }
+      );
+    }
+  
+    
+    delete filters.search;
+  
+    
+    const finalFilter = {
+      ...filters,
+      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+    };
 
     const result = await paginate(
       this.clinicCollectionModel,
@@ -58,7 +90,7 @@ export class ClinicCollectionService {
       page,
       limit,
       allData,
-      filters,
+      finalFilter,
       sort,
     );
 
