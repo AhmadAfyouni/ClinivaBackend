@@ -77,7 +77,7 @@ export class PatientService {
             .sort({ datetime: -1 })  // ترتيب حسب تاريخ ووقت الزيارة من الأحدث إلى الأقدم
          
             .exec();
-            let doctorName = 'غير معروف';
+            let doctorName = "null";
             if (lastAppointment && lastAppointment.doctor) {
               const doctor = await this.employeeModel.findById(lastAppointment.doctor);
               doctorName = doctor ? doctor.name : 'غير معروف';
