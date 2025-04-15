@@ -79,7 +79,7 @@ export class PatientService {
             .exec();
       
           // جلب كل المواعيد الخاصة بالمريض
-          const appointments = await this.appointmentModel.find({ patientId: patient._id }).select('_id');
+          const appointments = await this.appointmentModel.find({ patientId: patient._id.toString }).select('_id');
           const appointmentIds = appointments.map(app => app._id);
       
           // جلب سجلات العلاج المرتبطة بهذه المواعيد
