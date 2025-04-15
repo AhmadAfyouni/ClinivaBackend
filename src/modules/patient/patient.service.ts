@@ -6,11 +6,16 @@ import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
-
+import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
+import { EmployeeDocument,Employee } from '../employee/schemas/employee.schema';
+import { MedicalRecordDocument,MedicalRecord } from '../medicalrecord/schemas/medicalrecord.schema';
 @Injectable()
 export class PatientService {
   constructor(
     @InjectModel(Patient.name) private patientModel: Model<PatientDocument>,
+    @InjectModel(Appointment.name) private appointmentModel: Model<AppointmentDocument>,
+    @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
+    @InjectModel(MedicalRecord.name) private medicalRecordModel: Model<MedicalRecordDocument>,
   ) {}
 
   async createPatient(
@@ -27,18 +32,83 @@ export class PatientService {
 
   async getAllPatients(paginationDto: PaginationAndFilterDto, filters: any) {
     let { page, limit, allData, sortBy, order } = paginationDto;
-
+  
     // Convert page & limit to numbers
     page = Number(page) || 1;
     limit = Number(limit) || 10;
-
+  
     const sortField: string = sortBy ?? 'createdAt';
     const sort: Record<string, number> = {
       [sortField]: order === 'asc' ? 1 : -1,
     };
-    return paginate(this.patientModel, [], page, limit, allData, filters, sort);
-  }
+  
+    // إعداد شروط البحث
+    const searchConditions: any[] = [];
+  
+    // تحقق إذا كان يوجد نص للبحث
+    if (filters.search) {
+      const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
+  
+      // إضافة شروط البحث للحقول النصية مثل الاسم والحالة
+      searchConditions.push(
+        { name: regex },
+      
+      );
+    }
+  
+    // إزالة مفتاح البحث من الفلاتر قبل تمريرها
+    delete filters.search;
+  
+    // دمج الفلاتر مع شروط البحث
+    const finalFilter = {
+      ...filters,
+      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+    };
+  
+    // استخدام paginate مع الشروط النهائية
+    const result = await paginate(this.patientModel, [], page, limit, allData, finalFilter, sort);
+  
+    // إضافة آخر زيارة للمريض مع اسم الطبيب
+    if (result.data) {
+      const patients = result.data;
+      const updatedPatients = await Promise.all(
+        patients.map(async (patient) => {
+          // جلب آخر زيارة للمريض من جدول المواعيد
+          const lastAppointment = await this.appointmentModel
+            .findOne({ patientId: patient._id.toString })
+            .sort({ datetime: -1 })  // ترتيب حسب تاريخ ووقت الزيارة من الأحدث إلى الأقدم
+         
+            .exec();
+            let doctorName = "";
+            let treatmentPlan: string | null = null;
 
+            if (lastAppointment && lastAppointment.doctor) {
+              const doctor = await this.employeeModel.findById(lastAppointment.doctor);
+              doctorName = doctor ? doctor.name : " ";
+            }
+            if (lastAppointment?._id) {
+              const medicalRecord = await this.medicalRecordModel.findOne({
+                appointmentId: lastAppointment._id,
+              });
+        
+             treatmentPlan = medicalRecord?.treatmentPlan || null;
+            }
+        
+          // إضافة آخر زيارة مع اسم الطبيب إلى بيانات المريض
+          return {
+            ...patient.toObject(),
+            lastVisit: lastAppointment ? lastAppointment.datetime : null,
+           doctorName, // تحقق من وجود الطبيب قبل الوصول إلى اسمه
+           treatmentPlan, 
+          };
+        })
+      );
+      result.data = updatedPatients;
+    }
+  
+    return result;
+  }
+  
   async getPatientById(id: string): Promise<ApiGetResponse<Patient>> {
     const patient = await this.patientModel.findById(id).exec();
     if (!patient) throw new NotFoundException('Patient not found');
