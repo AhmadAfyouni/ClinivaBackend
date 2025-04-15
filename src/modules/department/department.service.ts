@@ -90,7 +90,7 @@ export class DepartmentService {
   async addClinicCounts(department: any) {
     // جلب عدد العيادات المرتبطة بالقسم
     const clinicCount = await this.clinicModel.countDocuments({
-      departmentId: department._id,
+      departmentId: department._id.toString,
     });
   
     // إرجاع البيانات مع إضافة عدد العيادات
