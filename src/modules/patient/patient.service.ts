@@ -7,11 +7,13 @@ import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
 import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
+import { EmployeeDocument,Employee } from '../employee/schemas/employee.schema';
 @Injectable()
 export class PatientService {
   constructor(
     @InjectModel(Patient.name) private patientModel: Model<PatientDocument>,
     @InjectModel(Appointment.name) private appointmentModel: Model<AppointmentDocument>,
+    @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
   ) {}
 
   async createPatient(
@@ -73,14 +75,18 @@ export class PatientService {
           const lastAppointment = await this.appointmentModel
             .findOne({ patientId: patient._id.toString })
             .sort({ datetime: -1 })  // ترتيب حسب تاريخ ووقت الزيارة من الأحدث إلى الأقدم
-            .populate('doctor', 'name')  // ربط معرف الطبيب مع اسم الطبيب
+         
             .exec();
-  
+            let doctorName = 'غير معروف';
+            if (lastAppointment && lastAppointment.doctor) {
+              const doctor = await this.employeeModel.findById(lastAppointment.doctor);
+              doctorName = doctor ? doctor.name : 'غير معروف';
+            }
           // إضافة آخر زيارة مع اسم الطبيب إلى بيانات المريض
           return {
             ...patient.toObject(),
             lastVisit: lastAppointment ? lastAppointment.datetime : null,
-         //   doctorName: lastAppointment?.doctor?.name || 'null', // تحقق من وجود الطبيب قبل الوصول إلى اسمه
+           doctorName // تحقق من وجود الطبيب قبل الوصول إلى اسمه
           };
         })
       );
