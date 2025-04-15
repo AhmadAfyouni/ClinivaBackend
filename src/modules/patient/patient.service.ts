@@ -8,12 +8,14 @@ import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
 import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
 import { EmployeeDocument,Employee } from '../employee/schemas/employee.schema';
+import { MedicalRecordDocument,MedicalRecord } from '../medicalrecord/schemas/medicalrecord.schema';
 @Injectable()
 export class PatientService {
   constructor(
     @InjectModel(Patient.name) private patientModel: Model<PatientDocument>,
     @InjectModel(Appointment.name) private appointmentModel: Model<AppointmentDocument>,
     @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
+    @InjectModel(MedicalRecord.name) private medicalRecordModel: Model<MedicalRecordDocument>,
   ) {}
 
   async createPatient(
@@ -78,15 +80,26 @@ export class PatientService {
          
             .exec();
             let doctorName = "";
+            let treatmentPlan: string | null = null;
+
             if (lastAppointment && lastAppointment.doctor) {
               const doctor = await this.employeeModel.findById(lastAppointment.doctor);
               doctorName = doctor ? doctor.name : " ";
             }
+            if (lastAppointment?._id) {
+              const medicalRecord = await this.medicalRecordModel.findOne({
+                appointmentId: lastAppointment._id,
+              });
+        
+             treatmentPlan = medicalRecord?.treatmentPlan || null;
+            }
+        
           // إضافة آخر زيارة مع اسم الطبيب إلى بيانات المريض
           return {
             ...patient.toObject(),
             lastVisit: lastAppointment ? lastAppointment.datetime : null,
-           doctorName // تحقق من وجود الطبيب قبل الوصول إلى اسمه
+           doctorName, // تحقق من وجود الطبيب قبل الوصول إلى اسمه
+           treatmentPlan, 
           };
         })
       );
