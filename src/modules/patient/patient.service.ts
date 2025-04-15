@@ -48,7 +48,7 @@ export class PatientService {
       // إضافة شروط البحث للحقول النصية مثل الاسم والحالة
       searchConditions.push(
         { name: regex },
-        { status: regex } // إضافة البحث على حالة المريض
+      
       );
     }
   
