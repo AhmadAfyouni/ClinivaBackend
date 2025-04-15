@@ -47,8 +47,12 @@ export class PatientService {
       // إضافة شروط البحث للحقول النصية مثل الاسم والحالة
       searchConditions.push(
         { name: regex },
-        { isActive: regex } // إضافة البحث على حالة المريض
+     
       );
+    }
+    if (filters.isActive !== undefined) {
+      // إذا كان الفلتر isActive يحتوي على قيمة (true أو false)
+      searchConditions.push({ isActive: filters.isActive === 'true' });
     }
   
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
