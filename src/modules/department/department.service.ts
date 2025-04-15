@@ -6,12 +6,14 @@ import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-
+import { ClinicDocument,Clinic } from '../clinic/schemas/clinic.schema';
 @Injectable()
 export class DepartmentService {
   constructor(
     @InjectModel(Department.name)
     private departmentModel: Model<DepartmentDocument>,
+    @InjectModel(Clinic.name) private clinicModel: Model<ClinicDocument>, // 👈 هنا
+  
   ) {}
 
   async createDepartment(
@@ -25,29 +27,72 @@ export class DepartmentService {
       data: savedDepartment,
     };
   }
-
   async getAllDepartments(paginationDto: PaginationAndFilterDto, filters: any) {
     let { page, limit, allData, sortBy, order } = paginationDto;
-
+  
     // Convert page & limit to numbers
     page = Number(page) || 1;
     limit = Number(limit) || 10;
-
+  
     const sortField: string = sortBy ?? 'createdAt';
     const sort: Record<string, number> = {
       [sortField]: order === 'asc' ? 1 : -1,
     };
-    return paginate(
+  
+    // إعداد شروط البحث
+    const searchConditions: any[] = [];
+  
+    if (filters.search) {
+      const regex = new RegExp(filters.search, 'i');
+  
+      searchConditions.push(
+        { name: regex },
+        { address: regex },
+        { 'clinicCollectionId.name': regex } // البحث داخل المجمع المرتبط
+      );
+    }
+  
+    delete filters.search;
+  
+    const finalFilter = {
+      ...filters,
+      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+    };
+  
+    // استخدام paginate مع populate
+    const result = await paginate(
       this.departmentModel,
       ['clinicCollectionId', 'specializations'],
       page,
       limit,
       allData,
-      filters,
+      finalFilter,
       sort,
     );
+  
+    // إضافة عدد العيادات المرتبطة بكل قسم
+    if (result.data) {
+      const departments = result.data;
+      const updatedDepartments = await Promise.all(
+        departments.map((department) => this.addClinicCounts(department)),
+      );
+      result.data = updatedDepartments;
+    }
+  
+    return result;
   }
-
+  
+  async addClinicCounts(department: any) {
+    const clinicCount = await this.clinicModel.countDocuments({
+      departmentId: department._id,
+    });
+  
+    return {
+      ...department.toObject?.() ?? department,
+      clinicCount,
+    };
+  }
+  
   async getDepartmentById(id: string): Promise<ApiGetResponse<Department>> {
     const department = await this.departmentModel
       .findById(id)
