@@ -7,12 +7,14 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ClinicDocument,Clinic } from '../clinic/schemas/clinic.schema';
+import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
 @Injectable()
 export class DepartmentService {
   constructor(
     @InjectModel(Department.name)
     private departmentModel: Model<DepartmentDocument>,
     @InjectModel(Clinic.name) private clinicModel: Model<ClinicDocument>, // 👈 هنا
+    @InjectModel(Appointment.name) private appointmentModel: Model<AppointmentDocument>, // 👈 هنا
   
   ) {}
 
@@ -75,7 +77,7 @@ export class DepartmentService {
       sort,
     );
   
-    // إضافة عدد العيادات المرتبطة بكل قسم
+    // إضافة عدد العيادات والمرضى المرتبطين بكل قسم
     if (result.data) {
       const departments = result.data;
       const updatedDepartments = await Promise.all(
@@ -90,15 +92,35 @@ export class DepartmentService {
   async addClinicCounts(department: any) {
     // جلب عدد العيادات المرتبطة بالقسم
     const clinicCount = await this.clinicModel.countDocuments({
-      departmentId: department._id.toString,
+      departmentId: department._id.toString(),
     });
   
-    // إرجاع البيانات مع إضافة عدد العيادات
+    // جلب عدد المرضى في العيادات المرتبطة بالقسم
+    const patientCount = await this.appointmentModel.aggregate([
+      {
+        $match: {
+          clinicId: { $in: department.clinicCollectionId.map((clinic: any) => clinic._id) },
+        },
+      },
+      {
+        $group: {
+          _id: "$patientId", // تجميع المواعيد بناءً على معرف المريض
+        },
+      },
+      {
+        $count: "totalPatients", // حساب عدد المرضى الفريدين
+      },
+    ]);
+  
+    const totalPatients = patientCount.length > 0 ? patientCount[0].totalPatients : 0;
+  
     return {
       ...department.toObject?.() ?? department,
-      clinicCount, // عدد العيادات المرتبطة
+      clinicCount,
+      totalPatients, // إضافة عدد المرضى
     };
   }
+  
   
   async getDepartmentById(id: string): Promise<ApiGetResponse<Department>> {
     const department = await this.departmentModel
