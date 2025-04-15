@@ -77,10 +77,10 @@ export class PatientService {
             .sort({ datetime: -1 })  // ترتيب حسب تاريخ ووقت الزيارة من الأحدث إلى الأقدم
          
             .exec();
-            let doctorName = "null";
+            let doctorName = "";
             if (lastAppointment && lastAppointment.doctor) {
               const doctor = await this.employeeModel.findById(lastAppointment.doctor);
-              doctorName = doctor ? doctor.name : 'غير معروف';
+              doctorName = doctor ? doctor.name : " ";
             }
           // إضافة آخر زيارة مع اسم الطبيب إلى بيانات المريض
           return {
