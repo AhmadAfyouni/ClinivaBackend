@@ -34,6 +34,7 @@ export class DepartmentService {
     page = Number(page) || 1;
     limit = Number(limit) || 10;
   
+    // تحديد حقل الفرز الافتراضي
     const sortField: string = sortBy ?? 'createdAt';
     const sort: Record<string, number> = {
       [sortField]: order === 'asc' ? 1 : -1,
@@ -42,9 +43,11 @@ export class DepartmentService {
     // إعداد شروط البحث
     const searchConditions: any[] = [];
   
+    // تحقق إذا كان يوجد نص للبحث
     if (filters.search) {
-      const regex = new RegExp(filters.search, 'i');
+      const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
   
+      // إضافة شروط البحث للحقول النصية والمرتبط بالمجمع
       searchConditions.push(
         { name: regex },
         { address: regex },
@@ -52,8 +55,10 @@ export class DepartmentService {
       );
     }
   
+    // إزالة مفتاح البحث من الفلاتر قبل تمريرها
     delete filters.search;
   
+    // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
@@ -62,7 +67,7 @@ export class DepartmentService {
     // استخدام paginate مع populate
     const result = await paginate(
       this.departmentModel,
-      ['clinicCollectionId', 'specializations'],
+      ['clinicCollectionId', 'specializations'], // الحقول المرتبطة التي سيتم تحميلها
       page,
       limit,
       allData,
@@ -74,7 +79,7 @@ export class DepartmentService {
     if (result.data) {
       const departments = result.data;
       const updatedDepartments = await Promise.all(
-        departments.map((department) => this.addClinicCounts(department)),
+        departments.map((department) => this.addClinicCounts(department)), // إضافة عدد العيادات
       );
       result.data = updatedDepartments;
     }
@@ -83,13 +88,15 @@ export class DepartmentService {
   }
   
   async addClinicCounts(department: any) {
+    // جلب عدد العيادات المرتبطة بالقسم
     const clinicCount = await this.clinicModel.countDocuments({
       departmentId: department._id,
     });
   
+    // إرجاع البيانات مع إضافة عدد العيادات
     return {
       ...department.toObject?.() ?? department,
-      clinicCount,
+      clinicCount, // عدد العيادات المرتبطة
     };
   }
   
