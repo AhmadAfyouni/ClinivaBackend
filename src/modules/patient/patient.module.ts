@@ -10,7 +10,7 @@ import { EmployeeModule } from '../employee/employee.module';
   imports: [MongooseModule.forFeature([{ name: Patient.name, schema: PatientSchema }]),AppointmentModule,MedicalRecordModule,EmployeeModule],
   controllers: [PatientController],
   providers: [PatientService],
-  exports: [PatientService], // يمكن استخدامها في وحدات أخرى
+  exports: [PatientService,MongooseModule], // يمكن استخدامها في وحدات أخرى
 })
 export class PatientModule {
 }
