@@ -62,36 +62,47 @@ export class ClinicCollectionService {
       sort,
     );
 
-    // Add employee count for each clinic collection
     if (result.data) {
       const clinicCollections = result.data;
-      const updatedClinicCollections = await Promise.all(clinicCollections.map(async (clinicCollection) => {
-        const [employeeCount, departmentCount] = await Promise.all([
-          this.employeeModel.countDocuments({
-            clinicCollectionId: clinicCollection._id.toString()
-          }),
-          this.departmentModel.countDocuments({
-            clinicCollectionId: clinicCollection._id.toString()
-          })
-        ]);
-
-        // console.log(`Clinic ${clinicCollection.name} (${clinicCollection._id}):`)
-        console.log(`- Employees: ${employeeCount}`)
-        // console.log(`- Departments: ${departmentCount}`)
-
-        // Create a new object with all the original properties plus counts
-        return {
-          ...clinicCollection.toObject(),
-          employeeCount,
-          departmentCount
-        };
-      }));
-
-      // Update the result data with the new array containing employeeCount
+      const updatedClinicCollections = await Promise.all(
+        clinicCollections.map((clinicCollection) => this.addClinicCounts(clinicCollection))
+      );
       result.data = updatedClinicCollections;
     }
 
     return result;
+  }
+
+  private async getRelatedCount(id: string, model: Model<any>, foreignKey: string): Promise<number> {
+    return await model.countDocuments({
+      [foreignKey]: id
+    });
+  }
+
+  private async addClinicCounts(clinicCollection: ClinicCollectionDocument) {
+    const countConfigs = [
+      { model: this.employeeModel, foreignKey: 'clinicCollectionId', resultKey: 'employeeCount' },
+      { model: this.departmentModel, foreignKey: 'clinicCollectionId', resultKey: 'departmentCount' }
+      // Add more models here as needed, for example:
+      // { model: this.clinicModel, foreignKey: 'clinicCollectionId', resultKey: 'clinicCount' }
+    ];
+
+    const counts = await Promise.all(
+      countConfigs.map(async config => {
+        const count = await this.getRelatedCount(
+          clinicCollection._id.toString(),
+          config.model,
+          config.foreignKey
+        );
+        console.log(`- ${config.resultKey}: ${count}`);
+        return { [config.resultKey]: count };
+      })
+    );
+
+    return {
+      ...clinicCollection.toObject(),
+      ...Object.assign({}, ...counts)
+    };
   }
 
   async getClinicCollectionById(id: string): Promise<ApiGetResponse<ClinicCollection>> {
@@ -99,12 +110,16 @@ export class ClinicCollectionService {
       .findById(id)
       .populate(['companyId', 'specializations'])
       .exec();
+
     if (!clinicCollection)
       throw new NotFoundException('Clinic Collection not found');
+
+    const clinicCollectionWithCounts = await this.addClinicCounts(clinicCollection);
+
     return {
       success: true,
       message: 'clinic Collection retrieved successfully',
-      data: clinicCollection,
+      data: clinicCollectionWithCounts,
     };
   }
 
