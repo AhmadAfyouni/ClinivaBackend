@@ -10,8 +10,8 @@ import { AppointmentSchema,Appointment } from '../appointment/schemas/appointmen
 import { EmployeeSchema,Employee } from '../employee/schemas/employee.schema';
 @Module({
   imports: [MongooseModule.forFeature([{ name: Patient.name, schema: PatientSchema },
-    { name: 'Appointment', schema: AppointmentSchema }, // إذا كنت تستخدم AppointmentModel هنا
-    { name: 'Employee', schema: EmployeeSchema },
+    { name: Appointment.name, schema: AppointmentSchema }, // إذا كنت تستخدم AppointmentModel هنا
+    { name: Employee.name, schema: EmployeeSchema },
   ]),AppointmentModule,MedicalRecordModule,EmployeeModule],
   controllers: [PatientController],
   providers: [PatientService],
