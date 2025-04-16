@@ -65,6 +65,15 @@ export class ClinicService {
       [sortField]: order === 'asc' ? 1 : -1,
     };
     const searchConditions: any[] = [];
+    const filterConditions: any[] = [];
+    const allowedStatuses = ['true', 'false'];
+    if (filters.isActive) {
+      if (allowedStatuses.includes(filters.isActive)) {
+        filterConditions.push({ isActive: filters.isActive });
+      } else {
+        throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
+      }
+    }
     if (filters.search){
       const regex = new RegExp(filters.search, 'i');
       searchConditions.push(
@@ -72,9 +81,11 @@ export class ClinicService {
       )
     }
     delete filters.search;
+    delete filters.isActive;
     const finalFilter = {
       ...filters,
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
     };
     // Specify the fields to populate
     const populateFields = [
