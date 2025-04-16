@@ -53,7 +53,15 @@ export class SpecializationService {
     };
     
     const searchConditions: any[] = [];
-
+    const filterConditions: any[] = [];
+    const allowedStatuses = ['true', 'false'];
+    if (filters.isActive) {
+      if (allowedStatuses.includes(filters.isActive)) {
+        filterConditions.push({ isActive: filters.isActive });
+      } else {
+        throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
+      }
+    }
   // تحقق إذا كان يوجد نص للبحث في الحقول النصية (name, email)
   if (filters.search) {
     const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
@@ -70,11 +78,13 @@ export class SpecializationService {
       const updatedAt = new Date(filters.updatedAt);
       searchConditions.push({ updatedAt: { $gte: updatedAt } });
     }
+    delete filters.isActive;
     delete filters.search;
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
     };
     // Get paginated specializations
     const result = await paginate(
