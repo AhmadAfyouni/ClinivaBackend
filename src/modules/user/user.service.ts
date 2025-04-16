@@ -40,25 +40,61 @@ export class UserService {
 
   async getAllUsers(paginationDto: PaginationAndFilterDto, filters: any) {
     let { page, limit, allData, sortBy, order } = paginationDto;
-
+  
     // Convert page & limit to numbers
     page = Number(page) || 1;
     limit = Number(limit) || 10;
-
+  
+    // تحديد حقل الفرز الافتراضي
     const sortField: string = sortBy ?? 'createdAt';
-    const sort: Record<string, number> = {
-      [sortField]: order === 'asc' ? 1 : -1,
+    const sort: { [key: string]: 1 | -1 } = {
+      [sortField]: order === 'asc' ? 1 : -1, // تحديد الاتجاه بناءً على 'asc' أو 'desc'
     };
-    return paginate(
-      this.userModel,
-      ['roleIds'],
+  
+    // إعداد شروط البحث
+    const searchConditions: any[] = [];
+  
+    // تحقق إذا كان يوجد نص للبحث في الحقول النصية
+    if (filters.search) {
+      const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
+  
+      // إضافة شروط البحث للحقول النصية
+      searchConditions.push(
+        { name: regex },         // البحث في الحقل name
+        { email: regex },        // البحث في الحقل email
+      );
+    }
+  
+    // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
+    if (filters.createdAt) {
+      const createdAt = new Date(filters.createdAt);
+      searchConditions.push({ createdAt: { $gte: createdAt } });
+    }
+  
+    // دمج الفلاتر مع شروط البحث
+    const finalFilter = {
+      ...filters,
+      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+    };
+  
+    // جلب جميع المستخدمين مع populate للأدوار
+    const users = await this.userModel
+      .find(finalFilter)
+      .populate('roleIds', 'name') // Populate للحصول على الأسماء فقط
+      .sort(sort) // استخدام sort مع التنسيق الصحيح
+      .skip((page - 1) * limit)
+      .limit(limit);
+  
+    // هنا يمكن تنفيذ التعديلات الأخرى مثل الإحصائيات وغيرها
+    // أرجع النتيجة مع الفلاتر
+    return {
+      data: users,
       page,
       limit,
-      allData,
-      filters,
-      sort,
-    );
+      total: await this.userModel.countDocuments(finalFilter),
+    };
   }
+  
 
   async getUserById(id: string): Promise<ApiGetResponse<User>> {
     const user = await this.userModel.findById(id).populate(['roleIds']).exec();
