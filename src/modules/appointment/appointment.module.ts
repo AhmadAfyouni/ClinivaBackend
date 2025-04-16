@@ -9,8 +9,8 @@ import { PatientModule } from '../patient/patient.module';
 import { Employee,EmployeeSchema } from '../employee/schemas/employee.schema';
 import { Patient,PatientSchema } from '../patient/schemas/patient.schema';
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Employee.name, schema: EmployeeSchema },
-    { name: Appointment.name, schema: AppointmentSchema },
+  imports: [MongooseModule.forFeature([{ name: Appointment.name, schema: AppointmentSchema },{ name: Employee.name, schema: EmployeeSchema },
+    
      { name: Patient.name, schema: PatientSchema }]),PatientModule,EmployeeModule],
   controllers: [AppointmentController],
   providers: [AppointmentService],
