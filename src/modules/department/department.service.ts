@@ -94,7 +94,7 @@ export class DepartmentService {
   async addStatsToDepartment(department: any) {
     // 1. جلب العيادات المرتبطة بالقسم
     const clinics = await this.clinicModel.find({
-      departmentId: department._id,
+      departmentId: department._id.toString,
     }).select('_id');
   
     const clinicIds = clinics.map(c => c._id);
