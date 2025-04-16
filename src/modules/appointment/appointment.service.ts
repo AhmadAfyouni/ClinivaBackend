@@ -78,7 +78,7 @@ export class AppointmentService {
 //   );
 // }
 
-async getAllAppointments(searchTerm: string, paginationDto: PaginationAndFilterDto) {
+async getAllAppointments(paginationDto: PaginationAndFilterDto, filters: any) {
   let { page, limit, allData, sortBy, order } = paginationDto;
 
   // تحويل الباجينيشين إلى أرقام
@@ -91,6 +91,7 @@ async getAllAppointments(searchTerm: string, paginationDto: PaginationAndFilterD
   let doctorIds: string[] = [];
   let patientIds: string[] = [];
   const searchConditions: any[] = [];
+  const searchTerm = filters.search; // استخراج searchTerm من الفلتر
 
   if (searchTerm) {
     const searchRegex = new RegExp(searchTerm, 'i');
@@ -111,8 +112,9 @@ async getAllAppointments(searchTerm: string, paginationDto: PaginationAndFilterD
     }
   
     if (patientIds.length) {
-      searchOrConditions.push({ patient: { $in: patientIds } }); // ✅ لن يظهر الخطأ الآن
+      searchOrConditions.push({ patient: { $in: patientIds } });
     }
+
     if (searchOrConditions.length) {
       searchConditions.push({ $or: searchOrConditions });
     } else {
@@ -120,8 +122,14 @@ async getAllAppointments(searchTerm: string, paginationDto: PaginationAndFilterD
     }
   }
 
-  // الفلتر النهائي يعتمد فقط على شروط البحث
-  const finalFilter = searchConditions.length ? { $and: searchConditions } : {};
+  // تنظيف الفلتر من حقل البحث
+  delete filters.search;
+
+  // دمج الفلاتر مع شروط البحث
+  const finalFilter: Record<string, any> = {
+    ...filters,
+    ...(searchConditions.length ? { $and: searchConditions } : {})
+  };
 
   // الاستعلام مع البوبيوليت
   const result = await paginate(
