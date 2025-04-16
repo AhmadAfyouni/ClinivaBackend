@@ -48,7 +48,7 @@ export class PatientService {
   const allowedStatuses = ['true', 'flase'];
   if (filters.isActive) {
     if (allowedStatuses.includes(filters.isActive)) {
-      filterConditions.push({ status: filters.isActive });
+      filterConditions.push({ isActive: filters.isActive });
     } else {
       throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
     }
