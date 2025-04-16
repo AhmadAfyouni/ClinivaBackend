@@ -41,15 +41,15 @@ export class AppointmentService {
   
     const searchConditions: any[] = [];
   
-    // تحقق إذا كان يوجد نص للبحث في الحقول النصية (doctor name, clinic name, patient name)
+    // تحقق إذا كان يوجد نص للبحث في الأسماء (name of doctor, clinic, patient)
     if (filters.search) {
-      const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
+      const searchRegex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
   
-      // إضافة شروط البحث للحقول النصية
+      // إضافة شروط البحث للأسماء
       searchConditions.push(
-        { 'doctor.name': regex },        // البحث في حقل اسم الطبيب
-        { 'clinic.name': regex },        // البحث في حقل اسم العيادة
-        { 'patient.name': regex },       // البحث في حقل اسم المريض
+        { 'doctor.name': searchRegex },   // البحث في اسم الطبيب
+        { 'clinic.name': searchRegex },   // البحث في اسم العيادة
+        { 'patient.name': searchRegex },  // البحث في اسم المريض
       );
     }
   
@@ -62,9 +62,14 @@ export class AppointmentService {
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
     };
   
+    // استخدم paginate مع populate لتمثيل الأسماء بدلاً من المعرفات
     return paginate(
       this.appointmentModel,
-      ['patient', 'clinic', 'doctor'],
+      [
+        { path: 'doctor', select: 'name' },  // Populate with doctor name
+        { path: 'clinic', select: 'name' },  // Populate with clinic name
+        { path: 'patient', select: 'name' }, // Populate with patient name
+      ],
       page,
       limit,
       allData,
