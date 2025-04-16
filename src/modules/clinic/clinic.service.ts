@@ -89,7 +89,7 @@ export class ClinicService {
       page,
       limit,
       allData,
-      filters,
+      finalFilter,
       sort,
     );
 
