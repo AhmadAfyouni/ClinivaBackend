@@ -48,7 +48,7 @@ export class DepartmentService {
   
     // إعداد شروط البحث
     const searchConditions: any[] = [];
-    const filterConditions: any[] = [];
+  
     // تحقق إذا كان يوجد نص للبحث
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
@@ -62,30 +62,18 @@ export class DepartmentService {
       );
     }
     if (filters.datetime) {
-      const targetDate = new Date(filters.datetime);
-      const startOfDay = new Date(targetDate);
-      startOfDay.setUTCHours(0, 0, 0, 0);
-      
-      const endOfDay = new Date(targetDate);
-      endOfDay.setUTCHours(23, 59, 59, 999);
-  
-      filterConditions.push({
-        datetime: {
-          $gte: startOfDay,
-          $lte: endOfDay
-        }
-      });
+      const datetime = new Date(filters.datetime);
+      searchConditions.push({ datetime });
     }
     
     
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
     delete filters.search;
-    delete filters.datetime;
+  
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
-      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
     };
   
     // استخدام paginate مع populate
