@@ -78,7 +78,7 @@ export class AppointmentService {
 //   );
 // }
 
-async searchAppointmentsByDoctorOrPatientName(searchTerm: string, paginationDto: PaginationAndFilterDto) {
+async getAllAppointments(searchTerm: string, paginationDto: PaginationAndFilterDto) {
   let { page, limit, allData, sortBy, order } = paginationDto;
 
   // تحويل الباجينيشين إلى أرقام
