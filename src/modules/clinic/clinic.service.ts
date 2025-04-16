@@ -64,7 +64,18 @@ export class ClinicService {
     const sort: Record<string, number> = {
       [sortField]: order === 'asc' ? 1 : -1,
     };
-
+    const searchConditions: any[] = [];
+    if (filters.search){
+      const regex = new RegExp(filters.search, 'i');
+      searchConditions.push(
+        { name: regex },
+      )
+    }
+    delete filters.search;
+    const finalFilter = {
+      ...filters,
+      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+    };
     // Specify the fields to populate
     const populateFields = [
       { path: 'departmentId' }, // Existing field
