@@ -52,7 +52,15 @@ export class UserService {
     };
   
     const searchConditions: any[] = [];
-
+    const filterConditions: any[] = [];
+    const allowedStatuses = ['true', 'false'];
+    if (filters.isActive) {
+      if (allowedStatuses.includes(filters.isActive)) {
+        filterConditions.push({ isActive: filters.isActive });
+      } else {
+        throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
+      }
+    }
   // تحقق إذا كان يوجد نص للبحث في الحقول النصية (name, email)
   if (filters.search) {
     const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
@@ -70,10 +78,12 @@ export class UserService {
       searchConditions.push({ createdAt: { $gte: createdAt } });
     }
     delete filters.search;
+    delete filters.isActive;
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
     };
   
     // استخدم paginate مع populate
