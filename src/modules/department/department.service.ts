@@ -105,7 +105,7 @@ export class DepartmentService {
     if (clinicCount > 0) {
       // 2. جلب المواعيد المرتبطة بهذه العيادات
       const appointments = await this.appointmentModel.find({
-        clinicId: { $in: clinicIds },
+        clinic: { $in: clinicIds },
       }).select('_id');
   
       const appointmentIds = appointments.map(a => a._id);
@@ -113,7 +113,7 @@ export class DepartmentService {
       if (appointmentIds.length > 0) {
         // 3. حساب عدد السجلات الطبية المرتبطة بهذه المواعيد
         patientCount = await this.medicalRecordModel.countDocuments({
-          appointmentId: { $in: appointmentIds },
+          appointment: { $in: appointmentIds },
         });
       }
     }
