@@ -51,19 +51,18 @@ export class UserService {
       [sortField]: order === 'asc' ? 1 : -1, // تحديد الاتجاه بناءً على 'asc' أو 'desc'
     };
   
-    // إعداد شروط البحث
     const searchConditions: any[] = [];
-  
-    // تحقق إذا كان يوجد نص للبحث في الحقول النصية
-    if (filters.search) {
-      const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
-  
-      // إضافة شروط البحث للحقول النصية
-      searchConditions.push(
-        { name: regex },         // البحث في الحقل name
-        { email: regex },        // البحث في الحقل email
-      );
-    }
+
+  // تحقق إذا كان يوجد نص للبحث في الحقول النصية (name, email)
+  if (filters.search) {
+    const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
+
+    // إضافة شروط البحث للحقول النصية
+    searchConditions.push(
+      { name: regex },         // البحث في الحقل name
+      { email: regex },        // البحث في الحقل email
+    );
+  }
   
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
     if (filters.createdAt) {
