@@ -52,6 +52,30 @@ export class SpecializationService {
       [sortField]: order === 'asc' ? 1 : -1,
     };
     
+    const searchConditions: any[] = [];
+
+  // تحقق إذا كان يوجد نص للبحث في الحقول النصية (name, email)
+  if (filters.search) {
+    const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
+
+    // إضافة شروط البحث للحقول النصية
+    searchConditions.push(
+      { name: regex },         // البحث في الحقل name
+  
+    );
+  }
+  
+    // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
+    if (filters.updatedAt) {
+      const updatedAt = new Date(filters.updatedAt);
+      searchConditions.push({ updatedAt: { $gte: updatedAt } });
+    }
+    delete filters.search;
+    // دمج الفلاتر مع شروط البحث
+    const finalFilter = {
+      ...filters,
+      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+    };
     // Get paginated specializations
     const result = await paginate(
       this.specializationModel,
@@ -59,7 +83,7 @@ export class SpecializationService {
       page,
       limit,
       allData,
-      filters,
+      finalFilter,
       sort,
     );
 
