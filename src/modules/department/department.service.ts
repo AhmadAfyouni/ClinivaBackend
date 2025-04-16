@@ -83,7 +83,7 @@ export class DepartmentService {
     if (result.data) {
       const departments = result.data;
       const updatedDepartments = await Promise.all(
-        departments.map((department) => this.addPatientCounts(department)),
+        departments.map((department) => this.addStatsToDepartment(department)),
       );
       result.data = updatedDepartments;
     }
@@ -91,45 +91,41 @@ export class DepartmentService {
     return result;
   }
   
-  async addPatientCounts(department: any) {
+  async addStatsToDepartment(department: any) {
     // 1. جلب العيادات المرتبطة بالقسم
     const clinics = await this.clinicModel.find({
       departmentId: department._id,
     }).select('_id');
   
     const clinicIds = clinics.map(c => c._id);
+    const clinicCount = clinicIds.length;
   
-    if (clinicIds.length === 0) {
-      return {
-        ...department.toObject?.() ?? department,
-        patientCount: 0,
-      };
+    let patientCount = 0;
+  
+    if (clinicCount > 0) {
+      // 2. جلب المواعيد المرتبطة بهذه العيادات
+      const appointments = await this.appointmentModel.find({
+        clinicId: { $in: clinicIds },
+      }).select('_id');
+  
+      const appointmentIds = appointments.map(a => a._id);
+  
+      if (appointmentIds.length > 0) {
+        // 3. حساب عدد السجلات الطبية المرتبطة بهذه المواعيد
+        patientCount = await this.medicalRecordModel.countDocuments({
+          appointmentId: { $in: appointmentIds },
+        });
+      }
     }
   
-    // 2. جلب المواعيد المرتبطة بهذه العيادات
-    const appointments = await this.appointmentModel.find({
-      clinicId: { $in: clinicIds },
-    }).select('_id');
-  
-    const appointmentIds = appointments.map(a => a._id);
-  
-    if (appointmentIds.length === 0) {
-      return {
-        ...department.toObject?.() ?? department,
-        patientCount: 0,
-      };
-    }
-  
-    // 3. حساب عدد السجلات الطبية المرتبطة بهذه المواعيد
-    const patientCount = await this.medicalRecordModel.countDocuments({
-      appointmentId: { $in: appointmentIds },
-    });
-  
+    // 4. إعادة القسم مع عدد العيادات وعدد المرضى
     return {
       ...department.toObject?.() ?? department,
+      clinicCount,
       patientCount,
     };
   }
+  
   
   
   async getDepartmentById(id: string): Promise<ApiGetResponse<Department>> {
