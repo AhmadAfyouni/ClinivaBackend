@@ -44,7 +44,15 @@ export class PatientService {
   
     // إعداد شروط البحث
     const searchConditions: any[] = [];
-  
+    const filterConditions: any[] = [];
+  const allowedStatuses = ['true', 'flase'];
+  if (filters.status) {
+    if (allowedStatuses.includes(filters.status)) {
+      filterConditions.push({ status: filters.status });
+    } else {
+      throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
+    }
+  }
     // تحقق إذا كان يوجد نص للبحث
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
@@ -58,11 +66,12 @@ export class PatientService {
   
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
     delete filters.search;
-  
+    delete filters.status;
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
     };
   
     // استخدام paginate مع الشروط النهائية
