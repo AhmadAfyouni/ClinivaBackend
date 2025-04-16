@@ -7,12 +7,16 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ClinicDocument,Clinic } from '../clinic/schemas/clinic.schema';
+import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
+import { MedicalRecord,MedicalRecordDocument } from '../medicalrecord/schemas/medicalrecord.schema';
 @Injectable()
 export class DepartmentService {
   constructor(
     @InjectModel(Department.name)
     private departmentModel: Model<DepartmentDocument>,
     @InjectModel(Clinic.name) private clinicModel: Model<ClinicDocument>, // 👈 هنا
+    @InjectModel(Appointment.name) private appointmentModel: Model<AppointmentDocument>, // 👈 هنا
+    @InjectModel(MedicalRecord.name) private medicalRecordModel: Model<MedicalRecordDocument>, // 👈 هنا
   
   ) {}
 
@@ -47,7 +51,7 @@ export class DepartmentService {
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
   
-      // إضافة شروط البحث للحقول النصية والمرتبط بالمجمع
+      // إضافة شروط البحث للحقول النصية والمرتبطة بالمجمع
       searchConditions.push(
         { name: regex },
         { address: regex },
@@ -75,11 +79,11 @@ export class DepartmentService {
       sort,
     );
   
-    // إضافة عدد العيادات المرتبطة بكل قسم
+    // إضافة عدد المرضى المرتبطين بكل قسم
     if (result.data) {
       const departments = result.data;
       const updatedDepartments = await Promise.all(
-        departments.map((department) => this.addClinicCounts(department)), // إضافة عدد العيادات
+        departments.map((department) => this.addPatientCounts(department)),
       );
       result.data = updatedDepartments;
     }
@@ -87,18 +91,46 @@ export class DepartmentService {
     return result;
   }
   
-  async addClinicCounts(department: any) {
-    // جلب عدد العيادات المرتبطة بالقسم
-    const clinicCount = await this.clinicModel.countDocuments({
-      departmentId: department._id.toString,
+  async addPatientCounts(department: any) {
+    // 1. جلب العيادات المرتبطة بالقسم
+    const clinics = await this.clinicModel.find({
+      departmentId: department._id,
+    }).select('_id');
+  
+    const clinicIds = clinics.map(c => c._id);
+  
+    if (clinicIds.length === 0) {
+      return {
+        ...department.toObject?.() ?? department,
+        patientCount: 0,
+      };
+    }
+  
+    // 2. جلب المواعيد المرتبطة بهذه العيادات
+    const appointments = await this.appointmentModel.find({
+      clinicId: { $in: clinicIds },
+    }).select('_id');
+  
+    const appointmentIds = appointments.map(a => a._id);
+  
+    if (appointmentIds.length === 0) {
+      return {
+        ...department.toObject?.() ?? department,
+        patientCount: 0,
+      };
+    }
+  
+    // 3. حساب عدد السجلات الطبية المرتبطة بهذه المواعيد
+    const patientCount = await this.medicalRecordModel.countDocuments({
+      appointmentId: { $in: appointmentIds },
     });
   
-    // إرجاع البيانات مع إضافة عدد العيادات
     return {
       ...department.toObject?.() ?? department,
-      clinicCount, // عدد العيادات المرتبطة
+      patientCount,
     };
   }
+  
   
   async getDepartmentById(id: string): Promise<ApiGetResponse<Department>> {
     const department = await this.departmentModel
