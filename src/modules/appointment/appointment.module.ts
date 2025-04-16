@@ -3,10 +3,15 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { AppointmentService } from './appointment.service';
 import { AppointmentController } from './appointment.controller';
 import { Appointment, AppointmentSchema } from './schemas/appointment.schema';
-import { PatientSchema } from '../patient/schemas/patient.schema';
 
+import { EmployeeModule } from '../employee/employee.module';
+import { PatientModule } from '../patient/patient.module';
+import { Employee,EmployeeSchema } from '../employee/schemas/employee.schema';
+import { Patient,PatientSchema } from '../patient/schemas/patient.schema';
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Appointment.name, schema: AppointmentSchema }, { name: 'Patient', schema: PatientSchema }])],
+  imports: [MongooseModule.forFeature([{ name: Employee.name, schema: EmployeeSchema },
+    { name: Appointment.name, schema: AppointmentSchema },
+     { name: Patient.name, schema: PatientSchema }]),PatientModule,EmployeeModule],
   controllers: [AppointmentController],
   providers: [AppointmentService],
   exports: [AppointmentService,MongooseModule],

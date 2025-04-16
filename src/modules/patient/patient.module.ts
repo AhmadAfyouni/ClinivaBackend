@@ -14,7 +14,7 @@ import { MedicalRecord,MedicalRecordSchema } from '../medicalrecord/schemas/medi
     { name: Appointment.name, schema: AppointmentSchema }, // إذا كنت تستخدم AppointmentModel هنا
     { name: Employee.name, schema: EmployeeSchema },
     { name: MedicalRecord.name, schema: MedicalRecordSchema },
-  ]),AppointmentModule,MedicalRecordModule,EmployeeModule,MedicalRecordModule],
+  ]),AppointmentModule,EmployeeModule,MedicalRecordModule],
   controllers: [PatientController],
   providers: [PatientService],
   exports: [PatientService], // يمكن استخدامها في وحدات أخرى
