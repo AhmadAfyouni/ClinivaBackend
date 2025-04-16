@@ -61,7 +61,10 @@ export class DepartmentService {
         { clinicCollectionId: { $in: clinicIds } } // البحث داخل المجمع المرتبط
       );
     }
-  
+    if (filters.datetime) {
+      const datetime = new Date(filters.datetime);
+      searchConditions.push({ datetime: { $gte: datetime } });
+    }
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
     delete filters.search;
   
