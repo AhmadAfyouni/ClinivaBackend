@@ -62,9 +62,11 @@ export class DepartmentService {
       );
     }
     if (filters.datetime) {
-      const datetime = new Date(filters.datetime);
-      searchConditions.push({ datetime: { $gte: datetime } });
+      searchConditions.push({
+        datetime: new Date(filters.datetime)
+      });
     }
+    
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
     delete filters.search;
   
