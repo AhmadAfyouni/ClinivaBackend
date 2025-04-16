@@ -69,7 +69,7 @@ export class UserService {
       const createdAt = new Date(filters.createdAt);
       searchConditions.push({ createdAt: { $gte: createdAt } });
     }
-  
+    delete filters.search;
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
