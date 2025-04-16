@@ -77,24 +77,22 @@ export class UserService {
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
     };
   
-    // جلب جميع المستخدمين مع populate للأدوار
-    const users = await this.userModel
-      .find(finalFilter)
-      .populate('roleIds', 'name') // Populate للحصول على الأسماء فقط
-      .sort(sort) // استخدام sort مع التنسيق الصحيح
-      .skip((page - 1) * limit)
-      .limit(limit);
-  
-    // هنا يمكن تنفيذ التعديلات الأخرى مثل الإحصائيات وغيرها
-    // أرجع النتيجة مع الفلاتر
-    return {
-      data: users,
+    // استخدم paginate مع populate
+    const result = await paginate(
+      this.userModel,
+      ['roleIds'], // الحقول المرتبطة التي سيتم تحميلها
       page,
       limit,
-      total: await this.userModel.countDocuments(finalFilter),
-    };
+      allData,
+      finalFilter, // الفلاتر النهائية
+      sort, // الفرز
+    );
+  
+    // نتيجة paginate يمكن أن تتطلب تعديل إضافي إذا كان يتم إضافة بيانات إضافية مثل الإحصائيات
+    return result;
   }
   
+
   async getUserById(id: string): Promise<ApiGetResponse<User>> {
     const user = await this.userModel.findById(id).populate(['roleIds']).exec();
 
