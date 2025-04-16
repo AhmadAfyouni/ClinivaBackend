@@ -80,15 +80,15 @@ export class UserService {
     // استخدم paginate مع populate
     const result = await paginate(
       this.userModel,
-      ['roleIds'], // الحقول المرتبطة التي سيتم تحميلها
+      ['roleIds'], 
       page,
       limit,
       allData,
-      finalFilter, // الفلاتر النهائية
-      sort, // الفرز
+      finalFilter, 
+      sort, 
     );
   
-    // نتيجة paginate يمكن أن تتطلب تعديل إضافي إذا كان يتم إضافة بيانات إضافية مثل الإحصائيات
+   
     return result;
   }
   
