@@ -45,7 +45,7 @@ export class PatientService {
     // إعداد شروط البحث
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
-  const allowedStatuses = ['true', 'flase'];
+  const allowedStatuses = ['true', 'false'];
   if (filters.isActive) {
     if (allowedStatuses.includes(filters.isActive)) {
       filterConditions.push({ isActive: filters.isActive });
