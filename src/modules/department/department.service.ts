@@ -9,6 +9,7 @@ import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ClinicDocument,Clinic } from '../clinic/schemas/clinic.schema';
 import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
 import { MedicalRecord,MedicalRecordDocument } from '../medicalrecord/schemas/medicalrecord.schema';
+import { ClinicCollectionDocument,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
 @Injectable()
 export class DepartmentService {
   constructor(
@@ -17,6 +18,7 @@ export class DepartmentService {
     @InjectModel(Clinic.name) private clinicModel: Model<ClinicDocument>, // 👈 هنا
     @InjectModel(Appointment.name) private appointmentModel: Model<AppointmentDocument>, // 👈 هنا
     @InjectModel(MedicalRecord.name) private medicalRecordModel: Model<MedicalRecordDocument>, // 👈 هنا
+    @InjectModel(ClinicCollection.name) private cliniccollectionModel: Model<ClinicCollectionDocument>, // 👈 هنا
   
   ) {}
 
@@ -50,12 +52,13 @@ export class DepartmentService {
     // تحقق إذا كان يوجد نص للبحث
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
-  
+      const clinics = await this.cliniccollectionModel.find({ name: regex }).select('_id');
+      const clinicIds = clinics.map(c => c._id.toString());
       // إضافة شروط البحث للحقول النصية والمرتبطة بالمجمع
       searchConditions.push(
         { name: regex },
         { address: regex },
-        { 'clinicCollectionId.name': regex } // البحث داخل المجمع المرتبط
+        { clinicCollectionId: { $in: clinicIds } } // البحث داخل المجمع المرتبط
       );
     }
   
@@ -71,7 +74,7 @@ export class DepartmentService {
     // استخدام paginate مع populate
     const result = await paginate(
       this.departmentModel,
-      ['clinicCollectionId', 'specializations'], // الحقول المرتبطة التي سيتم تحميلها
+      [ { path: 'clinicCollectionId', select: 'name' },, 'specializations'], // الحقول المرتبطة التي سيتم تحميلها
       page,
       limit,
       allData,

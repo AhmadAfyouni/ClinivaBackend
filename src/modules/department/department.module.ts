@@ -9,12 +9,15 @@ import { ClinicSchema,Clinic } from '../clinic/schemas/clinic.schema';
 import { AppointmentSchema,Appointment } from '../appointment/schemas/appointment.schema';
 import { MedicalRecordModule } from '../medicalrecord/medical-record.module';
 import { MedicalRecord,MedicalRecordSchema } from '../medicalrecord/schemas/medicalrecord.schema';
+import { ClinicCollectionSchema,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
+import { ClinicCollectionModule } from '../cliniccollection/clinic-collection.module';
 @Module({
   imports: [MongooseModule.forFeature([{ name: Department.name, schema: DepartmentSchema },
     { name: Clinic.name, schema: ClinicSchema },
+    { name: ClinicCollection.name, schema: ClinicCollectionSchema },
     { name: Appointment.name, schema: AppointmentSchema },
     { name: MedicalRecord.name, schema: MedicalRecordSchema },
-  ]),ClinicModule,AppointmentModule,MedicalRecordModule],
+  ]),ClinicModule,AppointmentModule,MedicalRecordModule,ClinicCollectionModule],
   controllers: [DepartmentController],
   providers: [DepartmentService],
   exports: [DepartmentService],
