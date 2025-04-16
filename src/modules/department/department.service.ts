@@ -85,6 +85,7 @@ export class DepartmentService {
     const finalFilter = {
       ...filters,
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
     };
   
     // استخدام paginate مع populate
