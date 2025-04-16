@@ -92,7 +92,15 @@ async getAllAppointments(paginationDto: PaginationAndFilterDto, filters: any) {
   let patientIds: string[] = [];
   const searchConditions: any[] = [];
   const searchTerm = filters.search; // استخراج searchTerm من الفلتر
-
+  const filterConditions: any[] = [];
+  const allowedStatuses = ['scheduled', 'completed', 'cancelled'];
+  if (filters.status) {
+    if (allowedStatuses.includes(filters.status)) {
+      filterConditions.push({ status: filters.status });
+    } else {
+      throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
+    }
+  }
   if (searchTerm) {
     const searchRegex = new RegExp(searchTerm, 'i');
 
@@ -124,11 +132,12 @@ async getAllAppointments(paginationDto: PaginationAndFilterDto, filters: any) {
 
   // تنظيف الفلتر من حقل البحث
   delete filters.search;
-
+  delete filters.status;
   // دمج الفلاتر مع شروط البحث
   const finalFilter: Record<string, any> = {
     ...filters,
-    ...(searchConditions.length ? { $and: searchConditions } : {})
+    ...(searchConditions.length ? { $and: searchConditions } : {}),
+    ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
   };
 
   // الاستعلام مع البوبيوليت
