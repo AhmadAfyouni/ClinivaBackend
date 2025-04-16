@@ -62,7 +62,7 @@ export class AppointmentService {
     };
   
     // استخدم paginate مع populate لتمثيل الأسماء بدلاً من المعرفات
-    return paginate(
+    const result = await paginate(
       this.appointmentModel,
       [
         { path: 'doctor', select: 'name' },  // Populate doctor name based on doctor ID
@@ -75,6 +75,11 @@ export class AppointmentService {
       finalFilter,
       sort,
     );
+  
+    // تأكد من أن النتيجة تحتوي على البيانات المطلوبة
+    console.log('Appointments with populated doctor, patient, and clinic:', result);
+  
+    return result;
   }
   
 
