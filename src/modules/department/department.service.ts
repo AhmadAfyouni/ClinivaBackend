@@ -91,9 +91,9 @@ export class DepartmentService {
     return result;
   }
   async addStatsToDepartment(department: any) {
-    console.log(`🔍 القسم: ${department.name} (ID: ${department._id})`);
+    console.log(`🔍 Department: ${department.name} (ID: ${department._id})`);
   
-    // 1. جلب العيادات المرتبطة بهذا القسم فقط
+    // 1. Get clinics associated with this department only
     const clinics = await this.clinicModel.find({
       departmentId: department._id.toString(),
     }).select('_id');
@@ -101,33 +101,33 @@ export class DepartmentService {
     const clinicIds = clinics.map(c => c._id);
     const clinicCount = clinicIds.length;
   
-    console.log(`🏥 عدد العيادات التابعة للقسم "${department.name}": ${clinicCount}`);
-    console.log(`🏥 عيادات القسم (${department.name}):`, clinicIds);
+    console.log(`🏥 Number of clinics for the department "${department.name}": ${clinicCount}`);
+    console.log(`🏥 Clinics for department "${department.name}":`, clinicIds);
   
     let patientCount = 0;
   
     if (clinicCount > 0) {
-      // 2. جلب المواعيد المرتبطة بهذه العيادات فقط
+      // 2. Get appointments related to these clinics only
       const appointments = await this.appointmentModel.find({
-        clinicId: { $in: clinicIds },
+        clinic: { $in: clinicIds },
       }).select('_id');
   
       const appointmentIds = appointments.map(a => a._id);
   
-      console.log(`📅 عدد المواعيد التابعة لعيادات القسم "${department.name}": ${appointmentIds.length}`);
-      console.log(`📅 مواعيد القسم (${department.name}):`, appointmentIds);
+      console.log(`📅 Number of appointments for clinics in department "${department.name}": ${appointmentIds.length}`);
+      console.log(`📅 Appointments for department "${department.name}":`, appointmentIds);
   
       if (appointmentIds.length > 0) {
-        // 3. جلب عدد السجلات الطبية المرتبطة بهذه المواعيد فقط
+        // 3. Count the medical records related to these appointments only
         patientCount = await this.medicalRecordModel.countDocuments({
-          appointmentId: { $in: appointmentIds },
+          appointment: { $in: appointmentIds },
         });
   
-        console.log(`🩺 عدد المرضى (السجلات الطبية) في القسم "${department.name}": ${patientCount}`);
+        console.log(`🩺 Number of patients (medical records) in department "${department.name}": ${patientCount}`);
       }
     }
   
-    // 4. إرجاع القسم مع عدد العيادات وعدد المرضى
+    // 4. Return department with clinic count and patient count
     return {
       ...department.toObject?.() ?? department,
       clinicCount,
