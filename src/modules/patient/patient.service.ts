@@ -46,9 +46,9 @@ export class PatientService {
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
   const allowedStatuses = ['true', 'flase'];
-  if (filters.status) {
-    if (allowedStatuses.includes(filters.status)) {
-      filterConditions.push({ status: filters.status });
+  if (filters.isActive) {
+    if (allowedStatuses.includes(filters.isActive)) {
+      filterConditions.push({ status: filters.isActive });
     } else {
       throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
     }
@@ -66,7 +66,7 @@ export class PatientService {
   
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
     delete filters.search;
-    delete filters.status;
+    delete filters.isActive;
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
