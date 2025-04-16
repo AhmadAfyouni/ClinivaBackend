@@ -90,42 +90,50 @@ export class DepartmentService {
   
     return result;
   }
-  
   async addStatsToDepartment(department: any) {
-    // 1. جلب العيادات المرتبطة بالقسم
+    console.log(`🔍 القسم: ${department.name} (ID: ${department._id})`);
+  
+    // 1. جلب العيادات المرتبطة بهذا القسم فقط
     const clinics = await this.clinicModel.find({
-      departmentId: department._id.toString,
+      departmentId: department._id.toString(),
     }).select('_id');
   
     const clinicIds = clinics.map(c => c._id);
     const clinicCount = clinicIds.length;
   
+    console.log(`🏥 عدد العيادات التابعة للقسم "${department.name}": ${clinicCount}`);
+    console.log(`🏥 عيادات القسم (${department.name}):`, clinicIds);
+  
     let patientCount = 0;
   
     if (clinicCount > 0) {
-      // 2. جلب المواعيد المرتبطة بهذه العيادات
+      // 2. جلب المواعيد المرتبطة بهذه العيادات فقط
       const appointments = await this.appointmentModel.find({
-        clinic: { $in: clinicIds },
+        clinicId: { $in: clinicIds },
       }).select('_id');
   
       const appointmentIds = appointments.map(a => a._id);
   
+      console.log(`📅 عدد المواعيد التابعة لعيادات القسم "${department.name}": ${appointmentIds.length}`);
+      console.log(`📅 مواعيد القسم (${department.name}):`, appointmentIds);
+  
       if (appointmentIds.length > 0) {
-        // 3. حساب عدد السجلات الطبية المرتبطة بهذه المواعيد
+        // 3. جلب عدد السجلات الطبية المرتبطة بهذه المواعيد فقط
         patientCount = await this.medicalRecordModel.countDocuments({
-          appointment: { $in: appointmentIds },
+          appointmentId: { $in: appointmentIds },
         });
+  
+        console.log(`🩺 عدد المرضى (السجلات الطبية) في القسم "${department.name}": ${patientCount}`);
       }
     }
   
-    // 4. إعادة القسم مع عدد العيادات وعدد المرضى
+    // 4. إرجاع القسم مع عدد العيادات وعدد المرضى
     return {
       ...department.toObject?.() ?? department,
       clinicCount,
       patientCount,
     };
   }
-  
   
   
   async getDepartmentById(id: string): Promise<ApiGetResponse<Department>> {
