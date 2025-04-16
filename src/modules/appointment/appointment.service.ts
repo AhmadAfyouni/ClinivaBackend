@@ -48,7 +48,7 @@ async getAllAppointments(paginationDto: PaginationAndFilterDto, filters: any) {
     // إضافة شروط البحث للحقول النصية
     searchConditions.push(
       { 'doctor.name': regex },        // البحث في حقل اسم الطبيب
-      { 'clinic.name': regex },        // البحث في حقل اسم العيادة
+    
       { 'patient.name': regex },       // البحث في حقل اسم المريض
     );
   }
