@@ -53,6 +53,10 @@ export class PatientService {
       throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
     }
   }
+  if (filters.dateOfBirth) {
+    const dateOfBirth = new Date(filters.dateOfBirth);
+    searchConditions.push({ dateOfBirth: { $gte: dateOfBirth } });
+  }
     // تحقق إذا كان يوجد نص للبحث
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
