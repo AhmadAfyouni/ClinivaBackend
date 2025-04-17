@@ -62,13 +62,17 @@ export class EmployeeService {
         throw new Error(`Invalid employeeType value. Allowed values: ${allowedEmployeeTypes.join(', ')}`);
       }
     }
+    if (filters.clinicCollectionName) {
+      const regex = new RegExp(filters.clinicCollectionName, 'i'); // case-insensitive
+      filterConditions.push({ 'clinicCollectionId.name': regex }); // assuming clinicCollectionId has a `name` field
+    }
     // Handle flexible text-based search
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i'); // case-insensitive
 
       searchConditions.push(
         { name: regex },
-        { employeeType: regex },
+        
         { identity: regex },
         { nationality: regex },
         { address: regex },
@@ -82,6 +86,7 @@ export class EmployeeService {
     delete filters.search;
     delete filters.isActive;
     delete filters.employeeType;
+    delete filters.clinicCollectionName; 
     const finalFilter = {
       ...filters,
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
@@ -91,8 +96,9 @@ export class EmployeeService {
     return paginate(
       this.employeeModel,
       [
-        'companyId',
-        'clinicCollectionId',
+        'companyId',{
+        path: 'clinicCollectionId', // populate بيانات المجمع الطبي
+        select: 'name',},
         'departmentId',
         'clinics',
         'specializations',
@@ -102,6 +108,7 @@ export class EmployeeService {
       allData,
       finalFilter,
       sort,
+   
     );
   }
 
