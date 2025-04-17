@@ -54,9 +54,24 @@ export class PatientService {
     }
   }
   if (filters.dateOfBirth) {
-    const dateOfBirth = new Date(filters.dateOfBirth);
-    searchConditions.push({ dateOfBirth: { $gte: dateOfBirth } });
+    const inputDate = new Date(filters.dateOfBirth);
+  
+    const startOfDay = new Date(inputDate);
+    startOfDay.setUTCHours(0, 0, 0, 0);
+  
+    const endOfDay = new Date(inputDate);
+    endOfDay.setUTCHours(23, 59, 59, 999);
+  
+    searchConditions.push({
+      dateOfBirth: {
+        $gte: startOfDay,
+        $lte: endOfDay
+      }
+    });
+  
+    delete filters.dateOfBirth;
   }
+  
     // تحقق إذا كان يوجد نص للبحث
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
