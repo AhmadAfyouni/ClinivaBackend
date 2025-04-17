@@ -60,6 +60,7 @@ export class PatientService {
       // إضافة شروط البحث للحقول النصية مثل الاسم والحالة
       searchConditions.push(
         { name: regex },
+        { gender: regex },
       
       );
     }
@@ -88,27 +89,27 @@ export class PatientService {
             .sort({ datetime: -1 })  // ترتيب حسب تاريخ ووقت الزيارة من الأحدث إلى الأقدم
          
             .exec();
-            let doctorName = "";
-            let treatmentPlan: string | null = null;
+            // let doctorName = "";
+            // let treatmentPlan: string | null = null;
 
-            if (lastAppointment && lastAppointment.doctor) {
-              const doctor = await this.employeeModel.findById(lastAppointment.doctor);
-              doctorName = doctor ? doctor.name : " ";
-            }
+            // if (lastAppointment && lastAppointment.doctor) {
+            //   const doctor = await this.employeeModel.findById(lastAppointment.doctor);
+            //   doctorName = doctor ? doctor.name : " ";
+            // }
             if (lastAppointment?._id) {
               const medicalRecord = await this.medicalRecordModel.findOne({
                 appointmentId: lastAppointment._id,
               });
         
-             treatmentPlan = medicalRecord?.treatmentPlan || null;
+             //treatmentPlan = medicalRecord?.treatmentPlan || null;
             }
         
           // إضافة آخر زيارة مع اسم الطبيب إلى بيانات المريض
           return {
             ...patient.toObject(),
             lastVisit: lastAppointment ? lastAppointment.datetime : null,
-           doctorName, // تحقق من وجود الطبيب قبل الوصول إلى اسمه
-           treatmentPlan, 
+          //  doctorName, // تحقق من وجود الطبيب قبل الوصول إلى اسمه
+          //  treatmentPlan, 
           };
         })
       );
