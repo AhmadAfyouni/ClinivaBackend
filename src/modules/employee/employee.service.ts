@@ -40,11 +40,26 @@ export class EmployeeService {
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
     const allowedStatuses = ['true', 'false'];
+    const allowedEmployeeTypes = [
+      'Doctor',
+      'Nurse',
+      'Technician',
+      'Administrative',
+      'Employee',
+      'Other',
+    ];
     if (filters.isActive) {
       if (allowedStatuses.includes(filters.isActive)) {
         filterConditions.push({ isActive: filters.isActive });
       } else {
         throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
+      }
+    }
+    if (filters.employeeType) {
+      if (allowedEmployeeTypes.includes(filters.employeeType)) {
+        filterConditions.push({ employeeType: filters.employeeType });
+      } else {
+        throw new Error(`Invalid employeeType value. Allowed values: ${allowedEmployeeTypes.join(', ')}`);
       }
     }
     // Handle flexible text-based search
@@ -66,6 +81,7 @@ export class EmployeeService {
     // Remove search key from filters before passing it down
     delete filters.search;
     delete filters.isActive;
+    delete filters.employeeType;
     const finalFilter = {
       ...filters,
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
