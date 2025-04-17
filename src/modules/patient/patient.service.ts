@@ -102,30 +102,16 @@ export class PatientService {
       const patients = result.data;
       const updatedPatients = await Promise.all(
         patients.map(async (patient) => {
-          // جلب آخر زيارة خاصة بكل مريض بشكل صحيح
+          // البحث باستخدام ObjectId مباشرة دون تحويل لـ string
           const lastAppointment = await this.appointmentModel
-            .findOne({ patientId: patient._id.toString() })  // ✅ تصحيح toString
-            .sort({ datetime: -1 }) // الأحدث أولًا
-            .exec();
-      
-          // مثال على معالجة إضافية
-          let lastVisit: Date | null = null;
-
-          if (lastAppointment) {
-            lastVisit = lastAppointment.datetime;
-      
-            // بإمكانك أيضًا تجيب السجل الطبي مثلًا:
-            const medicalRecord = await this.medicalRecordModel.findOne({
-              appointmentId: lastAppointment._id,
-            });
-      
-            // ممكن تخزن معلومات إضافية هنا حسب الحاجة
-            // مثلًا patient.lastTreatmentPlan = medicalRecord?.treatmentPlan;
-          }
-      
+            .findOne({ patientId: patient._id }) // افترضنا أن patientId من نوع ObjectId
+            .sort({ datetime: -1 })
+            .select('datetime -_id') // اختيار الحقول المطلوبة فقط لتحسين الأداء
+            .lean(); // إرجاع كائن عادي بدل مستند Mongoose
+    
           return {
             ...patient.toObject(),
-            lastVisit, // تضيف حقل جديد يمثل آخر زيارة
+            lastVisit: lastAppointment?.datetime || null,
           };
         })
       );
