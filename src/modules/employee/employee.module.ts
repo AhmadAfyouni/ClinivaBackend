@@ -7,13 +7,15 @@ import { ClinicCollectionModule } from '../cliniccollection/clinic-collection.mo
 import { ClinicCollectionSchema,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
 import { DepartmentModule } from '../department/department.module';
 import { Department,DepartmentSchema } from '../department/schemas/department.schema';
+import { forwardRef } from '@nestjs/common';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Employee.name, schema: EmployeeSchema },
       { name: ClinicCollection.name, schema: ClinicCollectionSchema },
       { name: Department.name, schema: DepartmentSchema },
-    ]),ClinicCollectionModule,DepartmentModule
+    ]), forwardRef(() => ClinicCollectionModule),
+    forwardRef(() => DepartmentModule),
   ],
   controllers: [EmployeeController],
   providers: [EmployeeService],
