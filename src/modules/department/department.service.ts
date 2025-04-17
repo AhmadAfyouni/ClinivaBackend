@@ -106,7 +106,7 @@ export class DepartmentService {
       departmentId: department._id.toString(),
     }).select('_id');
   
-    const clinicIds = clinics.map(c => c._id);
+    const clinicIds = clinics.map(c => c._id.toString());
     const clinicCount = clinicIds.length;
   
     console.log(`🏥 Number of clinics for the department "${department.name}": ${clinicCount}`);
@@ -120,7 +120,7 @@ export class DepartmentService {
         clinic: { $in: clinicIds },
       }).select('_id');
   
-      const appointmentIds = appointments.map(a => a._id);
+      const appointmentIds = appointments.map(a => a._id.toString());
   
       console.log(`📅 Number of appointments for clinics in department "${department.name}": ${appointmentIds.length}`);
       console.log(`📅 Appointments for department "${department.name}":`, appointmentIds);
