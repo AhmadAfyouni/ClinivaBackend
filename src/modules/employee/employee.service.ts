@@ -6,11 +6,14 @@ import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { ApiGetResponse, paginate } from '../../common/utlis/paginate';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
-
+import { ClinicCollectionDocument,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
+import { DepartmentDocument,Department } from '../department/schemas/department.schema';
 @Injectable()
 export class EmployeeService {
   constructor(
     @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
+    @InjectModel(ClinicCollection.name) private clinicCollectionModel: Model<ClinicCollectionDocument>,
+    @InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>,
   ) {}
 
   async createEmployee(
@@ -27,16 +30,16 @@ export class EmployeeService {
 
   async getAllEmployees(paginationDto: PaginationAndFilterDto, filters: any) {
     let { page, limit, allData, sortBy, order } = paginationDto;
-
-    // Convert page & limit to numbers
+  
+    // تحويل الصفحة والحد إلى أرقام
     page = Number(page) || 1;
     limit = Number(limit) || 10;
-
+  
     const sortField: string = sortBy ?? 'createdAt';
     const sort: Record<string, number> = {
       [sortField]: order === 'asc' ? 1 : -1,
     };
-
+  
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
     const allowedStatuses = ['true', 'false'];
@@ -48,6 +51,8 @@ export class EmployeeService {
       'Employee',
       'Other',
     ];
+  
+    // فلترة حسب الحالة النشطة
     if (filters.isActive) {
       if (allowedStatuses.includes(filters.isActive)) {
         filterConditions.push({ isActive: filters.isActive });
@@ -55,6 +60,8 @@ export class EmployeeService {
         throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
       }
     }
+  
+    // فلترة حسب نوع الموظف
     if (filters.employeeType) {
       if (allowedEmployeeTypes.includes(filters.employeeType)) {
         filterConditions.push({ employeeType: filters.employeeType });
@@ -62,17 +69,45 @@ export class EmployeeService {
         throw new Error(`Invalid employeeType value. Allowed values: ${allowedEmployeeTypes.join(', ')}`);
       }
     }
-    if (filters.clinicCollectionName) {
-      const regex = new RegExp(filters.clinicCollectionName, 'i'); // case-insensitive
-      filterConditions.push({ 'clinicCollectionId.name': regex }); // assuming clinicCollectionId has a `name` field
+  
+    // فلترة حسب اسم المجمع الطبي
+    if (filters.clinicName) {
+      const searchRegex = new RegExp(filters.clinicName, 'i'); // case-insensitive
+  
+      // البحث في المجمعات الطبية
+      const clinics = await this.clinicCollectionModel.find({ name: searchRegex }).select('_id');
+      const clinicIds = clinics.map(clinic => clinic._id.toString());
+  
+      // إضافة شرط البحث حسب المجمع الطبي
+      if (clinicIds.length) {
+        filterConditions.push({ clinicId: { $in: clinicIds } });
+      } else {
+        return { data: [], total: 0, page, limit, totalPages: 0 };
+      }
     }
-    // Handle flexible text-based search
+  
+    // فلترة حسب اسم القسم
+    if (filters.departmentName) {
+      const searchRegex = new RegExp(filters.departmentName, 'i'); // case-insensitive
+  
+      // البحث في الأقسام
+      const departments = await this.departmentModel.find({ name: searchRegex }).select('_id');
+      const departmentIds = departments.map(department => department._id.toString());
+  
+      // إضافة شرط البحث حسب القسم
+      if (departmentIds.length) {
+        filterConditions.push({ departmentId: { $in: departmentIds } });
+      } else {
+        return { data: [], total: 0, page, limit, totalPages: 0 };
+      }
+    }
+  
+    // Handle flexible text-based search في الموظفين
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i'); // case-insensitive
-
+  
       searchConditions.push(
         { name: regex },
-        
         { identity: regex },
         { nationality: regex },
         { address: regex },
@@ -81,25 +116,29 @@ export class EmployeeService {
         { professional_experience: regex },
       );
     }
-
-    // Remove search key from filters before passing it down
+  
+    // إزالة الحقول من الفلاتر بعد المعالجتها
     delete filters.search;
     delete filters.isActive;
     delete filters.employeeType;
-    delete filters.clinicCollectionName; 
+    delete filters.clinicName; // حذف فلتر اسم المجمع الطبي
+    delete filters.departmentName; // حذف فلتر اسم القسم
+  
+    // دمج الفلاتر النهائية
     const finalFilter = {
       ...filters,
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
-      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
+      ...(filterConditions.length > 0 ? { $and: filterConditions } : {}),
     };
-
+  
+    // تنفيذ الاستعلام باستخدام الـ pagination والـ populate
     return paginate(
       this.employeeModel,
       [
-        'companyId',{
-        path: 'clinicCollectionId', // populate بيانات المجمع الطبي
-        select: 'name',},
-        'departmentId',
+        'companyId',
+      
+        { path: 'clinicCollectionId', select: 'name' }, // populate بيانات المجمع الطبي
+        { path: 'departmentId', select: 'name' }, // تضمين بيانات القسم
         'clinics',
         'specializations',
       ],
@@ -108,9 +147,10 @@ export class EmployeeService {
       allData,
       finalFilter,
       sort,
-   
+     
     );
   }
+  
 
   async getEmployeeById(id: string): Promise<ApiGetResponse<Employee>> {
     const employee = await this.employeeModel
