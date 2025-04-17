@@ -102,36 +102,34 @@ export class PatientService {
       const patients = result.data;
       const updatedPatients = await Promise.all(
         patients.map(async (patient) => {
-          // جلب آخر زيارة للمريض من جدول المواعيد
+          // جلب آخر زيارة خاصة بكل مريض بشكل صحيح
           const lastAppointment = await this.appointmentModel
-            .findOne({ patientId: patient._id.toString })
-            .sort({ datetime: -1 })  // ترتيب حسب تاريخ ووقت الزيارة من الأحدث إلى الأقدم
-         
+            .findOne({ patientId: patient._id.toString() })  // ✅ تصحيح toString
+            .sort({ datetime: -1 }) // الأحدث أولًا
             .exec();
-            // let doctorName = "";
-            // let treatmentPlan: string | null = null;
+      
+          // مثال على معالجة إضافية
+          let lastVisit: Date | null = null;
 
-            // if (lastAppointment && lastAppointment.doctor) {
-            //   const doctor = await this.employeeModel.findById(lastAppointment.doctor);
-            //   doctorName = doctor ? doctor.name : " ";
-            // }
-            if (lastAppointment?._id) {
-              const medicalRecord = await this.medicalRecordModel.findOne({
-                appointmentId: lastAppointment._id,
-              });
-        
-             //treatmentPlan = medicalRecord?.treatmentPlan || null;
-            }
-        
-          // إضافة آخر زيارة مع اسم الطبيب إلى بيانات المريض
+          if (lastAppointment) {
+            lastVisit = lastAppointment.datetime;
+      
+            // بإمكانك أيضًا تجيب السجل الطبي مثلًا:
+            const medicalRecord = await this.medicalRecordModel.findOne({
+              appointmentId: lastAppointment._id,
+            });
+      
+            // ممكن تخزن معلومات إضافية هنا حسب الحاجة
+            // مثلًا patient.lastTreatmentPlan = medicalRecord?.treatmentPlan;
+          }
+      
           return {
             ...patient.toObject(),
-            lastVisit: lastAppointment ? lastAppointment.datetime : null,
-          //  doctorName, // تحقق من وجود الطبيب قبل الوصول إلى اسمه
-          //  treatmentPlan, 
+            lastVisit, // تضيف حقل جديد يمثل آخر زيارة
           };
         })
       );
+      
       result.data = updatedPatients;
     }
   
