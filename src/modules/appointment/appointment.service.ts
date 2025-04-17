@@ -136,7 +136,7 @@ async getAllAppointments(paginationDto: PaginationAndFilterDto, filters: any) {
   // تنظيف الفلتر من حقل البحث
   delete filters.search;
   delete filters.status;
-  delete filters.datetime
+ 
   // دمج الفلاتر مع شروط البحث
   const finalFilter: Record<string, any> = {
     ...filters,
