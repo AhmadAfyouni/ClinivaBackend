@@ -40,9 +40,10 @@ import { SpecializationModule } from './modules/specialization/specialization.mo
     RoleModule,
     CompanyModule,
     ClinicCollectionModule,
+    EmployeeModule,
     DepartmentModule,
     ClinicModule,
-    EmployeeModule,
+   
     PatientModule,
     AppointmentModule,
     MedicalRecordModule,
