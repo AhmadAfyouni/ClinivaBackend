@@ -104,7 +104,7 @@ export class PatientService {
         patients.map(async (patient) => {
           // البحث باستخدام ObjectId مباشرة دون تحويل لـ string
           const lastAppointment = await this.appointmentModel
-            .findOne({ patient: patient._id }) // افترضنا أن patientId من نوع ObjectId
+            .findOne({ patient: patient._id.toString() }) // افترضنا أن patientId من نوع ObjectId
             .sort({ datetime: -1 })
             .select('datetime -_id') // اختيار الحقول المطلوبة فقط لتحسين الأداء
             .lean(); // إرجاع كائن عادي بدل مستند Mongoose
