@@ -15,7 +15,7 @@ import { forwardRef } from '@nestjs/common';
       { name: ClinicCollection.name, schema: ClinicCollectionSchema },
       { name: Department.name, schema: DepartmentSchema },
     ]), forwardRef(() => ClinicCollectionModule),
-    DepartmentModule,
+    forwardRef(() => DepartmentModule),
   ],
   controllers: [EmployeeController],
   providers: [EmployeeService],
