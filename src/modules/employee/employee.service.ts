@@ -80,7 +80,7 @@ export class EmployeeService {
   
       // إضافة شرط البحث حسب المجمع الطبي
       if (clinicIds.length) {
-        filterConditions.push({ clinicId: { $in: clinicIds } });
+        filterConditions.push({ clinicCollectionId: { $in: clinicIds } });
       } else {
         return { data: [], total: 0, page, limit, totalPages: 0 };
       }
