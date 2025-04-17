@@ -129,10 +129,14 @@ async getAllAppointments(paginationDto: PaginationAndFilterDto, filters: any) {
       return { data: [], total: 0, page, limit, totalPages: 0 };
     }
   }
-
+  if (filters.datetime) {
+    const datetime = new Date(filters.datetime);
+    searchConditions.push({ datetime: { $gte: datetime } });
+  }
   // تنظيف الفلتر من حقل البحث
   delete filters.search;
   delete filters.status;
+  delete filters.datetime
   // دمج الفلاتر مع شروط البحث
   const finalFilter: Record<string, any> = {
     ...filters,
