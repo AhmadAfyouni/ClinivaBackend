@@ -38,7 +38,15 @@ export class EmployeeService {
     };
 
     const searchConditions: any[] = [];
-
+    const filterConditions: any[] = [];
+    const allowedStatuses = ['true', 'false'];
+    if (filters.isActive) {
+      if (allowedStatuses.includes(filters.isActive)) {
+        filterConditions.push({ isActive: filters.isActive });
+      } else {
+        throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
+      }
+    }
     // Handle flexible text-based search
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i'); // case-insensitive
@@ -57,10 +65,11 @@ export class EmployeeService {
 
     // Remove search key from filters before passing it down
     delete filters.search;
-
+    delete filters.isActive;
     const finalFilter = {
       ...filters,
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
     };
 
     return paginate(

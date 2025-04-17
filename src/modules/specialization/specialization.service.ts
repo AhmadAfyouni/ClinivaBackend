@@ -52,6 +52,40 @@ export class SpecializationService {
       [sortField]: order === 'asc' ? 1 : -1,
     };
     
+    const searchConditions: any[] = [];
+    const filterConditions: any[] = [];
+    const allowedStatuses = ['true', 'false'];
+    if (filters.isActive) {
+      if (allowedStatuses.includes(filters.isActive)) {
+        filterConditions.push({ isActive: filters.isActive });
+      } else {
+        throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
+      }
+    }
+  // تحقق إذا كان يوجد نص للبحث في الحقول النصية (name, email)
+  if (filters.search) {
+    const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
+
+    // إضافة شروط البحث للحقول النصية
+    searchConditions.push(
+      { name: regex },         // البحث في الحقل name
+  
+    );
+  }
+  
+    // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
+    if (filters.updatedAt) {
+      const updatedAt = new Date(filters.updatedAt);
+      searchConditions.push({ updatedAt: { $gte: updatedAt } });
+    }
+    delete filters.isActive;
+    delete filters.search;
+    // دمج الفلاتر مع شروط البحث
+    const finalFilter = {
+      ...filters,
+      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
+    };
     // Get paginated specializations
     const result = await paginate(
       this.specializationModel,
@@ -59,7 +93,7 @@ export class SpecializationService {
       page,
       limit,
       allData,
-      filters,
+      finalFilter,
       sort,
     );
 
