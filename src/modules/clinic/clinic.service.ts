@@ -106,7 +106,7 @@ export class ClinicService {
 
     const populateFields = [
       { path: 'departmentId' },
-      { path: 'specializations' },
+      { path: 'specializations' ,select:'name'},
       { path: 'insuranceCompany' },
     ];
 
