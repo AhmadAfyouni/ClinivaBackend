@@ -125,7 +125,7 @@ export class ClinicService {
     const appointmentIds = appointments.map(a => a._id.toString());
     const appointmentCount = appointmentIds.length;
   
-    console.log(`📅 Appointments for clinic "${clinic.name}": ${appointmentCount}`);
+  
   
     let treatedPatientCount = 0;
   
@@ -141,9 +141,7 @@ export class ClinicService {
     // 3. إعادة العيادة مع الإحصائيات
     const clinicObj = clinic.toObject();
     clinicObj['statistics'] = {
-      appointments: {
-        total: appointmentCount,
-      },
+    
       patients: {
         treated: treatedPatientCount,
       }
