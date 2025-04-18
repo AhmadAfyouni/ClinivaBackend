@@ -1,12 +1,14 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ClinicService } from './clinic.service';
 import { ClinicController } from './clinic.controller';
 import { Clinic, ClinicSchema } from './schemas/clinic.schema';
 import { AppointmentSchema } from '../appointment/schemas/appointment.schema';
+import { MedicalRecord,MedicalRecordSchema } from '../medicalrecord/schemas/medicalrecord.schema';
+import { MedicalRecordModule } from '../medicalrecord/medical-record.module';
 
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Clinic.name, schema: ClinicSchema }, { name: 'Appointment', schema: AppointmentSchema }])],
+  imports: [MongooseModule.forFeature([{ name: Clinic.name, schema: ClinicSchema }, { name: 'Appointment', schema: AppointmentSchema },{ name: MedicalRecord.name, schema: MedicalRecordSchema }]),forwardRef(()=>MedicalRecordModule)],
   controllers: [ClinicController],
   providers: [ClinicService],
   exports: [ClinicService,MongooseModule],
