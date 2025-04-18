@@ -71,12 +71,12 @@ export class EmployeeService {
     }
   
     // فلترة حسب اسم المجمع الطبي
-    if (filters.clinicCollectionName) {
+    if (filters.clinicName) {
       const searchRegex = new RegExp(filters.clinicName, 'i'); // case-insensitive
   
       // البحث في المجمعات الطبية
-      const clinicCollections = await this.clinicCollectionModel.find({ name: searchRegex }).select('_id');
-      const clinicIds = clinicCollections.map(clinic => clinic._id.toString());
+      const clinics = await this.clinicCollectionModel.find({ name: searchRegex }).select('_id');
+      const clinicIds = clinics.map(clinic => clinic._id.toString());
   
       // إضافة شرط البحث حسب المجمع الطبي
       if (clinicIds.length) {
@@ -121,7 +121,7 @@ export class EmployeeService {
     delete filters.search;
     delete filters.isActive;
     delete filters.employeeType;
-    delete filters.clinicCollectionName; // حذف فلتر اسم المجمع الطبي
+    delete filters.clinicName; // حذف فلتر اسم المجمع الطبي
     delete filters.departmentName; // حذف فلتر اسم القسم
   
     // دمج الفلاتر النهائية
