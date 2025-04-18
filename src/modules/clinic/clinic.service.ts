@@ -85,7 +85,16 @@ export class ClinicService {
       const regex = new RegExp(filters.search, 'i');
       searchConditions.push({ name: regex });
     }
-
+    if (filters.specializationName) {
+      const regex = new RegExp(filters.specializationName, 'i');
+      filterConditions.push({
+        specializations: {
+          $elemMatch: { name: regex },
+        },
+      });
+  
+    }
+    delete filters.specializationName;
     delete filters.search;
     delete filters.isActive;
 
