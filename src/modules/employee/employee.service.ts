@@ -72,7 +72,7 @@ export class EmployeeService {
   
     // فلترة حسب اسم المجمع الطبي
     if (filters.clinicCollectionName) {
-      const searchRegex = new RegExp(filters.clinicName, 'i'); // case-insensitive
+      const searchRegex = new RegExp(filters.clinicCollectionName, 'i'); // case-insensitive
   
       // البحث في المجمعات الطبية
       const clinics = await this.clinicCollectionModel.find({ name: searchRegex }).select('_id');
