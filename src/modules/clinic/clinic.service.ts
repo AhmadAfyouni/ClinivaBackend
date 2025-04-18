@@ -139,15 +139,15 @@ export class ClinicService {
     }
   
     // 3. إعادة العيادة مع الإحصائيات
-    const clinicObj = clinic.toObject();
-    clinicObj['statistics'] = {
+    // const clinicObj = clinic.toObject();
+   const patientstreated = {
     
-      patients: {
-        treated: treatedPatientCount,
-      }
+     
+         treatedPatientCount,
+     
     };
   
-    return clinicObj;
+    return patientstreated  ;
   }
   
   async getClinicById(id: string): Promise<ApiGetResponse<Clinic>> {
