@@ -90,7 +90,7 @@ export class ClinicService {
       const specializations = await this.specializationModel.find({ name: regex }).select('_id');
       specializationIds = specializations.map(doc => doc._id.toString());
       if (specializationIds.length) {
-        searchConditions.push({ doctor: { $in: specializationIds } });
+        searchConditions.push({ specializations: { $in: specializationIds } });
       }
       if (searchConditions.length) {
         searchConditions.push({ $or: searchConditions });
@@ -109,7 +109,7 @@ export class ClinicService {
     //   });
   
     // }
-    delete filters.specializationName;
+    // delete filters.specializationName;
     delete filters.search;
     delete filters.isActive;
 
