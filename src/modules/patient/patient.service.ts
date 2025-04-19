@@ -50,7 +50,7 @@ export class PatientService {
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
   const allowedStatuses = ['true', 'false'];
-  if (filters.isActive && filters.isActive !== null) {
+  if (filters.isActive || filters.isActive !== null) {
     if (allowedStatuses.includes(filters.isActive)) {
       filterConditions.push({ isActive: filters.isActive });
     } else {
