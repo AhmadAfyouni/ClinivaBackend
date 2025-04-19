@@ -12,7 +12,7 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { RoleDocument,Role } from '../role/schemas/role.schema';
-import { customAlphabet } from 'nanoid';
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -27,20 +27,7 @@ export class UserService {
       createUserDto.password,
       saltRounds,
     ); // ✅ تشفير كلمة المرور
-    const generateId = customAlphabet('0123456789', 4);
-    let publicId = '';
-    let isUnique = false;
-
-    // 🔁 توليد قيمة غير مكررة
-    while (!isUnique) {
-      const random = generateId();
-      publicId = `us-${random}`;
-
-      const existing = await this.userModel.findOne({ publicId });
-      if (!existing) {
-        isUnique = true;
-      }
-    }
+    const publicId = await generateUniquePublicId(this.userModel, 'us');
     const newUser = new this.userModel({
       ...createUserDto,
       password: hashedPassword,
