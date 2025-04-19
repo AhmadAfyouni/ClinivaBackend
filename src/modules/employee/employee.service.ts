@@ -94,7 +94,7 @@ export class EmployeeService {
         .select('_id');
     
       if (department) {
-        filterConditions.push({ departmentId: department._id });
+        filterConditions.push({ departmentId: department._id.toString() });
       } else {
         // ما في قسم بهذا الاسم
         return {
