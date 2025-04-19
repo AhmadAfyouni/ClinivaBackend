@@ -11,10 +11,12 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-
+import { RoleDocument,Role } from '../role/schemas/role.schema';
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
+  @InjectModel(Role.name) private roleModel: Model<RoleDocument>) {}
+
 
   async createUser(
     createUserDto: CreateUserDto,
@@ -53,6 +55,7 @@ export class UserService {
   
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
+    let RoleIds: string[] = [];
     const allowedStatuses = ['true', 'false'];
     if (filters.isActive) {
       if (allowedStatuses.includes(filters.isActive)) {
@@ -70,6 +73,17 @@ export class UserService {
       { name: regex },         // البحث في الحقل name
       { email: regex },        // البحث في الحقل email
     );
+    const Roles = await this.roleModel.find({ name: regex }).select('_id');
+    RoleIds = Roles.map(role => role._id.toString());
+    const searchOrConditions: Record<string, any>[] = [];
+    if (RoleIds.length) {
+      searchOrConditions.push({ roleIds: { $in: RoleIds } });
+    }
+    if (searchOrConditions.length) {
+      searchConditions.push({ $or: searchOrConditions });
+    } else {
+      return { data: [], total: 0, page, limit, totalPages: 0 };
+    }
   }
   
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
@@ -89,7 +103,7 @@ export class UserService {
     // استخدم paginate مع populate
     const result = await paginate(
       this.userModel,
-      ['roleIds'], 
+      [{path:"roleIds",select:'name'}], 
       page,
       limit,
       allData,
