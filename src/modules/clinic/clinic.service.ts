@@ -89,11 +89,12 @@ export class ClinicService {
       searchConditions.push({ name: regex });
       const specializations = await this.specializationModel.find({ name: regex }).select('_id');
       specializationIds = specializations.map(doc => doc._id.toString());
+      const searchOrConditions: Record<string, any>[] = [];
       if (specializationIds.length) {
-        searchConditions.push({ specializations: { $in: specializationIds } });
+        searchOrConditions.push({ specializations: { $in: specializationIds } });
       }
-      if (searchConditions.length) {
-        searchConditions.push({ $or: searchConditions });
+      if (searchOrConditions.length) {
+        searchConditions.push({ $or: searchOrConditions });
       } else {
         return { data: [], total: 0, page, limit, totalPages: 0 };
       }
