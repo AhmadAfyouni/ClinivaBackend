@@ -10,6 +10,7 @@ import { ClinicDocument,Clinic } from '../clinic/schemas/clinic.schema';
 import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
 import { MedicalRecord,MedicalRecordDocument } from '../medicalrecord/schemas/medicalrecord.schema';
 import { ClinicCollectionDocument,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class DepartmentService {
   constructor(
@@ -25,7 +26,12 @@ export class DepartmentService {
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
   ): Promise<ApiGetResponse<Department>> {
-    const newDepartment = new this.departmentModel(createDepartmentDto);
+      const publicId = await generateUniquePublicId(this.departmentModel, 'dep');
+    
+    const newDepartment = new this.departmentModel({
+      ...createDepartmentDto,
+      publicId
+    });
     const savedDepartment = await newDepartment.save();
     return {
       success: true,
