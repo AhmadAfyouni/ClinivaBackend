@@ -17,7 +17,7 @@ import {
   Department,
   DepartmentDocument,
 } from '../department/schemas/department.schema';
-
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class ClinicCollectionService {
   constructor(
@@ -32,8 +32,13 @@ export class ClinicCollectionService {
   async createClinicCollection(
     createClinicCollectionDto: CreateClinicCollectionDto,
   ): Promise<ApiGetResponse<ClinicCollection>> {
+        const publicId = await generateUniquePublicId(this.clinicCollectionModel, 'com');
+    
     const newClinicCollection = new this.clinicCollectionModel(
-      createClinicCollectionDto,
+     { 
+      ...createClinicCollectionDto,
+      publicId
+    }
     );
     const savedClinicCollection = await newClinicCollection.save();
     return {
