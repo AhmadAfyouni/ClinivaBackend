@@ -9,6 +9,7 @@ import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
 import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
 import { EmployeeDocument,Employee } from '../employee/schemas/employee.schema';
 import { MedicalRecordDocument,MedicalRecord } from '../medicalrecord/schemas/medicalrecord.schema';
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class PatientService {
   constructor(
@@ -21,7 +22,10 @@ export class PatientService {
   async createPatient(
     createPatientDto: CreatePatientDto,
   ): Promise<ApiGetResponse<Patient>> {
-    const newPatient = new this.patientModel(createPatientDto);
+    const publicId = await generateUniquePublicId(this.patientModel, 'pa');
+    const newPatient = new this.patientModel({
+      ...createPatientDto,
+      publicId});
     const savedPatient = await newPatient.save();
     return {
       success: true,

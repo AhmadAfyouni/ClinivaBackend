@@ -27,10 +27,10 @@ export class SpecializationService {
     createSpecializationDto: CreateSpecializationDto,
   ): Promise<ApiGetResponse<Specialization>> {
     const publicId = await generateUniquePublicId(this.specializationModel, 'sp');
-    const newSpecialization = new this.specializationModel(
-      createSpecializationDto,
+    const newSpecialization = new this.specializationModel({
+      ...createSpecializationDto,
       publicId
-    );
+    });
     const savedSpecialization = await newSpecialization.save();
     return {
       success: true,
