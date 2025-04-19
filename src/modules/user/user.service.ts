@@ -57,7 +57,7 @@ export class UserService {
     const filterConditions: any[] = [];
     let RoleIds: string[] = [];
     const allowedStatuses = ['true', 'false'];
-    if (filters.isActive) {
+    if (filters.isActive && filters.isActive!== null) {
       if (allowedStatuses.includes(filters.isActive)) {
         filterConditions.push({ isActive: filters.isActive });
       } else {
