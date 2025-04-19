@@ -8,6 +8,7 @@ import { ApiGetResponse, paginate } from '../../common/utlis/paginate';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
 import { ClinicCollectionDocument,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
 import { DepartmentDocument,Department } from '../department/schemas/department.schema';
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class EmployeeService {
   constructor(
@@ -19,7 +20,12 @@ export class EmployeeService {
   async createEmployee(
     createEmployeeDto: CreateEmployeeDto,
   ): Promise<ApiGetResponse<Employee>> {
-    const newEmployee = new this.employeeModel(createEmployeeDto);
+  const publicId = await generateUniquePublicId(this.employeeModel, 'emp');
+    
+    const newEmployee = new this.employeeModel({
+      ...createEmployeeDto,
+      publicId
+    });
     const savedEmployee = await newEmployee.save();
     return {
       success: true,
