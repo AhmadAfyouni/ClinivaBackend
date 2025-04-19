@@ -20,8 +20,7 @@ export class EmployeeService {
   async createEmployee(
     createEmployeeDto: CreateEmployeeDto,
   ): Promise<ApiGetResponse<Employee>> {
-  const publicId = await generateUniquePublicId(this.employeeModel, 'emp');
-  console.log(publicId)  
+    const publicId = await generateUniquePublicId(this.employeeModel, 'emp'); 
     const newEmployee = new this.employeeModel({
       ...createEmployeeDto,
       publicId

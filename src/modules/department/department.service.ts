@@ -26,7 +26,7 @@ export class DepartmentService {
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
   ): Promise<ApiGetResponse<Department>> {
-      const publicId = await generateUniquePublicId(this.departmentModel, 'dep');
+    const publicId = await generateUniquePublicId(this.departmentModel, 'dep');
     
     const newDepartment = new this.departmentModel({
       ...createDepartmentDto,

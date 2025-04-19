@@ -115,7 +115,7 @@ export class Employee {
   @Prop({ type: [Types.ObjectId], ref: 'Specialization', required: true })
   specializations: Types.ObjectId[]; // قائمة بمعرفات الاختصاصات المرتبطة بالعيادة
   @Prop({ unique: true, required: true })
-      publicId: string;
+  publicId: string;
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);
