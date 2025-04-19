@@ -11,7 +11,7 @@ import { CreateSpecializationDto } from './dto/create-specialization.dto';
 import { UpdateSpecializationDto } from './dto/update-specialization.dto';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
-
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class SpecializationService {
   constructor(
@@ -26,8 +26,10 @@ export class SpecializationService {
   async createSpecialization(
     createSpecializationDto: CreateSpecializationDto,
   ): Promise<ApiGetResponse<Specialization>> {
+    const publicId = await generateUniquePublicId(this.specializationModel, 'sp');
     const newSpecialization = new this.specializationModel(
       createSpecializationDto,
+      publicId
     );
     const savedSpecialization = await newSpecialization.save();
     return {
