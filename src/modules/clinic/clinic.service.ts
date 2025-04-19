@@ -88,7 +88,7 @@ export class ClinicService {
       const regex = new RegExp(filters.search, 'i');
       searchConditions.push({ name: regex });
       const specializations = await this.specializationModel.find({ name: regex }).select('_id');
-      specializationIds = specializations.map(doc => doc._id.toString());
+      specializationIds = specializations.map(spec => spec._id.toString());
       const searchOrConditions: Record<string, any>[] = [];
       if (specializationIds.length) {
         searchOrConditions.push({ specializations: { $in: specializationIds } });
