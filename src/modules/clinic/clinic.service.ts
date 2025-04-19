@@ -14,6 +14,7 @@ import {
   MedicalRecord,
   MedicalRecordDocument,
 } from '../medicalrecord/schemas/medicalrecord.schema';
+import { SpecializationDocument,Specialization } from '../specialization/schemas/specialization.schema';
 @Injectable()
 export class ClinicService {
   constructor(
@@ -22,6 +23,8 @@ export class ClinicService {
     private appointmentModel: Model<AppointmentDocument>,
     @InjectModel(MedicalRecord.name)
     private medicalRecordModel: Model<MedicalRecordDocument>,
+    @InjectModel(Specialization.name)
+    private specializationModel: Model<SpecializationDocument>,
   ) {}
   async createClinic(
     createClinicDto: CreateClinicDto,
@@ -75,7 +78,7 @@ export class ClinicService {
 
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
-
+    let specializationIds: string[] = [];
     const allowedStatuses = ['true', 'false'];
     if (filters.isActive && allowedStatuses.includes(filters.isActive)) {
       filterConditions.push({ isActive: filters.isActive });
@@ -84,16 +87,28 @@ export class ClinicService {
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i');
       searchConditions.push({ name: regex });
+      const specializations = await this.specializationModel.find({ name: regex }).select('_id');
+      specializationIds = specializations.map(doc => doc._id.toString());
+      if (specializationIds.length) {
+        searchConditions.push({ doctor: { $in: specializationIds } });
+      }
+      if (searchConditions.length) {
+        searchConditions.push({ $or: searchConditions });
+      } else {
+        return { data: [], total: 0, page, limit, totalPages: 0 };
+      }
     }
-    if (filters.specializationName) {
-      const regex = new RegExp(filters.specializationName, 'i');
-      filterConditions.push({
-        specializations: {
-          $elemMatch: { name: regex },
-        },
-      });
+   
+   
+    // if (filters.specializationName) {
+    //   const regex = new RegExp(filters.specializationName, 'i');
+    //   filterConditions.push({
+    //     specializations: {
+    //       $elemMatch: { name: regex },
+    //     },
+    //   });
   
-    }
+    // }
     delete filters.specializationName;
     delete filters.search;
     delete filters.isActive;
