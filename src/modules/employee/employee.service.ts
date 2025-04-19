@@ -88,19 +88,25 @@ export class EmployeeService {
   
     // فلترة حسب اسم القسم
     if (filters.departmentName) {
-      const searchRegex = new RegExp(filters.departmentName, 'i'); // case-insensitive
-  
-      // البحث في الأقسام
-      const departments = await this.departmentModel.find({ name: searchRegex }).select('_id');
-      const departmentIds = departments.map(department => department._id.toString());
-  
-      // إضافة شرط البحث حسب القسم
-      if (departmentIds.length) {
-        filterConditions.push({ departmentId: { $in: departmentIds } });
+      // البحث عن القسم المطابق تمامًا
+      const department = await this.departmentModel
+        .findOne({ name: filters.departmentName })
+        .select('_id');
+    
+      if (department) {
+        filterConditions.push({ departmentId: department._id });
       } else {
-        return { data: [], total: 0, page, limit, totalPages: 0 };
+        // ما في قسم بهذا الاسم
+        return {
+          data: [],
+          total: 0,
+          page,
+          limit,
+          totalPages: 0
+        };
       }
     }
+    
   
     // Handle flexible text-based search في الموظفين
     if (filters.search) {
