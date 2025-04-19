@@ -15,6 +15,7 @@ import {
   MedicalRecordDocument,
 } from '../medicalrecord/schemas/medicalrecord.schema';
 import { SpecializationDocument,Specialization } from '../specialization/schemas/specialization.schema';
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class ClinicService {
   constructor(
@@ -29,7 +30,11 @@ export class ClinicService {
   async createClinic(
     createClinicDto: CreateClinicDto,
   ): Promise<ApiGetResponse<Clinic>> {
-    const newClinic = new this.clinicModel(createClinicDto);
+   const publicId = await generateUniquePublicId(this.clinicModel, 'cli');
+    
+    const newClinic = new this.clinicModel({
+      ...createClinicDto,
+      publicId});
     const savedClinic = await newClinic.save();
     return {
       success: true,
