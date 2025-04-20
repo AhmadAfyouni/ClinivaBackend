@@ -72,7 +72,63 @@ export class EmployeeService {
       }
     }
   
-    // باقي معالجة الفلاتر (clinicCollectionName, departmentName, search)...
+        // فلترة حسب نوع الموظف
+      
+      
+        // فلترة حسب اسم المجمع الطبي
+        if (filters.clinicCollectionName) {
+          const searchRegex = new RegExp(filters.clinicCollectionName, 'i'); // case-insensitive
+      
+          // البحث في المجمعات الطبية
+          const clinics = await this.clinicCollectionModel.find({ name: searchRegex }).select('_id');
+          const clinicIds = clinics.map(clinic => clinic._id.toString());
+      
+          // إضافة شرط البحث حسب المجمع الطبي
+          if (clinicIds.length) {
+            filterConditions.push({ clinicCollectionId: { $in: clinicIds } });
+          } else {
+            return { data: [], total: 0, page, limit, totalPages: 0 };
+          }
+        }
+      
+        // فلترة حسب اسم القسم
+        if (filters.departmentName) {
+          // البحث عن القسم المطابق تمامًا
+          const department = await this.departmentModel
+            .findOne({ name: filters.departmentName })
+            .select('_id');
+        
+          if (department) {
+            filterConditions.push({ departmentId: department._id.toString() });
+          } else {
+            // ما في قسم بهذا الاسم
+            return {
+              data: [],
+              total: 0,
+              page,
+              limit,
+              totalPages: 0
+            };
+          }
+        }
+        
+      
+        // Handle flexible text-based search في الموظفين
+        if (filters.search) {
+          const regex = new RegExp(filters.search, 'i'); // case-insensitive
+      
+          searchConditions.push(
+            { name: regex },
+            { identity: regex },
+            { nationality: regex },
+            { address: regex },
+            { specialties: { $in: [regex] } },
+            { Languages: { $in: [regex] } },
+            { professional_experience: regex },
+          );
+        }
+      
+    
   
     // إزالة جميع الحقول المعالجة من الفلاتر
     const fieldsToDelete = ['search', 'isActive', 'employeeType', 'clinicCollectionName', 'departmentName'];
