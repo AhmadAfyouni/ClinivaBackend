@@ -149,12 +149,17 @@ export class AppointmentService {
         return { data: [], total: 0, page, limit, totalPages: 0 };
       }
     }
-    if (filters.datetime ! == 'undefined' || filters.datetime ! == 'null') {
-      const datetime = new Date(filters.datetime);
+    const datetimeStatuses = ['undefined', 'null', ' '];
+    if (filters.datetime) {
+      if(datetimeStatuses.includes(filters.datetime )){}
+      else  {
+        const datetime = new Date(filters.datetime);
     
-      if (!isNaN(datetime.getTime())) {
-        searchConditions.push({ datetime: { $gte: datetime } });
+        if (!isNaN(datetime.getTime())) {
+          searchConditions.push({ datetime: { $gte: datetime } });
+        }
       }
+    
       // إذا التاريخ غير صالح، لا تضيف أي شرط → تجاهله ببساطة
     }
     
