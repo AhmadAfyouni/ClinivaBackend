@@ -151,13 +151,13 @@ export class AppointmentService {
     }
     if (filters.datetime) {
       const datetime = new Date(filters.datetime);
-      
+    
       if (!isNaN(datetime.getTime())) {
         searchConditions.push({ datetime: { $gte: datetime } });
-      } else {
-        
       }
+      // إذا التاريخ غير صالح، لا تضيف أي شرط → تجاهله ببساطة
     }
+    
     
     // تنظيف الفلتر من حقل البحث
     delete filters.search;
