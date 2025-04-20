@@ -91,7 +91,7 @@ export async function applyModelFilter<T>(
   if (filters[filterKey]) {
     const filterValue = filters[filterKey];
 
-    if (filterValue === undefined || filterValue === 'null') {
+    if (filterValue === 'undefined' || filterValue === 'null') {
       // تجاهل الفلتر في هذه الحالة ولا ترجع شيء
       return;
     }
