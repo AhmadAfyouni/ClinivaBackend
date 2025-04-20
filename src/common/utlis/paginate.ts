@@ -92,8 +92,8 @@ export async function applyModelFilter<T>(
     const query: Record<string, any> = {};
     query[fieldName] = filters[filterKey];
 
-    const result = await this.model.findOne(query).select('_id');
-    if (result) {
+    const result = await model.findOne(query).select('_id');
+    if (result && result._id) {
       filterConditions.push({ [targetKey]: result._id.toString() });
     } else {
       return {
