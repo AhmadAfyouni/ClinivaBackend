@@ -151,8 +151,14 @@ export class AppointmentService {
     }
     if (filters.datetime) {
       const datetime = new Date(filters.datetime);
-      searchConditions.push({ datetime: { $gte: datetime } });
+      
+      if (!isNaN(datetime.getTime())) {
+        searchConditions.push({ datetime: { $gte: datetime } });
+      } else {
+        throw new Error('Invalid datetime value');
+      }
     }
+    
     // تنظيف الفلتر من حقل البحث
     delete filters.search;
     delete filters.status;
