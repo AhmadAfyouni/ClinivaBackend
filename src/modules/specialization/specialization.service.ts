@@ -10,7 +10,7 @@ import { Employee, EmployeeDocument } from '../employee/schemas/employee.schema'
 import { CreateSpecializationDto } from './dto/create-specialization.dto';
 import { UpdateSpecializationDto } from './dto/update-specialization.dto';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class SpecializationService {
@@ -56,14 +56,7 @@ export class SpecializationService {
     
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
-    const allowedStatuses = ['true', 'false'];
-    if (filters.isActive) {
-      if (allowedStatuses.includes(filters.isActive)) {
-        filterConditions.push({ isActive: filters.isActive });
-      } else {
-        throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
-      }
-    }
+  await applyBooleanFilter(filters, 'isActive', filterConditions)
   // تحقق إذا كان يوجد نص للبحث في الحقول النصية (name, email)
   if (filters.search) {
     const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف

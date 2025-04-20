@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { Employee, EmployeeDocument } from './schemas/employee.schema';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { ApiGetResponse, paginate,applyModelFilter } from '../../common/utlis/paginate';
+import { ApiGetResponse, paginate,applyModelFilter, applyBooleanFilter } from '../../common/utlis/paginate';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
 import { ClinicCollectionDocument,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
 import { DepartmentDocument,Department } from '../department/schemas/department.schema';
@@ -48,21 +48,7 @@ export class EmployeeService {
     const allowedEmployeeTypes = ['Doctor', 'Nurse', 'Technician', 'Administrative', 'Employee', 'Other'];
   
     // معالجة isActive
-    if (filters.hasOwnProperty('isActive')) {
-      const isActiveValue =
-        filters.isActive === 'null' ? null :
-        filters.isActive === 'true' ? true :
-        filters.isActive === 'false' ? false :
-        filters.isActive;
-  
-      if (isActiveValue === null) {
-        // تجاهل الفلتر
-      } else if (typeof isActiveValue === 'boolean') {
-        filterConditions.push({ isActive: isActiveValue });
-      } else {
-        throw new Error(`Invalid isActive value. Allowed values: true, false, null`);
-      }
-    }
+   await applyBooleanFilter(filters, 'isActive', filterConditions)
   
     // employeeType
     if (filters.employeeType) {
