@@ -149,35 +149,15 @@ export class AppointmentService {
         return { data: [], total: 0, page, limit, totalPages: 0 };
       }
     }
-    if (filters.hasOwnProperty('datetime')) {
-      const datetimeValue = filters.datetime;
   
-      // القيم التي يجب تجاهلها (إرجاع جميع البيانات)
-      const ignoreValues = [undefined, null, 'undefined', 'null', '', ' '];
-      
-      // تحقق إذا كانت القيمة يجب تجاهلها
-      const shouldIgnore = ignoreValues.some(value => {
-        if (typeof value === 'string' && typeof datetimeValue === 'string') {
-          return datetimeValue.trim().toLowerCase() === value.toLowerCase();
-        }
-        return datetimeValue === value;
-      });
-  
-      // إذا لم تكن القيمة مطلوب تجاهلها، أضف الشرط
-      if (!shouldIgnore) {
-        try {
-          const parsedDate = Date.parse(datetimeValue);
-          if (!isNaN(parsedDate)) {
-            const datetime = new Date(parsedDate);
-            searchConditions.push({ datetime: { $gte: datetime } });
-          }
-        } catch (error) {
-          console.error('Error processing datetime filter:', error);
-        }
-      }
-  
-      // احذف الحقل من الفلاتر بعد المعالجة
+    if (filters.datetime) {
+      const datetime = new Date(filters.datetime);
     
+      if (!isNaN(datetime.getTime())) {
+        searchConditions.push({ datetime: { $gte: datetime } });
+      }
+    
+      // إذا التاريخ غير صالح، لا تضيف أي شرط → تجاهله ببساطة
     }
     
     
