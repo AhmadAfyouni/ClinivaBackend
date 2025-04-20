@@ -77,15 +77,15 @@ export class EmployeeService {
       
         // فلترة حسب اسم المجمع الطبي
         if (filters.clinicCollectionName) {
-          const searchRegex = new RegExp(filters.clinicCollectionName, 'i'); // case-insensitive
+
       
           // البحث في المجمعات الطبية
-          const clinics = await this.clinicCollectionModel.find({ name: searchRegex }).select('_id');
-          const clinicIds = clinics.map(clinic => clinic._id.toString());
+          const clinics = await this.clinicCollectionModel.findOne({ name: filters.clinicCollectionName }).select('_id');
+         
       
           // إضافة شرط البحث حسب المجمع الطبي
-          if (clinicIds.length) {
-            filterConditions.push({ clinicCollectionId: { $in: clinicIds } });
+          if (clinics) {
+            filterConditions.push({ clinicCollectionId: clinics._id.toString() });
           } else {
             return { data: [], total: 0, page, limit, totalPages: 0 };
           }
