@@ -88,13 +88,13 @@ export async function applyModelFilter<T>(
   page: number,
   limit: number
 ): Promise<{ data: any[]; total: number; page: number; limit: number; totalPages: number } | void> {
-  if (filters[filterKey]) {
+  if (filters.filterKey) {
     const query: Record<string, any> = {};
-    query[fieldName] = filters[filterKey];
+    query.fieldName = filters.filterKey;
 
     const result = await this.model.findOne(query).select('_id');
     if (result) {
-      filterConditions.push({ [targetKey]: result._id.toString() });
+      filterConditions.push({ targetKey: result._id.toString() });
     } else {
       return {
         data: [],
