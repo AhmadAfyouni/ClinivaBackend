@@ -106,3 +106,29 @@ export async function applyModelFilter<T>(
     }
   }
 }
+export function applyBooleanFilter(
+  filters: any,
+  key: string,
+  filterConditions: any[]
+) {
+  if (filters.hasOwnProperty(key)) {
+    const value = filters[key];
+
+    const normalizedValue =
+      value === 'null' ? null :
+      value === 'true' ? true :
+      value === 'false' ? false :
+      value;
+
+    if (normalizedValue === null) {
+      // تجاهل الفلتر
+      return;
+    }
+
+    if (typeof normalizedValue === 'boolean') {
+      filterConditions.push({ [key]: normalizedValue });
+    } else {
+      throw new Error(`Invalid ${key} value. Allowed values: true, false, null`);
+    }
+  }
+}

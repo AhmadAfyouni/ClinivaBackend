@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { RoleDocument,Role } from '../role/schemas/role.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
@@ -58,22 +58,8 @@ export class UserService {
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
     let RoleIds: string[] = [];
-    if (filters.hasOwnProperty('isActive')) {
-      const isActiveValue =
-        filters.isActive === 'null' ? null :
-        filters.isActive === 'true' ? true :
-        filters.isActive === 'false' ? false :
-        filters.isActive;
-  
-      if (isActiveValue === null) {
-        // تجاهل الفلتر
-      } else if (typeof isActiveValue === 'boolean') {
-        filterConditions.push({ isActive: isActiveValue });
-      } else {
-        throw new Error(`Invalid isActive value. Allowed values: true, false, null`);
-      }
-    }
-  // تحقق إذا كان يوجد نص للبحث في الحقول النصية (name, email)
+   await applyBooleanFilter(filters, 'isActive', filterConditions)
+ 
   if (filters.search) {
     const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
 
