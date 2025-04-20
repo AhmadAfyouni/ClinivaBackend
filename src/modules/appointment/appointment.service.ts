@@ -151,8 +151,10 @@ export class AppointmentService {
     }
     if (filters.datetime) {
       if(filters.datetime === 'undefinde' || filters.datetime === 'null'){}
-      const datetime = new Date(filters.datetime);
+      else{
+        const datetime = new Date(filters.datetime);
       searchConditions.push({ datetime: { $gte: datetime } });
+      }
     }
     // تنظيف الفلتر من حقل البحث
     delete filters.search;
