@@ -98,7 +98,7 @@ export class UserService {
           );
           if (roleResult) return roleResult;
     
-    const fieldsToDelete = ['search', 'isActive','roleName'];
+    const fieldsToDelete = ['search', 'isActive','roleName','createdAt'];
     fieldsToDelete.forEach(field => delete filters[field]);
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
