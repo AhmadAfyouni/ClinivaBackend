@@ -149,7 +149,7 @@ export class AppointmentService {
         return { data: [], total: 0, page, limit, totalPages: 0 };
       }
     }
-    if (filters.datetime) {
+    if (filters.datetime ! == 'undefined' || filters.datetime ! == 'null') {
       const datetime = new Date(filters.datetime);
     
       if (!isNaN(datetime.getTime())) {
