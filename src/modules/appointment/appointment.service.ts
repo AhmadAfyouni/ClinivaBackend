@@ -151,7 +151,7 @@ export class AppointmentService {
     }
     if (filters.datetime) {
       if(filters.datetime === 'undefinde' || filters.datetime === 'null'){}
-      else{
+      else if(filters.datetime){
         const datetime = new Date(filters.datetime);
       searchConditions.push({ datetime: { $gte: datetime } });
       }
