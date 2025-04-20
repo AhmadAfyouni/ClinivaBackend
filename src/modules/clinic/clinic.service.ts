@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { Clinic, ClinicDocument } from './schemas/clinic.schema';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import {
   Appointment,
@@ -84,10 +84,7 @@ export class ClinicService {
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
     let specializationIds: string[] = [];
-    const allowedStatuses = ['true', 'false'];
-    if (filters.isActive && allowedStatuses.includes(filters.isActive)) {
-      filterConditions.push({ isActive: filters.isActive });
-    }
+   await applyBooleanFilter(filters, 'isActive', filterConditions)
 
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i');
