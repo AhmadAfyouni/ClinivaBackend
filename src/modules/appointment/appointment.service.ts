@@ -155,7 +155,7 @@ export class AppointmentService {
       if (!isNaN(datetime.getTime())) {
         searchConditions.push({ datetime: { $gte: datetime } });
       } else {
-        throw new Error('Invalid datetime value');
+        
       }
     }
     
