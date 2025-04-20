@@ -150,11 +150,8 @@ export class AppointmentService {
       }
     }
     if (filters.datetime) {
-      if(filters.datetime === 'undefinde' || filters.datetime === 'null'){}
-      else if(filters.datetime){
-        const datetime = new Date(filters.datetime);
+      const datetime = new Date(filters.datetime);
       searchConditions.push({ datetime: { $gte: datetime } });
-      }
     }
     // تنظيف الفلتر من حقل البحث
     delete filters.search;
