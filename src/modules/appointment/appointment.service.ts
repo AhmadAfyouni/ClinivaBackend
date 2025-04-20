@@ -151,26 +151,33 @@ export class AppointmentService {
     }
     if (filters.hasOwnProperty('datetime')) {
       const datetimeValue = filters.datetime;
+  
+      // القيم التي يجب تجاهلها (إرجاع جميع البيانات)
+      const ignoreValues = [undefined, null, 'undefined', 'null', '', ' '];
       
-      // الحالات التي نريد فيها إرجاع جميع البيانات
-      const shouldIgnore = [
-        undefined,
-        null,
-        'undefined',
-        'null',
-        '',
-        ' '
-      ].includes(datetimeValue);
-    
+      // تحقق إذا كانت القيمة يجب تجاهلها
+      const shouldIgnore = ignoreValues.some(value => {
+        if (typeof value === 'string' && typeof datetimeValue === 'string') {
+          return datetimeValue.trim().toLowerCase() === value.toLowerCase();
+        }
+        return datetimeValue === value;
+      });
+  
+      // إذا لم تكن القيمة مطلوب تجاهلها، أضف الشرط
       if (!shouldIgnore) {
-        const datetime = new Date(datetimeValue);
-        
-        if (!isNaN(datetime.getTime())) {
-          searchConditions.push({ datetime: { $gte: datetime } });
+        try {
+          const parsedDate = Date.parse(datetimeValue);
+          if (!isNaN(parsedDate)) {
+            const datetime = new Date(parsedDate);
+            searchConditions.push({ datetime: { $gte: datetime } });
+          }
+        } catch (error) {
+          console.error('Error processing datetime filter:', error);
         }
       }
-      
-      // في جميع الحالات الأخرى (بما في undefined/null/فراغ) تجاهل الفلتر تمامًا
+  
+      // احذف الحقل من الفلاتر بعد المعالجة
+    
     }
     
     
