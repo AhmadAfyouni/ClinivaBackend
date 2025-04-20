@@ -9,6 +9,7 @@ import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto'
 import { ClinicCollectionDocument,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
 import { DepartmentDocument,Department } from '../department/schemas/department.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { filter } from 'rxjs';
 @Injectable()
 export class EmployeeService {
   constructor(
@@ -58,14 +59,19 @@ export class EmployeeService {
     ];
   
     // فلترة حسب الحالة النشطة
+  if(filters.isActive  !==null){
     if (filters.isActive) {
       if (allowedStatuses.includes(filters.isActive)) {
         filterConditions.push({ isActive: filters.isActive });
       } else {
         throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
       }
+    delete filters.isActive;
+
     }
   
+  }else{
+    
     // فلترة حسب نوع الموظف
     if (filters.employeeType) {
       if (allowedEmployeeTypes.includes(filters.employeeType)) {
@@ -130,7 +136,6 @@ export class EmployeeService {
   
     // إزالة الحقول من الفلاتر بعد المعالجتها
     delete filters.search;
-    delete filters.isActive;
     delete filters.employeeType;
     delete filters.clinicCollectionName; // حذف فلتر اسم المجمع الطبي
     delete filters.departmentName; // حذف فلتر اسم القسم
@@ -160,6 +165,7 @@ export class EmployeeService {
       sort,
      
     );
+  }
   }
   
 
