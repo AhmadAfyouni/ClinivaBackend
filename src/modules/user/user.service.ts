@@ -85,6 +85,9 @@ export class UserService {
     if (filters.createdAt) {
       const createdAt = new Date(filters.createdAt);
       searchConditions.push({ createdAt: { $gte: createdAt } });
+      if (!isNaN(createdAt.getTime())) {
+        searchConditions.push({ createdAt: { $gte: createdAt } });
+      }
     }
       const roleResult = await applyModelFilter(
             this.roleModel,
