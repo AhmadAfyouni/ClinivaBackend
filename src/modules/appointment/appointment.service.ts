@@ -160,6 +160,17 @@ export class AppointmentService {
         limit
       );
       if (doctorsResult) return doctorsResult;
+      const patientResult = await applyModelFilter(
+        this.patientModel,
+        filters,
+        'patientName',
+        'name',
+        'patient',
+        filterConditions,
+        page,
+        limit
+      );
+      if (patientResult) return patientResult;
     if (filters.datetime) {
       const datetime = new Date(filters.datetime);
     
@@ -173,7 +184,7 @@ export class AppointmentService {
     
     // تنظيف الفلتر من حقل البحث
     
-    const fieldsToDelete = ['search', 'status', 'doctorName'];
+    const fieldsToDelete = ['search', 'status', 'doctorName','patientName'];
     fieldsToDelete.forEach(field => delete filters[field]);
     // دمج الفلاتر مع شروط البحث
     const finalFilter: Record<string, any> = {
