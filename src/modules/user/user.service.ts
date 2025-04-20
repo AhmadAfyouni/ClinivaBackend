@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, applyBooleanFilter, applyModelFilter, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { RoleDocument,Role } from '../role/schemas/role.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
@@ -86,8 +86,20 @@ export class UserService {
       const createdAt = new Date(filters.createdAt);
       searchConditions.push({ createdAt: { $gte: createdAt } });
     }
-    delete filters.search;
-    delete filters.isActive;
+      const roleResult = await applyModelFilter(
+            this.roleModel,
+            filters,
+            'roleName',
+            'name',
+            'roleIds',
+            filterConditions,
+            page,
+            limit
+          );
+          if (roleResult) return roleResult;
+    
+    const fieldsToDelete = ['search', 'isActive','roleName'];
+    fieldsToDelete.forEach(field => delete filters[field]);
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,

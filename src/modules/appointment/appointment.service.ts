@@ -184,7 +184,7 @@ export class AppointmentService {
     
     // تنظيف الفلتر من حقل البحث
     
-    const fieldsToDelete = ['search', 'status', 'doctorName','patientName'];
+    const fieldsToDelete = ['search', 'status', 'doctorName','patientName','datetime'];
     fieldsToDelete.forEach(field => delete filters[field]);
     // دمج الفلاتر مع شروط البحث
     const finalFilter: Record<string, any> = {
