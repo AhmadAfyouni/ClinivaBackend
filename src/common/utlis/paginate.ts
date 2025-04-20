@@ -89,9 +89,15 @@ export async function applyModelFilter<T>(
   limit: number
 ): Promise<{ data: any[]; total: number; page: number; limit: number; totalPages: number } | void> {
   if (filters[filterKey]) {
+    const filterValue = filters[filterKey];
+
+    if (filterValue === undefined || filterValue === 'null') {
+      // تجاهل الفلتر في هذه الحالة ولا ترجع شيء
+      return;
+    }
     const query: Record<string, any> = {};
     query[fieldName] = filters[filterKey];
-
+    
     const result = await model.findOne(query).select('_id');
     if (result && result._id) {
       filterConditions.push({ [targetKey]: result._id.toString() });
