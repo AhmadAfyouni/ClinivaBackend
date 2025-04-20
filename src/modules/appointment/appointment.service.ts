@@ -149,18 +149,28 @@ export class AppointmentService {
         return { data: [], total: 0, page, limit, totalPages: 0 };
       }
     }
-    const datetimeStatuses = ['undefined', 'null', ' '];
-    if (filters.datetime) {
-      if(datetimeStatuses.includes(filters.datetime )){}
-      else  {
-        const datetime = new Date(filters.datetime);
+    if (filters.hasOwnProperty('datetime')) {
+      const datetimeValue = filters.datetime;
+      
+      // الحالات التي نريد فيها إرجاع جميع البيانات
+      const shouldIgnore = [
+        undefined,
+        null,
+        'undefined',
+        'null',
+        '',
+        ' '
+      ].includes(datetimeValue);
     
+      if (!shouldIgnore) {
+        const datetime = new Date(datetimeValue);
+        
         if (!isNaN(datetime.getTime())) {
           searchConditions.push({ datetime: { $gte: datetime } });
         }
       }
-    
-      // إذا التاريخ غير صالح، لا تضيف أي شرط → تجاهله ببساطة
+      
+      // في جميع الحالات الأخرى (بما في undefined/null/فراغ) تجاهل الفلتر تمامًا
     }
     
     
