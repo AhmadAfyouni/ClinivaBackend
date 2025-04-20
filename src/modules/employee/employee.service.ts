@@ -36,133 +36,68 @@ export class EmployeeService {
   async getAllEmployees(paginationDto: PaginationAndFilterDto, filters: any) {
     let { page, limit, allData, sortBy, order } = paginationDto;
   
-    // تحويل الصفحة والحد إلى أرقام
     page = Number(page) || 1;
     limit = Number(limit) || 10;
   
     const sortField: string = sortBy ?? 'createdAt';
-    const sort: Record<string, number> = {
-      [sortField]: order === 'asc' ? 1 : -1,
-    };
+    const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
   
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
-    const allowedStatuses = ['true', 'false'];
-    const allowedEmployeeTypes = [
-      'Doctor',
-      'Nurse',
-      'Technician',
-      'Administrative',
-      'Employee',
-      'Other',
-    ];
+    const allowedEmployeeTypes = ['Doctor', 'Nurse', 'Technician', 'Administrative', 'Employee', 'Other'];
   
-    // فلترة حسب الحالة النشطة
-// فلترة حسب الحالة النشطة
-if (filters.hasOwnProperty('isActive')) {
-  if (filters.isActive === null || filters.isActive === '') {
-    // تجاهل الفلتر، لا تضف شيء
-  } else if (allowedStatuses.includes(filters.isActive)) {
-    filterConditions.push({ isActive: filters.isActive });
-  } else {
-    throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
-  }
-}
-
+    // معالجة isActive
+    if (filters.hasOwnProperty('isActive')) {
+      const isActiveValue = 
+        filters.isActive === 'null' ? null : 
+        filters.isActive === 'true' ? true : 
+        filters.isActive === 'false' ? false : 
+        filters.isActive;
   
-    // فلترة حسب نوع الموظف
+      if (isActiveValue === null) {
+        // لا تفعل أي شيء (تجاهل الفلتر)
+      } else if (typeof isActiveValue === 'boolean') {
+        filterConditions.push({ isActive: isActiveValue });
+      } else {
+        throw new Error(`Invalid isActive value. Allowed values: true, false, null`);
+      }
+    }
+  
+    // معالجة employeeType
     if (filters.employeeType) {
       if (allowedEmployeeTypes.includes(filters.employeeType)) {
         filterConditions.push({ employeeType: filters.employeeType });
       } else {
-        throw new Error(`Invalid employeeType value. Allowed values: ${allowedEmployeeTypes.join(', ')}`);
+        throw new Error(`Invalid employeeType. Allowed values: ${allowedEmployeeTypes.join(', ')}`);
       }
     }
   
-    // فلترة حسب اسم المجمع الطبي
-    if (filters.clinicCollectionName) {
-      const searchRegex = new RegExp(filters.clinicCollectionName, 'i'); // case-insensitive
+    // باقي معالجة الفلاتر (clinicCollectionName, departmentName, search)...
   
-      // البحث في المجمعات الطبية
-      const clinics = await this.clinicCollectionModel.find({ name: searchRegex }).select('_id');
-      const clinicIds = clinics.map(clinic => clinic._id.toString());
+    // إزالة جميع الحقول المعالجة من الفلاتر
+    const fieldsToDelete = ['search', 'isActive', 'employeeType', 'clinicCollectionName', 'departmentName'];
+    fieldsToDelete.forEach(field => delete filters[field]);
   
-      // إضافة شرط البحث حسب المجمع الطبي
-      if (clinicIds.length) {
-        filterConditions.push({ clinicCollectionId: { $in: clinicIds } });
-      } else {
-        return { data: [], total: 0, page, limit, totalPages: 0 };
-      }
-    }
-  
-    // فلترة حسب اسم القسم
-    if (filters.departmentName) {
-      // البحث عن القسم المطابق تمامًا
-      const department = await this.departmentModel
-        .findOne({ name: filters.departmentName })
-        .select('_id');
-    
-      if (department) {
-        filterConditions.push({ departmentId: department._id.toString() });
-      } else {
-        // ما في قسم بهذا الاسم
-        return {
-          data: [],
-          total: 0,
-          page,
-          limit,
-          totalPages: 0
-        };
-      }
-    }
-    
-  
-    // Handle flexible text-based search في الموظفين
-    if (filters.search) {
-      const regex = new RegExp(filters.search, 'i'); // case-insensitive
-  
-      searchConditions.push(
-        { name: regex },
-        { identity: regex },
-        { nationality: regex },
-        { address: regex },
-        { specialties: { $in: [regex] } },
-        { Languages: { $in: [regex] } },
-        { professional_experience: regex },
-      );
-    }
-  
-    // إزالة الحقول من الفلاتر بعد المعالجتها
-    delete filters.search;
-    delete filters.isActive;
-    delete filters.employeeType;
-    delete filters.clinicCollectionName; // حذف فلتر اسم المجمع الطبي
-    delete filters.departmentName; // حذف فلتر اسم القسم
-  
-    // دمج الفلاتر النهائية
+    // بناء الفلتر النهائي بدون ...filters
     const finalFilter = {
-      ...filters,
-      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
-      ...(filterConditions.length > 0 ? { $and: filterConditions } : {}),
+      ...(searchConditions.length > 0 && { $or: searchConditions }),
+      ...(filterConditions.length > 0 && { $and: filterConditions })
     };
   
-    // تنفيذ الاستعلام باستخدام الـ pagination والـ populate
     return paginate(
       this.employeeModel,
       [
         'companyId',
-      
-        { path: 'clinicCollectionId', select: 'name' }, // populate بيانات المجمع الطبي
-        { path: 'departmentId', select: 'name' }, // تضمين بيانات القسم
+        { path: 'clinicCollectionId', select: 'name' },
+        { path: 'departmentId', select: 'name' },
         'clinics',
         'specializations',
       ],
       page,
       limit,
       allData,
-      finalFilter,
-      sort,
-     
+      finalFilter, // تم إزالة ...filters هنا
+      sort
     );
   }
   
