@@ -5,7 +5,7 @@ import { Appointment, AppointmentDocument } from './schemas/appointment.schema';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, applyModelFilter, paginate } from 'src/common/utlis/paginate';
 import {
   Employee,
   EmployeeDocument,
@@ -149,7 +149,17 @@ export class AppointmentService {
         return { data: [], total: 0, page, limit, totalPages: 0 };
       }
     }
-  
+      const doctorsResult = await applyModelFilter(
+        this.doctorModel,
+        filters,
+        'doctorName',
+        'name',
+        'doctor',
+        filterConditions,
+        page,
+        limit
+      );
+      if (doctorsResult) return doctorsResult;
     if (filters.datetime) {
       const datetime = new Date(filters.datetime);
     
