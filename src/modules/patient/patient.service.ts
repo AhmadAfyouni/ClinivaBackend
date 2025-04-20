@@ -5,7 +5,7 @@ import { Patient, PatientDocument } from './schemas/patient.schema';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
 import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
 import { EmployeeDocument,Employee } from '../employee/schemas/employee.schema';
 import { MedicalRecordDocument,MedicalRecord } from '../medicalrecord/schemas/medicalrecord.schema';
@@ -49,14 +49,7 @@ export class PatientService {
     // إعداد شروط البحث
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
-  const allowedStatuses = ['true', 'false'];
-  if (filters.isActive !== null && filters.isActive !== undefined ) {
-    if (allowedStatuses.includes(filters.isActive)) {
-      filterConditions.push({ isActive: filters.isActive });
-    } else {
-      throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
-    }
-  }
+ await applyBooleanFilter(filters, 'isActive', filterConditions)
   if (filters.dateOfBirth) {
     const inputDate = new Date(filters.dateOfBirth);
   
