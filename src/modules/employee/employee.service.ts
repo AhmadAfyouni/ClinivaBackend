@@ -4,11 +4,12 @@ import { Model } from 'mongoose';
 import { Employee, EmployeeDocument } from './schemas/employee.schema';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { ApiGetResponse, paginate } from '../../common/utlis/paginate';
+import { ApiGetResponse, paginate,applyModelFilter } from '../../common/utlis/paginate';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
 import { ClinicCollectionDocument,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
 import { DepartmentDocument,Department } from '../department/schemas/department.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+
 @Injectable()
 export class EmployeeService {
   constructor(
@@ -48,14 +49,14 @@ export class EmployeeService {
   
     // معالجة isActive
     if (filters.hasOwnProperty('isActive')) {
-      const isActiveValue = 
-        filters.isActive === 'null' ? null : 
-        filters.isActive === 'true' ? true : 
-        filters.isActive === 'false' ? false : 
+      const isActiveValue =
+        filters.isActive === 'null' ? null :
+        filters.isActive === 'true' ? true :
+        filters.isActive === 'false' ? false :
         filters.isActive;
   
       if (isActiveValue === null) {
-        // لا تفعل أي شيء (تجاهل الفلتر)
+        // تجاهل الفلتر
       } else if (typeof isActiveValue === 'boolean') {
         filterConditions.push({ isActive: isActiveValue });
       } else {
@@ -63,7 +64,7 @@ export class EmployeeService {
       }
     }
   
-    // معالجة employeeType
+    // employeeType
     if (filters.employeeType) {
       if (allowedEmployeeTypes.includes(filters.employeeType)) {
         filterConditions.push({ employeeType: filters.employeeType });
@@ -72,69 +73,50 @@ export class EmployeeService {
       }
     }
   
-        // فلترة حسب نوع الموظف
-      
-      
-        // فلترة حسب اسم المجمع الطبي
-        if (filters.clinicCollectionName) {
-
-      
-          // البحث في المجمعات الطبية
-          const clinics = await this.clinicCollectionModel.findOne({ name: filters.clinicCollectionName }).select('_id');
-         
-      
-          // إضافة شرط البحث حسب المجمع الطبي
-          if (clinics) {
-            filterConditions.push({ clinicCollectionId: clinics._id.toString() });
-          } else {
-            return { data: [], total: 0, page, limit, totalPages: 0 };
-          }
-        }
-      
-        // فلترة حسب اسم القسم
-        if (filters.departmentName) {
-          // البحث عن القسم المطابق تمامًا
-          const department = await this.departmentModel
-            .findOne({ name: filters.departmentName })
-            .select('_id');
-        
-          if (department) {
-            filterConditions.push({ departmentId: department._id.toString() });
-          } else {
-            // ما في قسم بهذا الاسم
-            return {
-              data: [],
-              total: 0,
-              page,
-              limit,
-              totalPages: 0
-            };
-          }
-        }
-        
-      
-        // Handle flexible text-based search في الموظفين
-        if (filters.search) {
-          const regex = new RegExp(filters.search, 'i'); // case-insensitive
-      
-          searchConditions.push(
-            { name: regex },
-            { identity: regex },
-            { nationality: regex },
-            { address: regex },
-            { specialties: { $in: [regex] } },
-            { Languages: { $in: [regex] } },
-            { professional_experience: regex },
-          );
-        }
-      
-    
+    // استخدام الدالة الموحدة لفلترة المجمع الطبي
+    const clinicResult = await applyModelFilter(
+      this.clinicCollectionModel,
+      filters,
+      'clinicCollectionName',
+      'name',
+      'clinicCollectionId',
+      filterConditions,
+      page,
+      limit
+    );
+    if (clinicResult) return clinicResult;
   
-    // إزالة جميع الحقول المعالجة من الفلاتر
+    // استخدام الدالة الموحدة لفلترة القسم
+    const departmentResult = await applyModelFilter(
+      this.departmentModel,
+      filters,
+      'departmentName',
+      'name',
+      'departmentId',
+      filterConditions,
+      page,
+      limit
+    );
+    if (departmentResult) return departmentResult;
+  
+    // البحث المرن
+    if (filters.search) {
+      const regex = new RegExp(filters.search, 'i');
+      searchConditions.push(
+        { name: regex },
+        { identity: regex },
+        { nationality: regex },
+        { address: regex },
+        { specialties: { $in: [regex] } },
+        { Languages: { $in: [regex] } },
+        { professional_experience: regex },
+      );
+    }
+  
+    // حذف الحقول بعد معالجتها
     const fieldsToDelete = ['search', 'isActive', 'employeeType', 'clinicCollectionName', 'departmentName'];
     fieldsToDelete.forEach(field => delete filters[field]);
   
-    // بناء الفلتر النهائي بدون ...filters
     const finalFilter = {
       ...(searchConditions.length > 0 && { $or: searchConditions }),
       ...(filterConditions.length > 0 && { $and: filterConditions })
@@ -152,10 +134,11 @@ export class EmployeeService {
       page,
       limit,
       allData,
-      finalFilter, // تم إزالة ...filters هنا
+      finalFilter,
       sort
     );
   }
+  
   
 
   async getEmployeeById(id: string): Promise<ApiGetResponse<Employee>> {
