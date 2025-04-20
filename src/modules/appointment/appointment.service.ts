@@ -106,10 +106,10 @@ export class AppointmentService {
     const searchConditions: any[] = [];
     const searchTerm = filters.search; // استخراج searchTerm من الفلتر
     const filterConditions: any[] = [];
-    const allowedStatuses = ['scheduled', 'completed', 'cancelled','null'];
+    const allowedStatuses = ['scheduled', 'completed', 'cancelled'];
     if (filters.status) {
       if(filters.status === 'null'){}
-      else if (allowedStatuses.includes(filters.status && filters.status === 'null')) {
+      else if (allowedStatuses.includes(filters.status )) {
         filterConditions.push({ status: filters.status });
       } else {
         throw new Error(
