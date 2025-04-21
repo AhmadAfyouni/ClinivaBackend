@@ -76,9 +76,11 @@ export class DepartmentService {
     
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
     delete filters.search;
-    if ( departmentIds?.length) {
-      filters._id = { $in: departmentIds.toString() };
+    if (departmentIds?.length) {
+      // إذا كانت قائمة الأقسام تحتوي على قسم واحد، استخدم الفلتر مباشرة على هذا القسم
+      filters._id = departmentIds.length === 1 ? departmentIds[0] : { $in: departmentIds };
     }
+    
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
