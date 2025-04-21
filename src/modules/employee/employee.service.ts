@@ -53,7 +53,7 @@ export class EmployeeService {
     // employeeType
     if (filters.employeeType) {
       if(filters.employeeType === 'null'){}
-      if (allowedEmployeeTypes.includes(filters.employeeType)) {
+      else if (allowedEmployeeTypes.includes(filters.employeeType)) {
         filterConditions.push({ employeeType: filters.employeeType });
       } else {
         throw new Error(`Invalid employeeType. Allowed values: ${allowedEmployeeTypes.join(', ')}`);
