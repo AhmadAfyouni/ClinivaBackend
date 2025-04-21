@@ -38,7 +38,14 @@ export class DepartmentController {
     const employee = await this.employeeService.getEmployeeById(employeeId.toString());
   
     // استخراج معرف القسم الذي يتبع له الموظف
-    const departmentId = employee?.departmentId?._id?.toString();
+    const rawDepartmentId = employee.departmentId;
+    const departmentId = typeof rawDepartmentId === 'object' && rawDepartmentId !== null
+      ? rawDepartmentId._id?.toString()
+      : rawDepartmentId?.toString();
+    
+    if (departmentId) {
+      filters.departmentId = departmentId;
+    }
   
     // تحضير الفلاتر والاستعلام
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
