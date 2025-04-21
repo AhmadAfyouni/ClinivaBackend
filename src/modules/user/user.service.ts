@@ -84,7 +84,6 @@ export class UserService {
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
     if (filters.createdAt) {
       const createdAt = new Date(filters.createdAt);
-      searchConditions.push({ createdAt: { $gte: createdAt } });
       if (!isNaN(createdAt.getTime())) {
         searchConditions.push({ createdAt: { $gte: createdAt } });
       }
