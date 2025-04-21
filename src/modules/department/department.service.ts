@@ -77,7 +77,7 @@ export class DepartmentService {
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
     delete filters.search;
     if ( departmentIds?.length) {
-      filters._id = { $in: departmentIds };
+      filters._id = { $in: departmentIds.toString() };
     }
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
