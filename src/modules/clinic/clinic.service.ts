@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Clinic, ClinicDocument } from './schemas/clinic.schema';
@@ -7,12 +7,14 @@ import { UpdateClinicDto } from './dto/update-clinic.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { Appointment, AppointmentDocument } from '../appointment/schemas/appointment.schema';
+import { Employee, EmployeeDocument } from '../employee/schemas/employee.schema';
 
 @Injectable()
 export class ClinicService {
   constructor(
     @InjectModel(Clinic.name) private clinicModel: Model<ClinicDocument>,
     @InjectModel(Appointment.name) private appointmentModel: Model<AppointmentDocument>,
+    @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
   ) {}
   async createClinic(
     createClinicDto: CreateClinicDto,
@@ -229,8 +231,18 @@ export class ClinicService {
     return result;
   }
 
+  async getEmployeeCountByDoctorType(clinicId: string, doctorType: string = 'Doctor'): Promise<number> {
+    const count = await this.employeeModel.countDocuments({
+      clinics: clinicId,
+      employeeType: doctorType
+    });
+    return count;
+  }
   async getClinicById(id: string): Promise<ApiGetResponse<Clinic>> {
-    const [clinic, patientCount] = await Promise.all([
+    
+    try {
+    
+    const [clinic, patientCount, employeeCounts] = await Promise.all([
       this.clinicModel
         .findById(id)
         .populate([
@@ -238,19 +250,39 @@ export class ClinicService {
           'specializations',
           'insuranceCompany'
         ]),
-      this.appointmentModel.countDocuments({ clinic: id })
+      this.appointmentModel.countDocuments({ clinic: id }),
+      Promise.all([
+        this.getEmployeeCountByDoctorType( id,  'Doctor' ),
+        this.getEmployeeCountByDoctorType( id,  'Nurse' ),
+        this.getEmployeeCountByDoctorType( id,  'Technician' ),
+        this.getEmployeeCountByDoctorType( id,  'Administrative' )
+      ])
     ]);
 
     if (!clinic) throw new NotFoundException('Clinic not found');
 
     const clinicObj = clinic.toObject();
     clinicObj['patientCount'] = patientCount;
+    clinicObj['employeeCounts'] = {
+      doctors: employeeCounts[0],
+      nurses: employeeCounts[1],
+      technicians: employeeCounts[2],
+      administrative: employeeCounts[3],
+      total: employeeCounts.reduce((a, b) => a + b, 0)
+    };
 
     return {
       success: true,
       message: 'Clinic retrieved successfully',
       data: clinicObj,
-    };
+    };}
+    catch (error) {
+      console.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to retrieve clinic');
+    }
   }
 
   async updateClinic(
