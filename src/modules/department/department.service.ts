@@ -75,12 +75,12 @@ export class DepartmentService {
     
     
     if (filters.departmentId) {
-      searchConditions.push({ _id: filters.departmentId.toString() });
+      searchConditions.push({ _id: filters.departmentId });
     }
     
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
     delete filters.search;
-    
+    delete filters.departmentId
     
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
