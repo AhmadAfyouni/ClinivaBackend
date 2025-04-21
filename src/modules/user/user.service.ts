@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiGetResponse, applyBooleanFilter, applyModelFilter, paginate } from 'src/common/utlis/paginate';
+import { addDateFilter, ApiGetResponse, applyBooleanFilter, applyModelFilter, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { RoleDocument,Role } from '../role/schemas/role.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
@@ -82,12 +82,7 @@ export class UserService {
   }
   
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
-    if (filters.createdAt) {
-      const createdAt = new Date(filters.createdAt);
-      if (!isNaN(createdAt.getTime())) {
-        searchConditions.push({ createdAt: { $gte: createdAt } });
-      }
-    }
+   addDateFilter(filters, 'createdAt', searchConditions);
       const roleResult = await applyModelFilter(
             this.roleModel,
             filters,
