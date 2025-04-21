@@ -40,7 +40,7 @@ export class DepartmentController {
     const employee = await this.employeeService.getEmployeeById(employeeId.toString());
     const departmentId = extractId(employee.departmentId);
     // استخراج معرف القسم الذي يتبع له الموظف
-   
+   console.log(departmentId)
     // تحضير الفلاتر والاستعلام
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
     if (departmentId) {
