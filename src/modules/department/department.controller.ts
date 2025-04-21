@@ -22,6 +22,7 @@ export class DepartmentController {
   async getAllDepartments(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any,@Request() req,) {
     const userId = req.user.userId;
     const user = await this.userService.getUserById(userId);
+    console.log(user)
     const employee = await this.employeeService.getEmployeeById(user.employeeId);
   
     // افتراض أن الموظف مرتبط بقسم واحد عبر حقل departmentId
