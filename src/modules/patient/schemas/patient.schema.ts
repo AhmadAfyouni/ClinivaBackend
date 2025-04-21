@@ -106,7 +106,9 @@ export class Patient {
       })
       familyMedicalHistory: string[]; // قائمة بالأمراض الوراثية في العائلة
     
-
+      @Prop({ unique: true, required: true })
+      publicId: string;
+ 
 
 }
 

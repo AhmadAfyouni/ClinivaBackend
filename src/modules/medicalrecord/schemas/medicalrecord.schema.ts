@@ -64,6 +64,8 @@ export class MedicalRecord {
 
   @Prop({ enum: ['draft', 'finalized'], default: 'draft' })
   recordStatus: string;  // حالة السجل (مسودة أو نهائي)
+  @Prop({ unique: true, required: true })
+      publicId: string;
 }
 
 export const MedicalRecordSchema = SchemaFactory.createForClass(MedicalRecord);

@@ -27,7 +27,8 @@ status: string;
  
 @Prop()
 cancellationReason?: string; // سبب الإلغاء في حالة كان status = 'cancelled'
-  
+@Prop({ unique: true, required: true })
+publicId: string;
 }
 
 export const AppointmentSchema = SchemaFactory.createForClass(Appointment);

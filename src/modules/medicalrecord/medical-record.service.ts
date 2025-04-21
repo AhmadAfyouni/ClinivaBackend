@@ -9,7 +9,7 @@ import { CreateMedicalRecordDto } from './dto/create-medical-record.dto';
 import { UpdateMedicalRecordDto } from './dto/update-medical-record.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class MedicalRecordService {
   constructor(
@@ -20,7 +20,11 @@ export class MedicalRecordService {
   async createMedicalRecord(
     createMedicalRecordDto: CreateMedicalRecordDto,
   ): Promise<ApiGetResponse<MedicalRecord>> {
-    const newRecord = new this.medicalRecordModel(createMedicalRecordDto);
+     const publicId = await generateUniquePublicId(this.medicalRecordModel, 'me');
+    const newRecord = new this.medicalRecordModel({
+      ...createMedicalRecordDto,
+      publicId
+    });
     const savedRecord = await newRecord.save();
     return {
       success: true,

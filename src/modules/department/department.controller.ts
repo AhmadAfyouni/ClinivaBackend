@@ -1,13 +1,29 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Query,
+  Request,
+} from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-
+import { UserService } from '../user/user.service';
+import { EmployeeService } from '../employee/employee.service';
+import { extractId } from 'src/common/utlis/paginate';
 @Controller('departments')
 export class DepartmentController {
-  constructor(private readonly departmentService: DepartmentService) {
-  }
+  constructor(
+    private readonly departmentService: DepartmentService,
+    private readonly userService: UserService,
+    private readonly employeeService: EmployeeService,
+  ) {}
 
   @Post()
   async createDepartment(@Body() createDepartmentDto: CreateDepartmentDto) {
@@ -15,8 +31,31 @@ export class DepartmentController {
   }
 
   @Get()
-  async getAllDepartments(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any) {
+  async getAllDepartments(
+    @Query() paginationDto: PaginationAndFilterDto,
+    @Query() queryParams: any,
+    @Request() req,
+  ) {
+    const userId = req.user.userId;
+
+    const response = await this.userService.getUserById(userId);
+    if (!response.data || Array.isArray(response.data)) {
+      throw new NotFoundException('User not found');
+    }
+    const user = response.data;
+
+    const employeeId = user.employeeId;
+
+    const employee = await this.employeeService.getEmployeeById(
+      employeeId.toString(),
+    );
+    const departmentId = extractId(employee.data?.departmentId);
+
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+    if (departmentId) {
+      filters.departmentId = departmentId;
+    }
+
     return this.departmentService.getAllDepartments(paginationDto, filters);
   }
 
@@ -26,7 +65,10 @@ export class DepartmentController {
   }
 
   @Put(':id')
-  async updateDepartment(@Param('id') id: string, @Body() updateDepartmentDto: UpdateDepartmentDto) {
+  async updateDepartment(
+    @Param('id') id: string,
+    @Body() updateDepartmentDto: UpdateDepartmentDto,
+  ) {
     return this.departmentService.updateDepartment(id, updateDepartmentDto);
   }
 
@@ -37,7 +79,8 @@ export class DepartmentController {
 
   @Get('count/by-cliniccollection/:clinicCollectionId')
   getDepartmentCount(@Param('clinicCollectionId') clinicCollectionId: string) {
-    return this.departmentService.getCountByClinicCollectionId(clinicCollectionId);
+    return this.departmentService.getCountByClinicCollectionId(
+      clinicCollectionId,
+    );
   }
-
 }

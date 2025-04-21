@@ -8,7 +8,7 @@ import { MedicalRecord, MedicalRecordSchema } from './schemas/medicalrecord.sche
   imports: [MongooseModule.forFeature([{ name: MedicalRecord.name, schema: MedicalRecordSchema }])],
   controllers: [MedicalRecordController],
   providers: [MedicalRecordService],
-  exports: [MedicalRecordService], // لتتمكن وحدات أخرى من استخدام هذه الخدمة
+  exports: [MedicalRecordService,MongooseModule], // لتتمكن وحدات أخرى من استخدام هذه الخدمة
 })
 export class MedicalRecordModule {
 }

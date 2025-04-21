@@ -9,9 +9,15 @@ import { UpdateClinicCollectionDto } from './dto/update-clinic-collection.dto';
 import { CreateClinicCollectionDto } from './dto/create-clinic-collection.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
-import { Employee, EmployeeDocument } from '../employee/schemas/employee.schema';
-import { Department, DepartmentDocument } from '../department/schemas/department.schema';
-
+import {
+  Employee,
+  EmployeeDocument,
+} from '../employee/schemas/employee.schema';
+import {
+  Department,
+  DepartmentDocument,
+} from '../department/schemas/department.schema';
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class ClinicCollectionService {
   constructor(
@@ -26,8 +32,13 @@ export class ClinicCollectionService {
   async createClinicCollection(
     createClinicCollectionDto: CreateClinicCollectionDto,
   ): Promise<ApiGetResponse<ClinicCollection>> {
+        const publicId = await generateUniquePublicId(this.clinicCollectionModel, 'com');
+    
     const newClinicCollection = new this.clinicCollectionModel(
-      createClinicCollectionDto,
+     { 
+      ...createClinicCollectionDto,
+      publicId
+    }
     );
     const savedClinicCollection = await newClinicCollection.save();
     return {
@@ -52,20 +63,41 @@ export class ClinicCollectionService {
       [sortField]: order === 'asc' ? 1 : -1,
     };
 
+    const searchConditions: any[] = [];
+
+    if (filters.search) {
+      const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
+
+      searchConditions.push(
+        { name: regex },
+
+        { address: regex },
+      );
+    }
+
+    delete filters.search;
+
+    const finalFilter = {
+      ...filters,
+      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+    };
+
     const result = await paginate(
       this.clinicCollectionModel,
       ['companyId', 'specializations'],
       page,
       limit,
       allData,
-      filters,
+      finalFilter,
       sort,
     );
 
     if (result.data) {
       const clinicCollections = result.data;
       const updatedClinicCollections = await Promise.all(
-        clinicCollections.map((clinicCollection) => this.addClinicCounts(clinicCollection))
+        clinicCollections.map((clinicCollection) =>
+          this.addClinicCounts(clinicCollection),
+        ),
       );
       result.data = updatedClinicCollections;
     }
@@ -73,39 +105,53 @@ export class ClinicCollectionService {
     return result;
   }
 
-  private async getRelatedCount(id: string, model: Model<any>, foreignKey: string): Promise<number> {
+  private async getRelatedCount(
+    id: string,
+    model: Model<any>,
+    foreignKey: string,
+  ): Promise<number> {
     return await model.countDocuments({
-      [foreignKey]: id
+      [foreignKey]: id,
     });
   }
 
   private async addClinicCounts(clinicCollection: ClinicCollectionDocument) {
     const countConfigs = [
-      { model: this.employeeModel, foreignKey: 'clinicCollectionId', resultKey: 'employeeCount' },
-      { model: this.departmentModel, foreignKey: 'clinicCollectionId', resultKey: 'departmentCount' }
+      {
+        model: this.employeeModel,
+        foreignKey: 'clinicCollectionId',
+        resultKey: 'employeeCount',
+      },
+      {
+        model: this.departmentModel,
+        foreignKey: 'clinicCollectionId',
+        resultKey: 'departmentCount',
+      },
       // Add more models here as needed, for example:
       // { model: this.clinicModel, foreignKey: 'clinicCollectionId', resultKey: 'clinicCount' }
     ];
 
     const counts = await Promise.all(
-      countConfigs.map(async config => {
+      countConfigs.map(async (config) => {
         const count = await this.getRelatedCount(
           clinicCollection._id.toString(),
           config.model,
-          config.foreignKey
+          config.foreignKey,
         );
         console.log(`- ${config.resultKey}: ${count}`);
         return { [config.resultKey]: count };
-      })
+      }),
     );
 
     return {
       ...clinicCollection.toObject(),
-      ...Object.assign({}, ...counts)
+      ...Object.assign({}, ...counts),
     };
   }
 
-  async getClinicCollectionById(id: string): Promise<ApiGetResponse<ClinicCollection>> {
+  async getClinicCollectionById(
+    id: string,
+  ): Promise<ApiGetResponse<ClinicCollection>> {
     const clinicCollection = await this.clinicCollectionModel
       .findById(id)
       .populate(['companyId', 'specializations'])
@@ -114,7 +160,8 @@ export class ClinicCollectionService {
     if (!clinicCollection)
       throw new NotFoundException('Clinic Collection not found');
 
-    const clinicCollectionWithCounts = await this.addClinicCounts(clinicCollection);
+    const clinicCollectionWithCounts =
+      await this.addClinicCounts(clinicCollection);
 
     return {
       success: true,

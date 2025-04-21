@@ -78,3 +78,86 @@ export async function paginate<T>(
     },
   };
 }
+export async function applyModelFilter<T>(
+  model: Model<T>,
+  filters: any,
+  filterKey: string,
+  fieldName: string,
+  targetKey: string,
+  filterConditions: any[],
+  page: number,
+  limit: number
+): Promise<{ data: any[]; total: number; page: number; limit: number; totalPages: number } | void> {
+  if (filters[filterKey]) {
+    const filterValue = filters[filterKey];
+
+    if (filterValue === 'undefined' || filterValue === 'null') {
+      // تجاهل الفلتر في هذه الحالة ولا ترجع شيء
+      return;
+    }
+    const query: Record<string, any> = {};
+    query[fieldName] = filters[filterKey];
+    
+    const result = await model.findOne(query).select('_id');
+    if (result && result._id) {
+      filterConditions.push({ [targetKey]: result._id.toString() });
+    } else {
+      return {
+        data: [],
+        total: 0,
+        page,
+        limit,
+        totalPages: 0
+      };
+    }
+  }
+}
+export function applyBooleanFilter(
+  filters: any,
+  key: string,
+  filterConditions: any[]
+) {
+  if (filters.hasOwnProperty(key)) {
+    const value = filters[key];
+
+    const normalizedValue =
+      value === 'null' ? null :
+      value === 'true' ? true :
+      value === 'false' ? false :
+      value;
+
+    if (normalizedValue === null) {
+      // تجاهل الفلتر
+      return;
+    }
+
+    if (typeof normalizedValue === 'boolean') {
+      filterConditions.push({ [key]: normalizedValue });
+    } else {
+      throw new Error(`Invalid ${key} value. Allowed values: true, false, null`);
+    }
+  }
+}
+
+export function extractId(field: any): string | null {
+  if (!field) return null;
+  if (typeof field === 'object' && '_id' in field) return field._id.toString();
+  if (typeof field === 'string') return field;
+  return null;
+}
+
+
+
+export function addDateFilter(
+  filters: Record<string, any>,
+  key: string,
+  searchConditions: any[],
+  operator: '$gte' | '$lte' | '$eq' = '$gte'
+) {
+  const rawValue = filters[key];
+  const date = new Date(rawValue);
+
+  if (rawValue && !isNaN(date.getTime())) {
+    searchConditions.push({ [key]: { [operator]: date } });
+  }
+}

@@ -4,19 +4,28 @@ import { Model } from 'mongoose';
 import { Employee, EmployeeDocument } from './schemas/employee.schema';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { ApiGetResponse, paginate } from '../../common/utlis/paginate';
+import { ApiGetResponse, paginate,applyModelFilter, applyBooleanFilter } from '../../common/utlis/paginate';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
+import { ClinicCollectionDocument,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
+import { DepartmentDocument,Department } from '../department/schemas/department.schema';
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 
 @Injectable()
 export class EmployeeService {
   constructor(
     @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
+    @InjectModel(ClinicCollection.name) private clinicCollectionModel: Model<ClinicCollectionDocument>,
+    @InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>,
   ) {}
 
   async createEmployee(
     createEmployeeDto: CreateEmployeeDto,
   ): Promise<ApiGetResponse<Employee>> {
-    const newEmployee = new this.employeeModel(createEmployeeDto);
+    const publicId = await generateUniquePublicId(this.employeeModel, 'emp'); 
+    const newEmployee = new this.employeeModel({
+      ...createEmployeeDto,
+      publicId
+    });
     const savedEmployee = await newEmployee.save();
     return {
       success: true,
@@ -27,25 +36,61 @@ export class EmployeeService {
 
   async getAllEmployees(paginationDto: PaginationAndFilterDto, filters: any) {
     let { page, limit, allData, sortBy, order } = paginationDto;
-
-    // Convert page & limit to numbers
+  
     page = Number(page) || 1;
     limit = Number(limit) || 10;
-
+  
     const sortField: string = sortBy ?? 'createdAt';
-    const sort: Record<string, number> = {
-      [sortField]: order === 'asc' ? 1 : -1,
-    };
-
+    const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
+  
     const searchConditions: any[] = [];
-
-    // Handle flexible text-based search
+    const filterConditions: any[] = [];
+    const allowedEmployeeTypes = ['Doctor', 'Nurse', 'Technician', 'Administrative', 'Employee', 'Other'];
+  
+    // معالجة isActive
+   await applyBooleanFilter(filters, 'isActive', filterConditions)
+  
+    // employeeType
+    if (filters.employeeType) {
+      if(filters.employeeType === 'null'){}
+      else if (allowedEmployeeTypes.includes(filters.employeeType)) {
+        filterConditions.push({ employeeType: filters.employeeType });
+      } else {
+        throw new Error(`Invalid employeeType. Allowed values: ${allowedEmployeeTypes.join(', ')}`);
+      }
+    }
+  
+    // استخدام الدالة الموحدة لفلترة المجمع الطبي
+    const clinicResult = await applyModelFilter(
+      this.clinicCollectionModel,
+      filters,
+      'clinicCollectionName',
+      'name',
+      'clinicCollectionId',
+      filterConditions,
+      page,
+      limit
+    );
+    if (clinicResult) return clinicResult;
+  
+    // استخدام الدالة الموحدة لفلترة القسم
+    const departmentResult = await applyModelFilter(
+      this.departmentModel,
+      filters,
+      'departmentName',
+      'name',
+      'departmentId',
+      filterConditions,
+      page,
+      limit
+    );
+    if (departmentResult) return departmentResult;
+  
+    // البحث المرن
     if (filters.search) {
-      const regex = new RegExp(filters.search, 'i'); // case-insensitive
-
+      const regex = new RegExp(filters.search, 'i');
       searchConditions.push(
         { name: regex },
-        { employeeType: regex },
         { identity: regex },
         { nationality: regex },
         { address: regex },
@@ -54,21 +99,22 @@ export class EmployeeService {
         { professional_experience: regex },
       );
     }
-
-    // Remove search key from filters before passing it down
-    delete filters.search;
-
+  
+    // حذف الحقول بعد معالجتها
+    const fieldsToDelete = ['search', 'isActive', 'employeeType', 'clinicCollectionName', 'departmentName'];
+    fieldsToDelete.forEach(field => delete filters[field]);
+  
     const finalFilter = {
-      ...filters,
-      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+      ...(searchConditions.length > 0 && { $or: searchConditions }),
+      ...(filterConditions.length > 0 && { $and: filterConditions })
     };
-
+  
     return paginate(
       this.employeeModel,
       [
         'companyId',
-        'clinicCollectionId',
-        'departmentId',
+        { path: 'clinicCollectionId', select: 'name' },
+        { path: 'departmentId', select: 'name' },
         'clinics',
         'specializations',
       ],
@@ -76,9 +122,11 @@ export class EmployeeService {
       limit,
       allData,
       finalFilter,
-      sort,
+      sort
     );
   }
+  
+  
 
   async getEmployeeById(id: string): Promise<ApiGetResponse<Employee>> {
     const employee = await this.employeeModel

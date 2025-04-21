@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
+import mongoose, { Document, Types } from 'mongoose';
 import { ActivityLog, LoginHistory } from 'src/common/utlis/helper';
 
 export type UserDocument = User & Document;
@@ -37,6 +37,10 @@ export class User {
 
   @Prop({ type: [LoginHistory], default: [] })
   loginHistory?: LoginHistory[]; // تاريخ ووقت تسجيل الدخول من الأجهزة والعناوين IP
+  @Prop({ unique: true, required: true })
+  publicId: string;
+
 }
+
 
 export const UserSchema = SchemaFactory.createForClass(User);

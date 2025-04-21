@@ -1,10 +1,12 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, Types } from 'mongoose';
 
 export type SpecializationDocument = Specialization & Document;
 
 @Schema({ timestamps: true })
 export class Specialization {
+  _id: Types.ObjectId;
+
   @Prop({ required: true })
   name: string;
 
@@ -25,6 +27,8 @@ export class Specialization {
 
   @Prop({ required: true, default: true })
   isActive: boolean; // هل التخصص نشط؟
+  @Prop({ unique: true, required: true })
+  publicId: string;
 }
 
 export const SpecializationSchema = SchemaFactory.createForClass(Specialization);

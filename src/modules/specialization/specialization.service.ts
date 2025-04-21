@@ -10,8 +10,8 @@ import { Employee, EmployeeDocument } from '../employee/schemas/employee.schema'
 import { CreateSpecializationDto } from './dto/create-specialization.dto';
 import { UpdateSpecializationDto } from './dto/update-specialization.dto';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
-
+import { addDateFilter, ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class SpecializationService {
   constructor(
@@ -26,9 +26,11 @@ export class SpecializationService {
   async createSpecialization(
     createSpecializationDto: CreateSpecializationDto,
   ): Promise<ApiGetResponse<Specialization>> {
-    const newSpecialization = new this.specializationModel(
-      createSpecializationDto,
-    );
+    const publicId = await generateUniquePublicId(this.specializationModel, 'sp');
+    const newSpecialization = new this.specializationModel({
+      ...createSpecializationDto,
+      publicId
+    });
     const savedSpecialization = await newSpecialization.save();
     return {
       success: true,
@@ -52,6 +54,30 @@ export class SpecializationService {
       [sortField]: order === 'asc' ? 1 : -1,
     };
     
+    const searchConditions: any[] = [];
+    const filterConditions: any[] = [];
+  await applyBooleanFilter(filters, 'isActive', filterConditions)
+  // تحقق إذا كان يوجد نص للبحث في الحقول النصية (name, email)
+  if (filters.search) {
+    const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
+
+    // إضافة شروط البحث للحقول النصية
+    searchConditions.push(
+      { name: regex },         // البحث في الحقل name
+  
+    );
+  }
+  
+    // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
+  addDateFilter(filters, 'updatedAt', searchConditions);
+    const fieldsToDelete = ['search', 'isActive','updatedAt'];
+    fieldsToDelete.forEach(field => delete filters[field]);
+    // دمج الفلاتر مع شروط البحث
+    const finalFilter = {
+      ...filters,
+      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
+    };
     // Get paginated specializations
     const result = await paginate(
       this.specializationModel,
@@ -59,7 +85,7 @@ export class SpecializationService {
       page,
       limit,
       allData,
-      filters,
+      finalFilter,
       sort,
     );
 

@@ -41,9 +41,10 @@ import { ServiceModule } from './modules/service/service.module';
     RoleModule,
     CompanyModule,
     ClinicCollectionModule,
+    EmployeeModule,
     DepartmentModule,
     ClinicModule,
-    EmployeeModule,
+   
     PatientModule,
     AppointmentModule,
     MedicalRecordModule,
