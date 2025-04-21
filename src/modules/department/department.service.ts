@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Department, DepartmentDocument } from './schemas/department.schema';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
@@ -75,7 +75,7 @@ export class DepartmentService {
     
     
     if (filters.departmentId) {
-      filters._id = filters.departmentId; // 🔥 نحطها مباشرة في الفلاتر
+      filters._id = new Types.ObjectId(filters.departmentId); // 🔥 نحطها مباشرة في الفلاتر
     }
     
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
