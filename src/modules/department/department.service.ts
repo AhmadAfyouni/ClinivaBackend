@@ -75,9 +75,9 @@ export class DepartmentService {
     
     
     if (filters.departmentId) {
-      searchConditions.push({ departmentId: filters.departmentId });
+      searchConditions.push({ _id: filters.departmentId.toString() });
     }
-    delete filters.departmentId;
+    
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
     delete filters.search;
     
