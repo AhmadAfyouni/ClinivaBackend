@@ -131,7 +131,7 @@ export class EmployeeService {
   async getEmployeeById(id: string): Promise<ApiGetResponse<Employee>> {
     const objectId = new Types.ObjectId(id);
     const employee = await this.employeeModel
-      .findById(id)
+      .findById(objectId)
       .populate([
         'companyId',
         'clinicCollectionId',
