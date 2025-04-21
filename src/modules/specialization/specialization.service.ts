@@ -71,10 +71,13 @@ export class SpecializationService {
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
     if (filters.updatedAt) {
       const updatedAt = new Date(filters.updatedAt);
-      searchConditions.push({ updatedAt: { $gte: updatedAt } });
+      if (!isNaN(updatedAt.getTime())) {
+        searchConditions.push({ updatedAt: { $gte: updatedAt } });
+      }
+     
     }
-    delete filters.isActive;
-    delete filters.search;
+    const fieldsToDelete = ['search', 'isActive','updatedAt'];
+    fieldsToDelete.forEach(field => delete filters[field]);
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
