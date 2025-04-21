@@ -32,13 +32,16 @@ export class DepartmentController {
       throw new NotFoundException('User not found');
     }
     const user = response.data;
-  
+    console.log(user)
     // جلب بيانات الموظف المرتبط بالمستخدم
     const employeeId = user.employeeId;
+    console.log(employeeId)
     const employee = await this.employeeService.getEmployeeById(employeeId.toString());
-  
+    console.log(employee)
     // استخراج معرف القسم الذي يتبع له الموظف
     const rawDepartmentId = employee.departmentId;
+  console.log(rawDepartmentId)
+
     const departmentId = rawDepartmentId?.toString(); 
     
   console.log(departmentId)
