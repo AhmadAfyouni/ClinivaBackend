@@ -32,6 +32,7 @@ export class DepartmentController {
   console.log(employee)
     // افتراض أن الموظف مرتبط بقسم واحد عبر حقل departmentId
     const departmentId = employee.departmentId;
+    console.log(departmentId)
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
     filters.departmentId = departmentId?._id?.toString();
 
