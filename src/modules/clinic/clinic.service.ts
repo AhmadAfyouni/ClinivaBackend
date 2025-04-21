@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Clinic, ClinicDocument } from './schemas/clinic.schema';
@@ -16,6 +16,8 @@ import {
 } from '../medicalrecord/schemas/medicalrecord.schema';
 import { SpecializationDocument,Specialization } from '../specialization/schemas/specialization.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { Employee, EmployeeDocument } from '../employee/schemas/employee.schema';
+
 @Injectable()
 export class ClinicService {
   constructor(
@@ -26,6 +28,7 @@ export class ClinicService {
     private medicalRecordModel: Model<MedicalRecordDocument>,
     @InjectModel(Specialization.name)
     private specializationModel: Model<SpecializationDocument>,
+    @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
   ) {}
   async createClinic(
     createClinicDto: CreateClinicDto,
@@ -42,34 +45,6 @@ export class ClinicService {
       data: savedClinic,
     };
   }
-
-  // async getAllClinics(paginationDto: PaginationAndFilterDto, filters: any) {
-  //   let { page, limit, allData, sortBy, order } = paginationDto;
-
-  //   // Convert page & limit to numbers
-  //   page = Number(page) || 1;
-  //   limit = Number(limit) || 10;
-
-  //   const sortField: string = sortBy ?? 'createdAt';
-  //   const sort: Record<string, number> = {
-  //     [sortField]: order === 'asc' ? 1 : -1,
-  //   };
-  //   const populateFields = [
-  //     // { path: 'departmentId' }, // Existing field
-  //     { path: 'specializations' }, // New field to populate
-  //     // { path: 'insuranceCompany' }, // Another new field
-  //     // Add more fields as needed
-  //   ];
-  //   return paginate(
-  //     this.clinicModel,
-  //     populateFields,
-  //     page,
-  //     limit,
-  //     allData,
-  //     filters,
-  //     sort,
-  //   );
-  // }
   async getAllClinics(paginationDto: PaginationAndFilterDto, filters: any) {
     let { page, limit, allData, sortBy, order } = paginationDto;
 
@@ -181,24 +156,59 @@ export class ClinicService {
     };
   }
 
+  async getEmployeeCountByDoctorType(clinicId: string, doctorType: string = 'Doctor'): Promise<number> {
+    const count = await this.employeeModel.countDocuments({
+      clinics: clinicId,
+      employeeType: doctorType
+    });
+    return count;
+  }
   async getClinicById(id: string): Promise<ApiGetResponse<Clinic>> {
-    const [clinic, patientCount] = await Promise.all([
+    
+    try {
+    
+    const [clinic, patientCount, employeeCounts] = await Promise.all([
       this.clinicModel
         .findById(id)
-        .populate(['departmentId', 'specializations', 'insuranceCompany']),
+
+        .populate([
+          'departmentId',
+          'specializations',
+          'insuranceCompany'
+        ]),
       this.appointmentModel.countDocuments({ clinic: id }),
+      Promise.all([
+        this.getEmployeeCountByDoctorType( id,  'Doctor' ),
+        this.getEmployeeCountByDoctorType( id,  'Nurse' ),
+        this.getEmployeeCountByDoctorType( id,  'Technician' ),
+        this.getEmployeeCountByDoctorType( id,  'Administrative' )
+      ])
     ]);
 
     if (!clinic) throw new NotFoundException('Clinic not found');
 
     const clinicObj = clinic.toObject();
     clinicObj['patientCount'] = patientCount;
+    clinicObj['employeeCounts'] = {
+      doctors: employeeCounts[0],
+      nurses: employeeCounts[1],
+      technicians: employeeCounts[2],
+      administrative: employeeCounts[3],
+      total: employeeCounts.reduce((a, b) => a + b, 0)
+    };
 
     return {
       success: true,
       message: 'Clinic retrieved successfully',
       data: clinicObj,
-    };
+    };}
+    catch (error) {
+      console.log(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to retrieve clinic');
+    }
   }
 
   async updateClinic(

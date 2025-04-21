@@ -23,6 +23,7 @@ import { JwtAuthGuard } from './modules/auth/jwt-auth.guard';
 import { APP_GUARD } from '@nestjs/core';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { SpecializationModule } from './modules/specialization/specialization.module';
+import { ServiceModule } from './modules/service/service.module';
 
 // Security & Middleware
 
@@ -47,7 +48,8 @@ import { SpecializationModule } from './modules/specialization/specialization.mo
     PatientModule,
     AppointmentModule,
     MedicalRecordModule,
-    SpecializationModule
+    SpecializationModule,
+    ServiceModule,
   ],
   providers: [
     {
