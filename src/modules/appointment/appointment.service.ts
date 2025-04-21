@@ -5,7 +5,7 @@ import { Appointment, AppointmentDocument } from './schemas/appointment.schema';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { ApiGetResponse, applyModelFilter, paginate } from 'src/common/utlis/paginate';
+import { addDateFilter, ApiGetResponse, applyModelFilter, paginate } from 'src/common/utlis/paginate';
 import {
   Employee,
   EmployeeDocument,
@@ -171,16 +171,8 @@ export class AppointmentService {
         limit
       );
       if (patientResult) return patientResult;
-    if (filters.datetime) {
-      const datetime = new Date(filters.datetime);
-    
-      if (!isNaN(datetime.getTime())) {
-        searchConditions.push({ datetime: { $gte: datetime } });
-      }
-    
-      // إذا التاريخ غير صالح، لا تضيف أي شرط → تجاهله ببساطة
-    }
-    
+  
+      addDateFilter(filters, 'datetime', searchConditions);
     
     // تنظيف الفلتر من حقل البحث
     

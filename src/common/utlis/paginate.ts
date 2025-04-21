@@ -138,18 +138,26 @@ export function applyBooleanFilter(
     }
   }
 }
-export function addDateFilter(filters: any, field: string, searchConditions: any[]) {
-  const value = filters[field];
-  if (value) {
-    const date = new Date(value);
-    if (!isNaN(date.getTime())) {
-      searchConditions.push({ [field]: { $gte: date } });
-    }
-  }
-}
+
 export function extractId(field: any): string | null {
   if (!field) return null;
   if (typeof field === 'object' && '_id' in field) return field._id.toString();
   if (typeof field === 'string') return field;
   return null;
+}
+
+
+
+export function addDateFilter(
+  filters: Record<string, any>,
+  key: string,
+  searchConditions: any[],
+  operator: '$gte' | '$lte' | '$eq' = '$gte'
+) {
+  const rawValue = filters[key];
+  const date = new Date(rawValue);
+
+  if (rawValue && !isNaN(date.getTime())) {
+    searchConditions.push({ [key]: { [operator]: date } });
+  }
 }
