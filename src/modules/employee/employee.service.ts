@@ -131,13 +131,13 @@ export class EmployeeService {
   async getEmployeeById(id: string): Promise<ApiGetResponse<Employee>> {
     const employee = await this.employeeModel
       .findById(id)
-      .populate([
-        'companyId',
-        'clinicCollectionId',
-        'departmentId',
-        'clinics',
-        'specializations',
-      ])
+      // .populate([
+      //   'companyId',
+      //   'clinicCollectionId',
+      //   'departmentId',
+      //   'clinics',
+      //   'specializations',
+      // ])
       .exec();
     if (!employee) throw new NotFoundException('Employee not found');
     return {
