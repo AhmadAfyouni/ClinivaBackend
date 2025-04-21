@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query ,Request} from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+  Put,
+  Query,
+  Request,
+} from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
@@ -8,11 +19,11 @@ import { EmployeeService } from '../employee/employee.service';
 import { extractId } from 'src/common/utlis/paginate';
 @Controller('departments')
 export class DepartmentController {
-  constructor(private readonly departmentService: DepartmentService,
+  constructor(
+    private readonly departmentService: DepartmentService,
     private readonly userService: UserService,
-    private readonly employeeService: EmployeeService,) {
-  }
-
+    private readonly employeeService: EmployeeService,
+  ) {}
 
   @Post()
   async createDepartment(@Body() createDepartmentDto: CreateDepartmentDto) {
@@ -26,43 +37,38 @@ export class DepartmentController {
     @Request() req,
   ) {
     const userId = req.user.userId;
-  
-    // جلب بيانات المستخدم
+
     const response = await this.userService.getUserById(userId);
     if (!response.data || Array.isArray(response.data)) {
       throw new NotFoundException('User not found');
     }
     const user = response.data;
-    console.log(user)
-    // جلب بيانات الموظف المرتبط بالمستخدم
+
     const employeeId = user.employeeId;
-    console.log(employeeId)
-    const employee = await this.employeeService.getEmployeeById(employeeId.toString());
-    const departmentId = extractId( employee.data?.departmentId);
-    // استخراج معرف القسم الذي يتبع له الموظف
-   console.log(departmentId)
-    // تحضير الفلاتر والاستعلام
+
+    const employee = await this.employeeService.getEmployeeById(
+      employeeId.toString(),
+    );
+    const departmentId = extractId(employee.data?.departmentId);
+
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
     if (departmentId) {
       filters.departmentId = departmentId;
     }
-  
-    console.log('Filtered departmentId:', filters.departmentId);
-    console.log('employee keys:', Object.keys(employee));
-    console.log('employee.departmentId:', employee.departmentId);
-    console.log('typeof employee.departmentId:', typeof employee.departmentId);
-    
-    // إرسال البيانات إلى الخدمة مع تضمين departmentId في الفلترة
+
     return this.departmentService.getAllDepartments(paginationDto, filters);
   }
-  
+
   @Get(':id')
   async getDepartmentById(@Param('id') id: string) {
     return this.departmentService.getDepartmentById(id);
   }
 
   @Put(':id')
-  async updateDepartment(@Param('id') id: string, @Body() updateDepartmentDto: UpdateDepartmentDto) {
+  async updateDepartment(
+    @Param('id') id: string,
+    @Body() updateDepartmentDto: UpdateDepartmentDto,
+  ) {
     return this.departmentService.updateDepartment(id, updateDepartmentDto);
   }
 
@@ -73,7 +79,8 @@ export class DepartmentController {
 
   @Get('count/by-cliniccollection/:clinicCollectionId')
   getDepartmentCount(@Param('clinicCollectionId') clinicCollectionId: string) {
-    return this.departmentService.getCountByClinicCollectionId(clinicCollectionId);
+    return this.departmentService.getCountByClinicCollectionId(
+      clinicCollectionId,
+    );
   }
-
 }
