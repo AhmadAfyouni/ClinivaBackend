@@ -39,13 +39,9 @@ export class DepartmentController {
   
     // استخراج معرف القسم الذي يتبع له الموظف
     const rawDepartmentId = employee.departmentId;
-    const departmentId = typeof rawDepartmentId === 'object' && rawDepartmentId !== null
-      ? rawDepartmentId._id?.toString()
-      : rawDepartmentId?.toString();
-    
-    if (departmentId) {
-      filters.departmentId = departmentId;
-    }
+const departmentId = typeof rawDepartmentId === 'object' && rawDepartmentId !== null
+  ? rawDepartmentId._id?.toString()
+  : rawDepartmentId?.toString();
   
     // تحضير الفلاتر والاستعلام
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
