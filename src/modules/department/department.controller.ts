@@ -39,7 +39,11 @@ export class DepartmentController {
     const employee = await this.employeeService.getEmployeeById(employeeId.toString());
     console.log(employee)
     // استخراج معرف القسم الذي يتبع له الموظف
-    const rawDepartmentId = employee.departmentId?._id.toString();
+    const rawDepartmentId = typeof employee.departmentId === 'object' && employee.departmentId !== null
+    ? employee.departmentId._id
+    : employee.departmentId;
+  
+  
   console.log(rawDepartmentId)
 
     const departmentId = rawDepartmentId?.toString(); 
