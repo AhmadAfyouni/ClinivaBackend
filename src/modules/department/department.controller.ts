@@ -5,6 +5,7 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { UserService } from '../user/user.service';
 import { EmployeeService } from '../employee/employee.service';
+import { extractId } from 'src/common/utlis/paginate';
 @Controller('departments')
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService,
@@ -37,18 +38,9 @@ export class DepartmentController {
     const employeeId = user.employeeId;
     console.log(employeeId)
     const employee = await this.employeeService.getEmployeeById(employeeId.toString());
-    console.log(employee)
+    const departmentId = extractId(employee.departmentId);
     // استخراج معرف القسم الذي يتبع له الموظف
-    const rawDepartmentId = typeof employee.departmentId === 'object' && employee.departmentId !== null
-    ? employee.departmentId._id
-    : employee.departmentId;
-  
-  
-  console.log(rawDepartmentId)
-
-    const departmentId = rawDepartmentId?.toString(); 
-    
-  console.log(departmentId)
+   
     // تحضير الفلاتر والاستعلام
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
     if (departmentId) {

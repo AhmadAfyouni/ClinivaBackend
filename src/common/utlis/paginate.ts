@@ -147,3 +147,9 @@ export function addDateFilter(filters: any, field: string, searchConditions: any
     }
   }
 }
+export function extractId(field: any): string | null {
+  if (!field) return null;
+  if (typeof field === 'object' && '_id' in field) return field._id.toString();
+  if (typeof field === 'string') return field;
+  return null;
+}
