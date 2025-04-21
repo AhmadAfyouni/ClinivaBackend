@@ -19,27 +19,39 @@ export class DepartmentController {
   }
 
   @Get()
-  async getAllDepartments(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any,@Request() req,) {
+  async getAllDepartments(
+    @Query() paginationDto: PaginationAndFilterDto,
+    @Query() queryParams: any,
+    @Request() req,
+  ) {
     const userId = req.user.userId;
+  
+    // جلب بيانات المستخدم
     const response = await this.userService.getUserById(userId);
-    console.log(response)
     if (!response.data || Array.isArray(response.data)) {
       throw new NotFoundException('User not found');
     }
-    const user=response.data
-    const employeeId  =user.employeeId
+    const user = response.data;
+  
+    // جلب بيانات الموظف المرتبط بالمستخدم
+    const employeeId = user.employeeId;
     const employee = await this.employeeService.getEmployeeById(employeeId.toString());
-  console.log(employee)
-    // افتراض أن الموظف مرتبط بقسم واحد عبر حقل departmentId
-    const departmentId = employee.departmentId;
-    console.log(departmentId)
+  
+    // استخراج معرف القسم الذي يتبع له الموظف
+    const departmentId = employee?.departmentId?._id?.toString();
+  
+    // تحضير الفلاتر والاستعلام
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-    filters.departmentId = departmentId?._id?.toString();
-
-    console.log(filters.departmentId)
+    if (departmentId) {
+      filters.departmentId = departmentId;
+    }
+  
+    console.log('Filtered departmentId:', filters.departmentId);
+  
+    // إرسال البيانات إلى الخدمة مع تضمين departmentId في الفلترة
     return this.departmentService.getAllDepartments(paginationDto, filters);
   }
-
+  
   @Get(':id')
   async getDepartmentById(@Param('id') id: string) {
     return this.departmentService.getDepartmentById(id);
