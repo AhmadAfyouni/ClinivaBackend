@@ -80,7 +80,7 @@ export class DepartmentService {
     
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
     delete filters.search;
-    delete filters.departmentId
+ 
     
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
