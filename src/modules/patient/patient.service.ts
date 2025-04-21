@@ -52,21 +52,24 @@ export class PatientService {
  await applyBooleanFilter(filters, 'isActive', filterConditions)
   if (filters.dateOfBirth) {
     const inputDate = new Date(filters.dateOfBirth);
+    if (!isNaN(inputDate.getTime())) {
+      const startOfDay = new Date(inputDate);
+      startOfDay.setUTCHours(0, 0, 0, 0);
+    
+      const endOfDay = new Date(inputDate);
+      endOfDay.setUTCHours(23, 59, 59, 999);
+    
+      searchConditions.push({
+        dateOfBirth: {
+          $gte: startOfDay,
+          $lte: endOfDay
+        }
+      });
+      
+    }
   
-    const startOfDay = new Date(inputDate);
-    startOfDay.setUTCHours(0, 0, 0, 0);
   
-    const endOfDay = new Date(inputDate);
-    endOfDay.setUTCHours(23, 59, 59, 999);
-  
-    searchConditions.push({
-      dateOfBirth: {
-        $gte: startOfDay,
-        $lte: endOfDay
-      }
-    });
-  
-    delete filters.dateOfBirth;
+    
   }
   
     // تحقق إذا كان يوجد نص للبحث
@@ -82,8 +85,9 @@ export class PatientService {
     }
   
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
-    delete filters.search;
-    delete filters.isActive;
+   
+    const fieldsToDelete = ['search', 'isActive','dateOfBirth'];
+    fieldsToDelete.forEach(field => delete filters[field])
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
