@@ -3,7 +3,9 @@ import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-
+import { CurrentUser } from '../auth/current-user.decorator';
+import { UseGuards } from '@nestjs/common';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 @Controller('departments')
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService) {
@@ -13,11 +15,11 @@ export class DepartmentController {
   async createDepartment(@Body() createDepartmentDto: CreateDepartmentDto) {
     return this.departmentService.createDepartment(createDepartmentDto);
   }
-
+  @UseGuards(JwtAuthGuard)
   @Get()
-  async getAllDepartments(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any) {
+  async getAllDepartments(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any,@CurrentUser() user: any) {
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-    return this.departmentService.getAllDepartments(paginationDto, filters);
+    return this.departmentService.getAllDepartments(paginationDto, filters,user.departmentIds);
   }
 
   @Get(':id')

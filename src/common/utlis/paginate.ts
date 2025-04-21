@@ -138,3 +138,12 @@ export function applyBooleanFilter(
     }
   }
 }
+export function addDateFilter(filters: any, field: string, searchConditions: any[]) {
+  const value = filters[field];
+  if (value) {
+    const date = new Date(value);
+    if (!isNaN(date.getTime())) {
+      searchConditions.push({ [field]: { $gte: date } });
+    }
+  }
+}

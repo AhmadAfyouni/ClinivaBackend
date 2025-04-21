@@ -39,7 +39,7 @@ export class DepartmentService {
       data: savedDepartment,
     };
   }
-  async getAllDepartments(paginationDto: PaginationAndFilterDto, filters: any) {
+  async getAllDepartments(paginationDto: PaginationAndFilterDto, filters: any, departmentIds: string[],) {
     let { page, limit, allData, sortBy, order } = paginationDto;
   
     // Convert page & limit to numbers
@@ -73,9 +73,12 @@ export class DepartmentService {
     }
     
     
+    
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
     delete filters.search;
-  
+    if ( departmentIds?.length) {
+      filters._id = { $in: departmentIds };
+    }
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
