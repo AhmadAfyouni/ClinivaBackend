@@ -68,22 +68,19 @@ export class DepartmentService {
         { clinicCollectionId: { $in: clinicIds } } // البحث داخل المجمع المرتبط
       );
     }
-    if (filters.datetime) {
-      const datetime = new Date(filters.datetime);
-      searchConditions.push({ datetime });
-    }
+
     
     
     if (filters.departmentId) {
       filters._id = filters.departmentId; 
-      delete filters.departmentId;// 🔥 نحطها مباشرة في الفلاتر
+      delete filters.departmentId;
     }
     
-    // إزالة مفتاح البحث من الفلاتر قبل تمريرها
+
     delete filters.search;
  
     
-    // دمج الفلاتر مع شروط البحث
+   
     const finalFilter = {
       ...filters,
       ...(searchConditions.length > 0 ? { $and: [{ $or: searchConditions }] } : {}), 
