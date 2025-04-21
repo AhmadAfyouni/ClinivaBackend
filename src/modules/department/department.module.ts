@@ -12,6 +12,8 @@ import { MedicalRecord,MedicalRecordSchema } from '../medicalrecord/schemas/medi
 import { ClinicCollectionSchema,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
 import { ClinicCollectionModule } from '../cliniccollection/clinic-collection.module';
 import { forwardRef } from '@nestjs/common';
+import { EmployeeService } from '../employee/employee.service';
+import { UserService } from '../user/user.service';
 @Module({
   imports: [MongooseModule.forFeature([{ name: Department.name, schema: DepartmentSchema },
     { name: Clinic.name, schema: ClinicSchema },
@@ -20,7 +22,7 @@ import { forwardRef } from '@nestjs/common';
     { name: MedicalRecord.name, schema: MedicalRecordSchema },
   ]),forwardRef(() => ClinicModule),forwardRef(() => AppointmentModule),forwardRef(() => MedicalRecordModule),forwardRef(() => ClinicCollectionModule)],
   controllers: [DepartmentController],
-  providers: [DepartmentService],
+  providers: [DepartmentService, EmployeeService, UserService],
   exports: [DepartmentService],
 })
 export class DepartmentModule {
