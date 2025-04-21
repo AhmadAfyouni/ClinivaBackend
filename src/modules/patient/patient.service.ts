@@ -5,7 +5,7 @@ import { Patient, PatientDocument } from './schemas/patient.schema';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
+import { addDateFilter, ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
 import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
 import { EmployeeDocument,Employee } from '../employee/schemas/employee.schema';
 import { MedicalRecordDocument,MedicalRecord } from '../medicalrecord/schemas/medicalrecord.schema';
@@ -50,27 +50,8 @@ export class PatientService {
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
  await applyBooleanFilter(filters, 'isActive', filterConditions)
-  if (filters.dateOfBirth) {
-    const inputDate = new Date(filters.dateOfBirth);
-    if (!isNaN(inputDate.getTime())) {
-      const startOfDay = new Date(inputDate);
-      startOfDay.setUTCHours(0, 0, 0, 0);
-    
-      const endOfDay = new Date(inputDate);
-      endOfDay.setUTCHours(23, 59, 59, 999);
-    
-      searchConditions.push({
-        dateOfBirth: {
-          $gte: startOfDay,
-          $lte: endOfDay
-        }
-      });
-      
-    }
   
-  
-    
-  }
+ addDateFilter(filters, 'dateOfBirth', searchConditions);
   
     // تحقق إذا كان يوجد نص للبحث
     if (filters.search) {
