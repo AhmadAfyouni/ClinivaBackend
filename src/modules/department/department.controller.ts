@@ -40,7 +40,8 @@ export class DepartmentController {
     // استخراج معرف القسم الذي يتبع له الموظف
     const rawDepartmentId = employee.departmentId;
     const departmentId = rawDepartmentId?.toString(); 
-  
+    
+  console.log(departmentId)
     // تحضير الفلاتر والاستعلام
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
     if (departmentId) {
