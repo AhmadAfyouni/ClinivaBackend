@@ -10,7 +10,7 @@ import { Employee, EmployeeDocument } from '../employee/schemas/employee.schema'
 import { CreateSpecializationDto } from './dto/create-specialization.dto';
 import { UpdateSpecializationDto } from './dto/update-specialization.dto';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
-import { ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
+import { addDateFilter, ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class SpecializationService {
@@ -69,13 +69,7 @@ export class SpecializationService {
   }
   
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
-    if (filters.updatedAt) {
-      const updatedAt = new Date(filters.updatedAt);
-      if (!isNaN(updatedAt.getTime())) {
-        searchConditions.push({ updatedAt: { $gte: updatedAt } });
-      }
-     
-    }
+  addDateFilter(filters, 'updatedAt', searchConditions);
     const fieldsToDelete = ['search', 'isActive','updatedAt'];
     fieldsToDelete.forEach(field => delete filters[field]);
     // دمج الفلاتر مع شروط البحث
