@@ -23,7 +23,7 @@ export class DepartmentController {
     const userId = req.user.userId;
     const user = await this.userService.getUserById(userId);
     console.log(user)
-    const employee = await this.employeeService.getEmployeeById(user.employeeId.toString);
+    const employee = await this.employeeService.getEmployeeById(user.employeeId);
   
     // افتراض أن الموظف مرتبط بقسم واحد عبر حقل departmentId
     const departmentId = employee.departmentId;
