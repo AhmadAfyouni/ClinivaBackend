@@ -16,6 +16,7 @@ import { EmployeeService } from '../employee/employee.service';
 import { UserService } from '../user/user.service';
 import { UserModule } from '../user/user.module';
 import { User, UserSchema } from '../user/schemas/user.schema';
+import { RoleModule } from '../role/role.module';
 @Module({
   imports: [MongooseModule.forFeature([{ name: Department.name, schema: DepartmentSchema },
     { name: Clinic.name, schema: ClinicSchema },
@@ -23,7 +24,7 @@ import { User, UserSchema } from '../user/schemas/user.schema';
     { name: Appointment.name, schema: AppointmentSchema },
     { name: MedicalRecord.name, schema: MedicalRecordSchema },
     { name: User.name, schema: UserSchema },
-  ]),forwardRef(() => ClinicModule),forwardRef(() => AppointmentModule),forwardRef(() => MedicalRecordModule),forwardRef(() => ClinicCollectionModule),forwardRef(() => UserModule)],
+  ]),forwardRef(() => ClinicModule),forwardRef(() => AppointmentModule),forwardRef(() => MedicalRecordModule),forwardRef(() => ClinicCollectionModule),forwardRef(() => UserModule),forwardRef(() => RoleModule),],
   controllers: [DepartmentController],
   providers: [DepartmentService, EmployeeService, UserService],
   exports: [DepartmentService],
