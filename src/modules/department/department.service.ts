@@ -11,6 +11,7 @@ import { AppointmentDocument,Appointment } from '../appointment/schemas/appointm
 import { MedicalRecord,MedicalRecordDocument } from '../medicalrecord/schemas/medicalrecord.schema';
 import { ClinicCollectionDocument,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { UserService } from '../user/user.service';
 @Injectable()
 export class DepartmentService {
   constructor(
@@ -39,7 +40,7 @@ export class DepartmentService {
       data: savedDepartment,
     };
   }
-  async getAllDepartments(paginationDto: PaginationAndFilterDto, filters: any, departmentIds: string[],) {
+  async getAllDepartments(paginationDto: PaginationAndFilterDto, filters: any, ) {
     let { page, limit, allData, sortBy, order } = paginationDto;
   
     // Convert page & limit to numbers
@@ -73,13 +74,13 @@ export class DepartmentService {
     }
     
     
-    
+    if (filters.departmentId) {
+      searchConditions.push({ departmentId: filters.departmentId });
+    }
+    delete filters.departmentId;
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
     delete filters.search;
-    if (departmentIds?.length) {
-      // إذا كانت قائمة الأقسام تحتوي على قسم واحد، استخدم الفلتر مباشرة على هذا القسم
-      filters._id = departmentIds.length === 1 ? departmentIds[0] : { $in: departmentIds };
-    }
+    
     
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {

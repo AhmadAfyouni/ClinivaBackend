@@ -1,25 +1,34 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query ,Request} from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { CurrentUser } from '../auth/current-user.decorator';
-import { UseGuards } from '@nestjs/common';
-import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { UserService } from '../user/user.service';
+import { EmployeeService } from '../employee/employee.service';
 @Controller('departments')
 export class DepartmentController {
-  constructor(private readonly departmentService: DepartmentService) {
+  constructor(private readonly departmentService: DepartmentService,
+    private readonly userService: UserService,
+    private readonly employeeService: EmployeeService,) {
   }
+
 
   @Post()
   async createDepartment(@Body() createDepartmentDto: CreateDepartmentDto) {
     return this.departmentService.createDepartment(createDepartmentDto);
   }
-  @UseGuards(JwtAuthGuard)
+
   @Get()
-  async getAllDepartments(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any,@CurrentUser() user: any) {
+  async getAllDepartments(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any,@Request() req,) {
+    const userId = req.user.userId;
+    const user = await this.userService.getUserById(userId);
+    const employee = await this.employeeService.getEmployeeById(user.employeeId);
+  
+    // افتراض أن الموظف مرتبط بقسم واحد عبر حقل departmentId
+    const departmentId = employee.departmentId;
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-    return this.departmentService.getAllDepartments(paginationDto, filters,user.departmentIds);
+    filters.departmentId = departmentId
+    return this.departmentService.getAllDepartments(paginationDto, filters);
   }
 
   @Get(':id')
