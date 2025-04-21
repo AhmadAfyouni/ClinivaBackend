@@ -48,7 +48,10 @@ export class DepartmentController {
     }
   
     console.log('Filtered departmentId:', filters.departmentId);
-  
+    console.log('employee keys:', Object.keys(employee));
+    console.log('employee.departmentId:', employee.departmentId);
+    console.log('typeof employee.departmentId:', typeof employee.departmentId);
+    
     // إرسال البيانات إلى الخدمة مع تضمين departmentId في الفلترة
     return this.departmentService.getAllDepartments(paginationDto, filters);
   }
