@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query ,Request} from '@nestjs/common';
+import { Body, Controller, Delete, Get, NotFoundException, Param, Post, Put, Query ,Request} from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
@@ -21,9 +21,13 @@ export class DepartmentController {
   @Get()
   async getAllDepartments(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any,@Request() req,) {
     const userId = req.user.userId;
-    const user = await this.userService.getUserById(userId);
-    console.log(user)
-    const employee = await this.employeeService.getEmployeeById(user.employeeId);
+    const response = await this.userService.getUserById(userId);
+    if (!response.data || Array.isArray(response.data)) {
+      throw new NotFoundException('User not found');
+    }
+    const user=response.data
+    const employeeId  =user.employeeId
+    const employee = await this.employeeService.getEmployeeById(employeeId.toString());
   
     // افتراض أن الموظف مرتبط بقسم واحد عبر حقل departmentId
     const departmentId = employee.departmentId;
