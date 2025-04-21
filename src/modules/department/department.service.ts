@@ -85,7 +85,7 @@ export class DepartmentService {
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
-      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+      ...(searchConditions.length > 0 ? { $and: [{ $or: searchConditions }] } : {}), 
     };
   
     // استخدام paginate مع populate
