@@ -5,7 +5,6 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { UserService } from '../user/user.service';
 import { EmployeeService } from '../employee/employee.service';
-import { Types } from 'mongoose';
 @Controller('departments')
 export class DepartmentController {
   constructor(private readonly departmentService: DepartmentService,
@@ -31,9 +30,9 @@ export class DepartmentController {
     const employee = await this.employeeService.getEmployeeById(employeeId.toString());
   
     // افتراض أن الموظف مرتبط بقسم واحد عبر حقل departmentId
-    const departmentId =  new Types.ObjectId(employee.departmentId);
+    const departmentId = employee.departmentId;
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-    filters.departmentId = departmentId
+    filters.departmentId = departmentId.toString()
     return this.departmentService.getAllDepartments(paginationDto, filters);
   }
 
