@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Employee, EmployeeDocument } from './schemas/employee.schema';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
@@ -129,15 +129,16 @@ export class EmployeeService {
   
 
   async getEmployeeById(id: string): Promise<ApiGetResponse<Employee>> {
+    const objectId = new Types.ObjectId(id);
     const employee = await this.employeeModel
       .findById(id)
-      // .populate([
-      //   'companyId',
-      //   'clinicCollectionId',
-      //   'departmentId',
-      //   'clinics',
-      //   'specializations',
-      // ])
+      .populate([
+        'companyId',
+        'clinicCollectionId',
+        'departmentId',
+        'clinics',
+        'specializations',
+      ])
       .exec();
     if (!employee) throw new NotFoundException('Employee not found');
     return {
