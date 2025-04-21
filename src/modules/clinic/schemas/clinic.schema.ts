@@ -80,7 +80,8 @@ export class Clinic {
 
   @Prop({ type: [Types.ObjectId], ref: 'Specialization', required: true })
   specializations: Types.ObjectId[];  // قائمة بمعرفات الاختصاصات المرتبطة بالعيادة
-
+  @Prop({ unique: true, required: true })
+  publicId: string;
 }
 
 export const ClinicSchema = SchemaFactory.createForClass(Clinic);

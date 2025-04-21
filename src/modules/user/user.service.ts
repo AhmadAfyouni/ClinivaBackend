@@ -9,12 +9,15 @@ import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { addDateFilter, ApiGetResponse, applyBooleanFilter, applyModelFilter, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-
+import { RoleDocument,Role } from '../role/schemas/role.schema';
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class UserService {
-  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
+  @InjectModel(Role.name) private roleModel: Model<RoleDocument>) {}
+
 
   async createUser(
     createUserDto: CreateUserDto,
@@ -24,10 +27,11 @@ export class UserService {
       createUserDto.password,
       saltRounds,
     ); // ✅ تشفير كلمة المرور
-
+    const publicId = await generateUniquePublicId(this.userModel, 'us');
     const newUser = new this.userModel({
       ...createUserDto,
       password: hashedPassword,
+      publicId,
     });
     const savedUser = await newUser.save();
 
@@ -53,15 +57,9 @@ export class UserService {
   
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
-    const allowedStatuses = ['true', 'false'];
-    if (filters.isActive) {
-      if (allowedStatuses.includes(filters.isActive)) {
-        filterConditions.push({ isActive: filters.isActive });
-      } else {
-        throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
-      }
-    }
-  // تحقق إذا كان يوجد نص للبحث في الحقول النصية (name, email)
+    let RoleIds: string[] = [];
+   await applyBooleanFilter(filters, 'isActive', filterConditions)
+ 
   if (filters.search) {
     const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
 
@@ -70,15 +68,35 @@ export class UserService {
       { name: regex },         // البحث في الحقل name
       { email: regex },        // البحث في الحقل email
     );
+    const Roles = await this.roleModel.find({ name: regex }).select('_id');
+    RoleIds = Roles.map(role => role._id.toString());
+    const searchOrConditions: Record<string, any>[] = [];
+    if (RoleIds.length) {
+      searchOrConditions.push({ roleIds: { $in: RoleIds } });
+    }
+    if (searchOrConditions.length) {
+      searchConditions.push({ $or: searchOrConditions });
+    } else {
+      return { data: [], total: 0, page, limit, totalPages: 0 };
+    }
   }
   
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
-    if (filters.createdAt) {
-      const createdAt = new Date(filters.createdAt);
-      searchConditions.push({ createdAt: { $gte: createdAt } });
-    }
-    delete filters.search;
-    delete filters.isActive;
+   addDateFilter(filters, 'createdAt', searchConditions);
+      const roleResult = await applyModelFilter(
+            this.roleModel,
+            filters,
+            'roleName',
+            'name',
+            'roleIds',
+            filterConditions,
+            page,
+            limit
+          );
+          if (roleResult) return roleResult;
+    
+    const fieldsToDelete = ['search', 'isActive','roleName','createdAt'];
+    fieldsToDelete.forEach(field => delete filters[field]);
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
@@ -89,7 +107,7 @@ export class UserService {
     // استخدم paginate مع populate
     const result = await paginate(
       this.userModel,
-      ['roleIds'], 
+      [{path:"roleIds",select:'name'}], 
       page,
       limit,
       allData,

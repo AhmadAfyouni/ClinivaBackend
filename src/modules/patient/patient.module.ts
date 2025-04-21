@@ -16,8 +16,8 @@ import { forwardRef } from '@nestjs/common';
     { name: Employee.name, schema: EmployeeSchema },
     { name: MedicalRecord.name, schema: MedicalRecordSchema },
   ]), forwardRef(() => AppointmentModule),
-  EmployeeModule,
-  MedicalRecordModule,],
+  forwardRef(() => EmployeeModule) ,
+  forwardRef(() => MedicalRecordModule),],
   controllers: [PatientController],
   providers: [PatientService],
   exports: [PatientService], // يمكن استخدامها في وحدات أخرى

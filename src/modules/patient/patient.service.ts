@@ -5,10 +5,11 @@ import { Patient, PatientDocument } from './schemas/patient.schema';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { addDateFilter, ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
 import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
 import { EmployeeDocument,Employee } from '../employee/schemas/employee.schema';
 import { MedicalRecordDocument,MedicalRecord } from '../medicalrecord/schemas/medicalrecord.schema';
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class PatientService {
   constructor(
@@ -21,7 +22,10 @@ export class PatientService {
   async createPatient(
     createPatientDto: CreatePatientDto,
   ): Promise<ApiGetResponse<Patient>> {
-    const newPatient = new this.patientModel(createPatientDto);
+    const publicId = await generateUniquePublicId(this.patientModel, 'pa');
+    const newPatient = new this.patientModel({
+      ...createPatientDto,
+      publicId});
     const savedPatient = await newPatient.save();
     return {
       success: true,
@@ -45,14 +49,10 @@ export class PatientService {
     // إعداد شروط البحث
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
-  const allowedStatuses = ['true', 'false'];
-  if (filters.isActive) {
-    if (allowedStatuses.includes(filters.isActive)) {
-      filterConditions.push({ isActive: filters.isActive });
-    } else {
-      throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
-    }
-  }
+ await applyBooleanFilter(filters, 'isActive', filterConditions)
+  
+ addDateFilter(filters, 'dateOfBirth', searchConditions);
+  
     // تحقق إذا كان يوجد نص للبحث
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
@@ -60,13 +60,15 @@ export class PatientService {
       // إضافة شروط البحث للحقول النصية مثل الاسم والحالة
       searchConditions.push(
         { name: regex },
+        { gender: regex },
       
       );
     }
   
     // إزالة مفتاح البحث من الفلاتر قبل تمريرها
-    delete filters.search;
-    delete filters.isActive;
+   
+    const fieldsToDelete = ['search', 'isActive','dateOfBirth'];
+    fieldsToDelete.forEach(field => delete filters[field])
     // دمج الفلاتر مع شروط البحث
     const finalFilter = {
       ...filters,
@@ -82,36 +84,20 @@ export class PatientService {
       const patients = result.data;
       const updatedPatients = await Promise.all(
         patients.map(async (patient) => {
-          // جلب آخر زيارة للمريض من جدول المواعيد
+          // البحث باستخدام ObjectId مباشرة دون تحويل لـ string
           const lastAppointment = await this.appointmentModel
-            .findOne({ patientId: patient._id.toString })
-            .sort({ datetime: -1 })  // ترتيب حسب تاريخ ووقت الزيارة من الأحدث إلى الأقدم
-         
-            .exec();
-            let doctorName = "";
-            let treatmentPlan: string | null = null;
-
-            if (lastAppointment && lastAppointment.doctor) {
-              const doctor = await this.employeeModel.findById(lastAppointment.doctor);
-              doctorName = doctor ? doctor.name : " ";
-            }
-            if (lastAppointment?._id) {
-              const medicalRecord = await this.medicalRecordModel.findOne({
-                appointmentId: lastAppointment._id,
-              });
-        
-             treatmentPlan = medicalRecord?.treatmentPlan || null;
-            }
-        
-          // إضافة آخر زيارة مع اسم الطبيب إلى بيانات المريض
+            .findOne({ patient: patient._id.toString() }) // افترضنا أن patientId من نوع ObjectId
+            .sort({ datetime: -1 })
+            .select('datetime -_id') // اختيار الحقول المطلوبة فقط لتحسين الأداء
+            .lean(); // إرجاع كائن عادي بدل مستند Mongoose
+    
           return {
             ...patient.toObject(),
-            lastVisit: lastAppointment ? lastAppointment.datetime : null,
-           doctorName, // تحقق من وجود الطبيب قبل الوصول إلى اسمه
-           treatmentPlan, 
+            lastVisit: lastAppointment?.datetime || null,
           };
         })
       );
+      
       result.data = updatedPatients;
     }
   

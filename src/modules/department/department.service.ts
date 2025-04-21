@@ -10,6 +10,8 @@ import { ClinicDocument,Clinic } from '../clinic/schemas/clinic.schema';
 import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
 import { MedicalRecord,MedicalRecordDocument } from '../medicalrecord/schemas/medicalrecord.schema';
 import { ClinicCollectionDocument,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { UserService } from '../user/user.service';
 @Injectable()
 export class DepartmentService {
   constructor(
@@ -25,7 +27,12 @@ export class DepartmentService {
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
   ): Promise<ApiGetResponse<Department>> {
-    const newDepartment = new this.departmentModel(createDepartmentDto);
+    const publicId = await generateUniquePublicId(this.departmentModel, 'dep');
+    
+    const newDepartment = new this.departmentModel({
+      ...createDepartmentDto,
+      publicId
+    });
     const savedDepartment = await newDepartment.save();
     return {
       success: true,
@@ -33,7 +40,7 @@ export class DepartmentService {
       data: savedDepartment,
     };
   }
-  async getAllDepartments(paginationDto: PaginationAndFilterDto, filters: any) {
+  async getAllDepartments(paginationDto: PaginationAndFilterDto, filters: any, ) {
     let { page, limit, allData, sortBy, order } = paginationDto;
   
     // Convert page & limit to numbers
@@ -61,19 +68,22 @@ export class DepartmentService {
         { clinicCollectionId: { $in: clinicIds } } // البحث داخل المجمع المرتبط
       );
     }
-    if (filters.datetime) {
-      const datetime = new Date(filters.datetime);
-      searchConditions.push({ datetime });
+
+    
+    
+    if (filters.departmentId) {
+      filters._id = filters.departmentId; 
+      delete filters.departmentId;
     }
     
-    
-    // إزالة مفتاح البحث من الفلاتر قبل تمريرها
+
     delete filters.search;
-  
-    // دمج الفلاتر مع شروط البحث
+ 
+    
+   
     const finalFilter = {
       ...filters,
-      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+      ...(searchConditions.length > 0 ? { $and: [{ $or: searchConditions }] } : {}), 
     };
   
     // استخدام paginate مع populate
@@ -106,7 +116,7 @@ export class DepartmentService {
       departmentId: department._id.toString(),
     }).select('_id');
   
-    const clinicIds = clinics.map(c => c._id);
+    const clinicIds = clinics.map(c => c._id.toString());
     const clinicCount = clinicIds.length;
   
     console.log(`🏥 Number of clinics for the department "${department.name}": ${clinicCount}`);
@@ -120,7 +130,7 @@ export class DepartmentService {
         clinic: { $in: clinicIds },
       }).select('_id');
   
-      const appointmentIds = appointments.map(a => a._id);
+      const appointmentIds = appointments.map(a => a._id.toString());
   
       console.log(`📅 Number of appointments for clinics in department "${department.name}": ${appointmentIds.length}`);
       console.log(`📅 Appointments for department "${department.name}":`, appointmentIds);

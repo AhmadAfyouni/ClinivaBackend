@@ -4,22 +4,40 @@ import { Model } from 'mongoose';
 import { Clinic, ClinicDocument } from './schemas/clinic.schema';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, applyBooleanFilter, applyModelFilter, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { Appointment, AppointmentDocument } from '../appointment/schemas/appointment.schema';
+import {
+  Appointment,
+  AppointmentDocument,
+} from '../appointment/schemas/appointment.schema';
+import {
+  MedicalRecord,
+  MedicalRecordDocument,
+} from '../medicalrecord/schemas/medicalrecord.schema';
+import { SpecializationDocument,Specialization } from '../specialization/schemas/specialization.schema';
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 import { Employee, EmployeeDocument } from '../employee/schemas/employee.schema';
 
 @Injectable()
 export class ClinicService {
   constructor(
     @InjectModel(Clinic.name) private clinicModel: Model<ClinicDocument>,
-    @InjectModel(Appointment.name) private appointmentModel: Model<AppointmentDocument>,
+    @InjectModel(Appointment.name)
+    private appointmentModel: Model<AppointmentDocument>,
+    @InjectModel(MedicalRecord.name)
+    private medicalRecordModel: Model<MedicalRecordDocument>,
+    @InjectModel(Specialization.name)
+    private specializationModel: Model<SpecializationDocument>,
     @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
   ) {}
   async createClinic(
     createClinicDto: CreateClinicDto,
   ): Promise<ApiGetResponse<Clinic>> {
-    const newClinic = new this.clinicModel(createClinicDto);
+   const publicId = await generateUniquePublicId(this.clinicModel, 'cli');
+    
+    const newClinic = new this.clinicModel({
+      ...createClinicDto,
+      publicId});
     const savedClinic = await newClinic.save();
     return {
       success: true,
@@ -27,38 +45,9 @@ export class ClinicService {
       data: savedClinic,
     };
   }
-
-  // async getAllClinics(paginationDto: PaginationAndFilterDto, filters: any) {
-  //   let { page, limit, allData, sortBy, order } = paginationDto;
-
-  //   // Convert page & limit to numbers
-  //   page = Number(page) || 1;
-  //   limit = Number(limit) || 10;
-
-  //   const sortField: string = sortBy ?? 'createdAt';
-  //   const sort: Record<string, number> = {
-  //     [sortField]: order === 'asc' ? 1 : -1,
-  //   };
-  //   const populateFields = [
-  //     // { path: 'departmentId' }, // Existing field
-  //     { path: 'specializations' }, // New field to populate
-  //     // { path: 'insuranceCompany' }, // Another new field
-  //     // Add more fields as needed
-  //   ];
-  //   return paginate(
-  //     this.clinicModel,
-  //     populateFields,
-  //     page,
-  //     limit,
-  //     allData,
-  //     filters,
-  //     sort,
-  //   );
-  // }
   async getAllClinics(paginationDto: PaginationAndFilterDto, filters: any) {
     let { page, limit, allData, sortBy, order } = paginationDto;
 
-    // Convert page & limit to numbers
     page = Number(page) || 1;
     limit = Number(limit) || 10;
 
@@ -66,34 +55,52 @@ export class ClinicService {
     const sort: Record<string, number> = {
       [sortField]: order === 'asc' ? 1 : -1,
     };
+
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
-    const allowedStatuses = ['true', 'false'];
-    if (filters.isActive) {
-      if (allowedStatuses.includes(filters.isActive)) {
-        filterConditions.push({ isActive: filters.isActive });
+    let specializationIds: string[] = [];
+   await applyBooleanFilter(filters, 'isActive', filterConditions)
+
+    if (filters.search) {
+      const regex = new RegExp(filters.search, 'i');
+      searchConditions.push({ name: regex });
+      const specializations = await this.specializationModel.find({ name: regex }).select('_id');
+      specializationIds = specializations.map(spec => spec._id.toString());
+      const searchOrConditions: Record<string, any>[] = [];
+      if (specializationIds.length) {
+        searchOrConditions.push({ specializations: { $in: specializationIds } });
+      }
+      if (searchOrConditions.length) {
+        searchConditions.push({ $or: searchOrConditions });
       } else {
-        throw new Error(`Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`);
+        return { data: [], total: 0, page, limit, totalPages: 0 };
       }
     }
-    if (filters.search){
-      const regex = new RegExp(filters.search, 'i');
-      searchConditions.push(
-        { name: regex },
-      )
-    }
-    delete filters.search;
-    delete filters.isActive;
+   
+      const specializationtResult = await applyModelFilter(
+           this.specializationModel,
+           filters,
+           'specializationName',
+           'name',
+           'specializations',
+           filterConditions,
+           page,
+           limit
+         );
+         if (specializationtResult) return specializationtResult;
+         const fieldsToDelete = ['search', 'isActive','specializationName'];
+         fieldsToDelete.forEach(field => delete filters[field])
+
     const finalFilter = {
       ...filters,
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
-      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
+      ...(filterConditions.length > 0 ? { $and: filterConditions } : {}),
     };
-    // Specify the fields to populate
+
     const populateFields = [
-      { path: 'departmentId' }, // Existing field
-      { path: 'specializations' }, // New field to populate
-      { path: 'insuranceCompany' }, // Another new field
+      { path: 'departmentId' },
+      { path: 'specializations' ,select:'name'},
+      { path: 'insuranceCompany' },
     ];
 
     const result = await paginate(
@@ -106,129 +113,47 @@ export class ClinicService {
       sort,
     );
 
-    if (result.success && result.data && result.data.length > 0) {
-      // Get all clinic IDs
-      const clinicIds = result.data.map(clinic => clinic._id.toString());
-      // console.log('clinicIds', clinicIds);
-      // Get comprehensive statistics for all clinics in a single aggregation
-      const clinicStats = await this.appointmentModel.aggregate([
-        { 
-          $match: { 
-            clinic: { $in: clinicIds } 
-          } 
-        },
-        {
-          $group: {
-            _id: '$clinic',
-            totalAppointments: { $sum: 1 },
-            activeAppointments: { 
-              $sum: { 
-                $cond: [{ $eq: ['$status', 'scheduled'] }, 1, 0] 
-              } 
-            },
-            uniquePatients: { $addToSet: '$patient' },
-            byStatus: {
-              $push: '$status'
-            },
-            // Group appointments by date
-            appointmentsByDate: {
-              $push: {
-                date: '$datetime',
-                status: '$status'
-              }
-            }
-          }
-        },
-        {
-          $project: {
-            totalAppointments: 1,
-            activeAppointments: 1,
-            uniquePatientCount: { $size: '$uniquePatients' },
-            statusCounts: {
-              scheduled: { 
-                $size: { 
-                  $filter: { 
-                    input: '$byStatus', 
-                    cond: { $eq: ['$$this', 'scheduled'] } 
-                  } 
-                } 
-              },
-              completed: { 
-                $size: { 
-                  $filter: { 
-                    input: '$byStatus', 
-                    cond: { $eq: ['$$this', 'completed'] } 
-                  } 
-                } 
-              },
-              cancelled: { 
-                $size: { 
-                  $filter: { 
-                    input: '$byStatus', 
-                    cond: { $eq: ['$$this', 'cancelled'] } 
-                  } 
-                } 
-              }
-            },
-            // Get appointments for last 30 days
-            recentActivity: {
-              $filter: {
-                input: '$appointmentsByDate',
-                as: 'appt',
-                cond: { 
-                  $gte: ['$$appt.date', { 
-                    $dateSubtract: { 
-                      startDate: '$$NOW', 
-                      unit: 'day', 
-                      amount: 30 
-                    } 
-                  }] 
-                }
-              }
-            }
-          }
-        }
-      ]);
-
-      // Create a map of clinic ID to statistics
-      const statsMap = new Map(
-        clinicStats.map(item => [item._id.toString(), {
-          totalAppointments: item.totalAppointments,
-          activeAppointments: item.activeAppointments,
-          uniquePatientCount: item.uniquePatientCount,
-          statusCounts: item.statusCounts,
-          recentActivity: item.recentActivity
-        }])
+    // إحصائيات لكل عيادة
+    if (result.data) {
+      const clinics = result.data;
+      const updatedClinics = await Promise.all(
+        clinics.map((clinic) => this.addStatsToClinic(clinic)),
       );
-
-      // Add statistics to clinic objects
-      result.data = result.data.map(clinic => {
-        const clinicObj = clinic.toObject();
-        const stats = statsMap.get(clinic._id.toString()) || {
-          totalAppointments: 0,
-          activeAppointments: 0,
-          uniquePatientCount: 0,
-          statusCounts: { scheduled: 0, completed: 0, cancelled: 0 },
-          recentActivity: []
-        };
-        
-        clinicObj['statistics'] = {
-          appointments: {
-            total: stats.totalAppointments,
-            active: stats.activeAppointments,
-            byStatus: stats.statusCounts
-          },
-          patients: {
-            total: stats.uniquePatientCount
-          },
-          recentActivity: stats.recentActivity
-        };
-        
-        return clinicObj;
-      });
+      result.data = updatedClinics;
     }
 
     return result;
+  }
+  async addStatsToClinic(clinic: any) {
+    console.log(`🔍 Clinic: ${clinic.name} (ID: ${clinic._id})`);
+
+    // 1. الحصول على المواعيد المرتبطة بهذه العيادة
+    const appointments = await this.appointmentModel
+      .find({
+        clinic: clinic._id.toString(),
+      })
+      .select('_id');
+
+    const appointmentIds = appointments.map((a) => a._id.toString());
+    const appointmentCount = appointmentIds.length;
+
+    let treatedPatientCount = 0;
+
+    if (appointmentCount > 0) {
+      // 2. حساب عدد السجلات الطبية المرتبطة بهذه المواعيد (عدد المرضى المعالجين)
+      treatedPatientCount = await this.medicalRecordModel.countDocuments({
+        appointment: { $in: appointmentIds },
+      });
+
+      console.log(
+        `🩺 Treated patients in clinic "${clinic.name}": ${treatedPatientCount}`,
+      );
+    }
+
+    return {
+      ...(clinic.toObject?.() ?? clinic),
+      treatedPatientCount,
+    };
   }
 
   async getEmployeeCountByDoctorType(clinicId: string, doctorType: string = 'Doctor'): Promise<number> {
@@ -245,6 +170,7 @@ export class ClinicService {
     const [clinic, patientCount, employeeCounts] = await Promise.all([
       this.clinicModel
         .findById(id)
+
         .populate([
           'departmentId',
           'specializations',
@@ -331,7 +257,9 @@ export class ClinicService {
     };
   }
 
-  async getClinicPatientCount(clinicId: string): Promise<ApiGetResponse<{ patientCount: number }>> {
+  async getClinicPatientCount(
+    clinicId: string,
+  ): Promise<ApiGetResponse<{ patientCount: number }>> {
     // Get unique patient count from appointments for this clinic
     const uniquePatients = await this.appointmentModel.distinct('patientId', {
       clinicId: clinicId,
