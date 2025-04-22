@@ -182,7 +182,7 @@ export class AppointmentService {
       const employee = await this.doctorModel.findById(filters.employeeId.toString());
       if (employee?.employeeType === 'Doctor') {
         filters.doctor = filters.employeeId;
-      }else if(employee?.employeeType === 'Receptionist'){
+      }else if(employee?.employeeType === 'Other'){
         const clinicIds = employee?.clinics?.map((clinic: any) => clinic._id.toString()) || [];
         filters.clinic = { $in: clinicIds };
       }
