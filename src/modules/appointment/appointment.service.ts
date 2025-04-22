@@ -50,7 +50,7 @@ export class AppointmentService {
   //   page = Number(page) || 1;
   //   limit = Number(limit) || 10;
 
-  //   const sortField: string = sortBy ?? 'createdAt';
+  //   const sortField: string = sortBy ?? 'id';
   //   const sort: Record<string, number> = {
   //     [sortField]: order === 'asc' ? 1 : -1,
   //   };
@@ -99,7 +99,7 @@ export class AppointmentService {
     page = Number(page) || 1;
     limit = Number(limit) || 10;
 
-    const sortField: string = sortBy ?? 'createdAt';
+    const sortField: string = sortBy ?? 'id';
     const sort: Record<string, number> = {
       [sortField]: order === 'asc' ? 1 : -1,
     };
