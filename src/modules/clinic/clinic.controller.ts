@@ -8,7 +8,7 @@ import {
   Post,
   Put,
   Query,
-  Request
+  Request,
 } from '@nestjs/common';
 import { ClinicService } from './clinic.service';
 import { CreateClinicDto } from './dto/create-clinic.dto';
@@ -19,7 +19,8 @@ import { extractId } from 'src/common/utlis/paginate';
 import { EmployeeService } from '../employee/employee.service';
 @Controller('clinics')
 export class ClinicController {
-  constructor(private readonly clinicService: ClinicService,
+  constructor(
+    private readonly clinicService: ClinicService,
     private readonly userService: UserService,
     private readonly employeeService: EmployeeService,
   ) {}
@@ -33,30 +34,8 @@ export class ClinicController {
   async getAllClinics(
     @Query() paginationDto: PaginationAndFilterDto,
     @Query() queryParams: any,
-    @Request() req
   ) {
-    const userId= req.user.userId
-    const response = await this.userService.getUserById(userId)
-  if (!response.data || Array.isArray(response.data)) {
-      throw new NotFoundException('User not found');
-    }
-    const user = response.data;
-    const employeeId = user.employeeId;
-    const employee = await this.employeeService.getEmployeeById(
-      employeeId.toString(),
-    );
-    console.log(employee)
-
-    const clinicsId = employee.data?.clinics || [];
-    
-    console.log(`clinicsId: ${clinicsId}`);
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-    if (clinicsId.length > 0) {
-      filters.clinicsId = clinicsId;
-    }
-  
-    console.log(`filters.clinicsId: ${filters.clinicsId}`);
-  
 
     return this.clinicService.getAllClinics(paginationDto, filters);
   }

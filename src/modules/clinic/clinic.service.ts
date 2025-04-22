@@ -85,11 +85,8 @@ export class ClinicService {
            limit
          );
      
-         if (filters.clinicsId) {
-          filters._id = filters.clinicsId; 
-          
-        }
-         const fieldsToDelete = ['search', 'isActive','specializationName','clinicsId'];
+      
+         const fieldsToDelete = ['search', 'isActive','specializationName'];
          fieldsToDelete.forEach(field => delete filters[field])
            const finalFilter= buildFinalFilter(filters, searchConditions, filterConditions);
        
