@@ -74,7 +74,7 @@ export class ClinicService {
   }
   
    
-      const specializationtResult = await applyModelFilter(
+       await applyModelFilter(
            this.specializationModel,
            filters,
            'specializationName',
