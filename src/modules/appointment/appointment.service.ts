@@ -176,7 +176,9 @@ export class AppointmentService {
     
     // تنظيف الفلتر من حقل البحث
     if (filters.employeeId) {
-      filters.doctor = filters.employeeId; 
+      const typeJob= await this.doctorModel.findById(filters.employee.toString())
+      if(typeJob?.employeeType === "Doctor")
+      {filters.doctor = filters.employeeId; }
       
     }
     const fieldsToDelete = ['search', 'status', 'doctorName','patientName','datetime','employeeId'];
