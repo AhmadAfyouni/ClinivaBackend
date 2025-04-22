@@ -5,13 +5,14 @@ import { Appointment, AppointmentDocument } from './schemas/appointment.schema';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { addDateFilter, ApiGetResponse, applyModelFilter, paginate } from 'src/common/utlis/paginate';
+import { addDateFilter, ApiGetResponse, applyModelFilter, buildFinalFilter, paginate } from 'src/common/utlis/paginate';
 import {
   Employee,
   EmployeeDocument,
 } from '../employee/schemas/employee.schema';
 import { Patient, PatientDocument } from '../patient/schemas/patient.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { UserDocument,User } from '../user/schemas/user.schema';
 @Injectable()
 export class AppointmentService {
   constructor(
@@ -21,6 +22,8 @@ export class AppointmentService {
     private patientModel: Model<PatientDocument>,
     @InjectModel(Employee.name)
     private doctorModel: Model<EmployeeDocument>,
+    @InjectModel(Employee.name)
+    private clinicModel: Model<UserDocument>,
   ) {}
 
   async createAppointment(
@@ -159,7 +162,7 @@ export class AppointmentService {
         page,
         limit
       );
-      if (doctorsResult) return doctorsResult;
+     
       const patientResult = await applyModelFilter(
         this.patientModel,
         filters,
@@ -170,22 +173,19 @@ export class AppointmentService {
         page,
         limit
       );
-      if (patientResult) return patientResult;
+    
   
       addDateFilter(filters, 'datetime', searchConditions);
     
     // تنظيف الفلتر من حقل البحث
-    
-    const fieldsToDelete = ['search', 'status', 'doctorName','patientName','datetime'];
+  await this.viewWonerAppointment(filters)
+    const fieldsToDelete = ['search', 'status', 'doctorName','patientName','datetime','employeeId'];
     fieldsToDelete.forEach(field => delete filters[field]);
-    // دمج الفلاتر مع شروط البحث
-    const finalFilter: Record<string, any> = {
-      ...filters,
-      ...(searchConditions.length ? { $and: searchConditions } : {}),
-      ...(filterConditions.length > 0 ? { $and: filterConditions } : {}),
-    };
+  
+   
+    const finalFilter= buildFinalFilter(filters, searchConditions, filterConditions);
 
-    // الاستعلام مع البوبيوليت
+    
     const result = await paginate(
       this.appointmentModel,
       [
@@ -202,7 +202,18 @@ export class AppointmentService {
 
     return result;
   }
-
+  private async  viewWonerAppointment(filters:any){
+  if (filters.employeeId) {
+    const employee = await this.doctorModel.findById(filters.employeeId.toString());
+    if (employee?.employeeType === 'Doctor') {
+      filters.doctor = filters.employeeId;
+    }else if(employee?.employeeType === 'Other'){
+      const clinicIds = employee.clinics || [];
+      filters.clinic = { $in: clinicIds };
+    }
+    delete filters.employeeId;
+  }
+}
   async getAppointmentById(id: string): Promise<ApiGetResponse<Appointment>> {
     const appointment = await this.appointmentModel
       .findById(id)

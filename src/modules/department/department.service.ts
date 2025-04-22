@@ -71,10 +71,7 @@ export class DepartmentService {
 
     
     
-    if (filters.departmentId) {
-      filters._id = filters.departmentId; 
-      delete filters.departmentId;
-    }
+   
     
 
     delete filters.search;
