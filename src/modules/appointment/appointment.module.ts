@@ -6,16 +6,25 @@ import { Appointment, AppointmentSchema } from './schemas/appointment.schema';
 
 import { EmployeeModule } from '../employee/employee.module';
 import { PatientModule } from '../patient/patient.module';
-import { Employee,EmployeeSchema } from '../employee/schemas/employee.schema';
-import { Patient,PatientSchema } from '../patient/schemas/patient.schema';
+import { Employee, EmployeeSchema } from '../employee/schemas/employee.schema';
+import { Patient, PatientSchema } from '../patient/schemas/patient.schema';
+import { UserModule } from '../user/user.module';
+import { User, UserSchema } from '../user/schemas/user.schema';
 import { forwardRef } from '@nestjs/common';
 @Module({
-  imports: [MongooseModule.forFeature([{ name: Appointment.name, schema: AppointmentSchema },{ name: Employee.name, schema: EmployeeSchema },
-    
-     { name: Patient.name, schema: PatientSchema }]),forwardRef(() => PatientModule),forwardRef(() => EmployeeModule)],
+  imports: [
+    MongooseModule.forFeature([
+      { name: Appointment.name, schema: AppointmentSchema },
+      { name: Employee.name, schema: EmployeeSchema },
+      { name: Patient.name, schema: PatientSchema },
+       { name: User.name, schema: UserSchema },
+    ]),
+    forwardRef(() => PatientModule),
+    forwardRef(() => EmployeeModule),
+    forwardRef(() => UserModule),
+  ],
   controllers: [AppointmentController],
   providers: [AppointmentService],
-  exports: [AppointmentService,MongooseModule],
+  exports: [AppointmentService, MongooseModule],
 })
-export class AppointmentModule {
-}
+export class AppointmentModule {}

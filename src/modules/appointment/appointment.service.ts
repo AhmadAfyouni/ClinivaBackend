@@ -5,7 +5,7 @@ import { Appointment, AppointmentDocument } from './schemas/appointment.schema';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { addDateFilter, ApiGetResponse, applyModelFilter, paginate } from 'src/common/utlis/paginate';
+import { addDateFilter, ApiGetResponse, applyModelFilter, buildFinalFilter, paginate } from 'src/common/utlis/paginate';
 import {
   Employee,
   EmployeeDocument,
@@ -159,7 +159,7 @@ export class AppointmentService {
         page,
         limit
       );
-      if (doctorsResult) return doctorsResult;
+     
       const patientResult = await applyModelFilter(
         this.patientModel,
         filters,
@@ -170,22 +170,22 @@ export class AppointmentService {
         page,
         limit
       );
-      if (patientResult) return patientResult;
+    
   
       addDateFilter(filters, 'datetime', searchConditions);
     
     // تنظيف الفلتر من حقل البحث
-    
-    const fieldsToDelete = ['search', 'status', 'doctorName','patientName','datetime'];
+    if (filters.employeeId) {
+      filters.doctor = filters.employeeId; 
+      
+    }
+    const fieldsToDelete = ['search', 'status', 'doctorName','patientName','datetime','employeeId'];
     fieldsToDelete.forEach(field => delete filters[field]);
-    // دمج الفلاتر مع شروط البحث
-    const finalFilter: Record<string, any> = {
-      ...filters,
-      ...(searchConditions.length ? { $and: searchConditions } : {}),
-      ...(filterConditions.length > 0 ? { $and: filterConditions } : {}),
-    };
+  
+   
+    const finalFilter= buildFinalFilter(filters, searchConditions, filterConditions);
 
-    // الاستعلام مع البوبيوليت
+    
     const result = await paginate(
       this.appointmentModel,
       [
