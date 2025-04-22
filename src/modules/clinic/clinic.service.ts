@@ -61,21 +61,18 @@ export class ClinicService {
     let specializationIds: string[] = [];
    await applyBooleanFilter(filters, 'isActive', filterConditions)
 
-    if (filters.search) {
-      const regex = new RegExp(filters.search, 'i');
-      searchConditions.push({ name: regex });
-      const specializations = await this.specializationModel.find({ name: regex }).select('_id');
-      specializationIds = specializations.map(spec => spec._id.toString());
-      const searchOrConditions: Record<string, any>[] = [];
-      if (specializationIds.length) {
-        searchOrConditions.push({ specializations: { $in: specializationIds } });
-      }
-      if (searchOrConditions.length) {
-        searchConditions.push({ $or: searchOrConditions });
-      } else {
-        return { data: [], total: 0, page, limit, totalPages: 0 };
-      }
+   if (filters.search) {
+    const regex = new RegExp(filters.search, 'i');
+    searchConditions.push({ name: regex });
+  
+    const specializations = await this.specializationModel.find({ name: regex }).select('_id');
+    specializationIds = specializations.map(spec => spec._id.toString());
+  
+    if (specializationIds.length) {
+      searchConditions.push({ specializations: { $in: specializationIds } });
     }
+  }
+  
    
       const specializationtResult = await applyModelFilter(
            this.specializationModel,
@@ -87,7 +84,7 @@ export class ClinicService {
            page,
            limit
          );
-         if (specializationtResult) return specializationtResult;
+     
          if (filters.clinicsId) {
           filters._id = filters.clinicsId; 
           delete filters.clinicsId;
