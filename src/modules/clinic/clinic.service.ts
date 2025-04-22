@@ -89,7 +89,7 @@ export class ClinicService {
           filters._id = filters.clinicsId; 
           
         }
-         const fieldsToDelete = ['search', 'isActive','specializationName',,'clinicsId'];
+         const fieldsToDelete = ['search', 'isActive','specializationName','clinicsId'];
          fieldsToDelete.forEach(field => delete filters[field])
          const finalFilter: any = { $and: [] };
 
