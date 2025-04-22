@@ -47,13 +47,16 @@ export class ClinicController {
     );
     console.log(employee)
 
-    const clinicsId = extractId(employee.data?.clinics);
-    console.log(`clinicsId${clinicsId}`)
+    const clinicsId = employee.data?.clinics || [];
+    
+    console.log(`clinicsId: ${clinicsId}`);
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-    if (clinicsId) {
+    if (clinicsId.length > 0) {
       filters.clinicsId = clinicsId;
     }
-    console.log(`filters.clinicsId${filters.clinicsId}`)
+  
+    console.log(`filters.clinicsId: ${filters.clinicsId}`);
+  
 
     return this.clinicService.getAllClinics(paginationDto, filters);
   }
