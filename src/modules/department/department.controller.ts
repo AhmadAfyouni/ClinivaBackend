@@ -34,27 +34,17 @@ export class DepartmentController {
   async getAllDepartments(
     @Query() paginationDto: PaginationAndFilterDto,
     @Query() queryParams: any,
-    @Request() req,
+  
   ) {
-    const userId = req.user.userId;
+ 
 
-    const response = await this.userService.getUserById(userId);
-    if (!response.data || Array.isArray(response.data)) {
-      throw new NotFoundException('User not found');
-    }
-    const user = response.data;
-
-    const employeeId = user.employeeId;
-
-    const employee = await this.employeeService.getEmployeeById(
-      employeeId.toString(),
-    );
-    const departmentId = extractId(employee.data?.departmentId);
+    
+ 
+   
+  
 
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-    if (departmentId) {
-      filters.departmentId = departmentId;
-    }
+
 
     return this.departmentService.getAllDepartments(paginationDto, filters);
   }

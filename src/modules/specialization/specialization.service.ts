@@ -10,7 +10,7 @@ import { Employee, EmployeeDocument } from '../employee/schemas/employee.schema'
 import { CreateSpecializationDto } from './dto/create-specialization.dto';
 import { UpdateSpecializationDto } from './dto/update-specialization.dto';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
-import { addDateFilter, ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
+import { addDateFilter, ApiGetResponse, applyBooleanFilter, buildFinalFilter, paginate } from 'src/common/utlis/paginate';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class SpecializationService {
@@ -70,14 +70,12 @@ export class SpecializationService {
   
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
   addDateFilter(filters, 'updatedAt', searchConditions);
+  
     const fieldsToDelete = ['search', 'isActive','updatedAt'];
     fieldsToDelete.forEach(field => delete filters[field]);
-    // دمج الفلاتر مع شروط البحث
-    const finalFilter = {
-      ...filters,
-      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
-      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
-    };
+    
+    const finalFilter= buildFinalFilter(filters, searchConditions, filterConditions);
+   
     // Get paginated specializations
     const result = await paginate(
       this.specializationModel,

@@ -1,15 +1,5 @@
-// import { customAlphabet } from 'nanoid';
-import mongoose, { Model } from 'mongoose';
+import { Model } from 'mongoose';
 
-// const generateId = customAlphabet('0123456789', 4);
-
-/**
- * يولد معرف فريد بصيغة prefix-#### ويتأكد أنه غير مكرر في الموديل
- * @param model موديل Mongoose
- * @param prefix بادئة (مثلاً: us، emp، doc...)
- * @param field اسم الحقل (مثل publicId)
- * @returns قيمة معرف فريد مثل us-4832
- */
 export const generateUniquePublicId = async (
   model: Model<any>,
   prefix: string,
@@ -19,8 +9,8 @@ export const generateUniquePublicId = async (
   let publicId = '';
 
   while (!isUnique) {
-    // const random = generateId();
-    publicId = `${prefix}-${"random"}`;
+    const random = generateRandomNumber(4); // مثلاً: 9271
+    publicId = `${prefix}-${random}`;       // مثال: doc-9271
 
     const exists = await model.findOne({ [field]: publicId });
     if (!exists) {
@@ -30,3 +20,11 @@ export const generateUniquePublicId = async (
 
   return publicId;
 };
+
+function generateRandomNumber(length: number = 4): string {
+  let result = '';
+  for (let i = 0; i < length; i++) {
+    result += Math.floor(Math.random() * 10);
+  }
+  return result;
+}

@@ -161,3 +161,25 @@ export function addDateFilter(
     searchConditions.push({ [key]: { [operator]: date } });
   }
 }
+
+export function buildFinalFilter(
+  filters: Record<string, any>,
+  searchConditions: Record<string, any>[],
+  filterConditions: Record<string, any>[]
+): Record<string, any> {
+  const andConditions: Record<string, any>[] = [];
+
+  if (Object.keys(filters).length > 0) {
+    andConditions.push(filters);
+  }
+
+  if (searchConditions.length > 0) {
+    andConditions.push({ $or: searchConditions });
+  }
+
+  if (filterConditions.length > 0) {
+    andConditions.push(...filterConditions);
+  }
+
+  return andConditions.length > 0 ? { $and: andConditions } : {};
+}

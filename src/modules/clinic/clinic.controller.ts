@@ -3,19 +3,27 @@ import {
   Controller,
   Delete,
   Get,
+  NotFoundException,
   Param,
   Post,
   Put,
   Query,
+  Request,
 } from '@nestjs/common';
 import { ClinicService } from './clinic.service';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-
+import { UserService } from '../user/user.service';
+import { extractId } from 'src/common/utlis/paginate';
+import { EmployeeService } from '../employee/employee.service';
 @Controller('clinics')
 export class ClinicController {
-  constructor(private readonly clinicService: ClinicService) {}
+  constructor(
+    private readonly clinicService: ClinicService,
+    private readonly userService: UserService,
+    private readonly employeeService: EmployeeService,
+  ) {}
 
   @Post()
   async createClinic(@Body() createClinicDto: CreateClinicDto) {
