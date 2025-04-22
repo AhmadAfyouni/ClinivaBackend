@@ -10,7 +10,7 @@ import { Employee, EmployeeDocument } from '../employee/schemas/employee.schema'
 import { CreateSpecializationDto } from './dto/create-specialization.dto';
 import { UpdateSpecializationDto } from './dto/update-specialization.dto';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
-import { addDateFilter, ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
+import { addDateFilter, ApiGetResponse, applyBooleanFilter, buildFinalFilter, paginate } from 'src/common/utlis/paginate';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
 export class SpecializationService {
@@ -76,23 +76,8 @@ export class SpecializationService {
   }
     const fieldsToDelete = ['search', 'isActive','updatedAt','specializationsId'];
     fieldsToDelete.forEach(field => delete filters[field]);
-    const finalFilter: any = { $and: [] };
-
-    if (Object.keys(filters).length > 0) {
-      finalFilter.$and.push(filters);
-    }
     
-    if (searchConditions.length > 0) {
-      finalFilter.$and.push({ $or: searchConditions });
-    }
-    
-    if (filterConditions.length > 0) {
-      finalFilter.$and.push(...filterConditions);
-    }
-    
-    if (finalFilter.$and.length === 0) {
-      delete finalFilter.$and;
-    }
+    const finalFilter= buildFinalFilter(filters, searchConditions, filterConditions);
    
     // Get paginated specializations
     const result = await paginate(
