@@ -45,7 +45,7 @@ export class ClinicController {
     const employee = await this.employeeService.getEmployeeById(
       employeeId.toString(),
     );
-    console.log(`employee${employee}`)
+    console.log(employee)
 
     const clinicsId = extractId(employee.data?.clinics);
     console.log(`clinicsId${clinicsId}`)
