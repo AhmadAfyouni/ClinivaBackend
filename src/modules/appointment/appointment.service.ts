@@ -12,6 +12,7 @@ import {
 } from '../employee/schemas/employee.schema';
 import { Patient, PatientDocument } from '../patient/schemas/patient.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { UserDocument,User } from '../user/schemas/user.schema';
 @Injectable()
 export class AppointmentService {
   constructor(
@@ -21,6 +22,8 @@ export class AppointmentService {
     private patientModel: Model<PatientDocument>,
     @InjectModel(Employee.name)
     private doctorModel: Model<EmployeeDocument>,
+    @InjectModel(Employee.name)
+    private clinicModel: Model<UserDocument>,
   ) {}
 
   async createAppointment(
@@ -179,6 +182,9 @@ export class AppointmentService {
       const employee = await this.doctorModel.findById(filters.employeeId.toString());
       if (employee?.employeeType === 'Doctor') {
         filters.doctor = filters.employeeId;
+      }else if(employee?.employeeType === 'Receptionist'){
+        const clinicIds = employee?.clinics?.map((clinic: any) => clinic._id.toString()) || [];
+        filters.clinic = { $in: clinicIds };
       }
       delete filters.employeeId;
     }

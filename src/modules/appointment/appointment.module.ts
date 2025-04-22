@@ -11,6 +11,8 @@ import { Patient, PatientSchema } from '../patient/schemas/patient.schema';
 import { UserModule } from '../user/user.module';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { forwardRef } from '@nestjs/common';
+import { Clinic,ClinicSchema } from '../clinic/schemas/clinic.schema';
+import { ClinicModule } from '../clinic/clinic.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -18,10 +20,12 @@ import { forwardRef } from '@nestjs/common';
       { name: Employee.name, schema: EmployeeSchema },
       { name: Patient.name, schema: PatientSchema },
        { name: User.name, schema: UserSchema },
+       { name: Clinic.name, schema: ClinicSchema },
     ]),
     forwardRef(() => PatientModule),
     forwardRef(() => EmployeeModule),
     forwardRef(() => UserModule),
+    forwardRef(() => ClinicModule),
   ],
   controllers: [AppointmentController],
   providers: [AppointmentService],
