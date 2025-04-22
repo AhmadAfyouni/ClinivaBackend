@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { Clinic, ClinicDocument } from './schemas/clinic.schema';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
-import { ApiGetResponse, applyBooleanFilter, applyModelFilter, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, applyBooleanFilter, applyModelFilter, buildFinalFilter, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import {
   Appointment,
@@ -91,23 +91,8 @@ export class ClinicService {
         }
          const fieldsToDelete = ['search', 'isActive','specializationName','clinicsId'];
          fieldsToDelete.forEach(field => delete filters[field])
-         const finalFilter: any = { $and: [] };
-
-         if (Object.keys(filters).length > 0) {
-           finalFilter.$and.push(filters);
-         }
-         
-         if (searchConditions.length > 0) {
-           finalFilter.$and.push({ $or: searchConditions });
-         }
-         
-         if (filterConditions.length > 0) {
-           finalFilter.$and.push(...filterConditions);
-         }
-         
-         if (finalFilter.$and.length === 0) {
-           delete finalFilter.$and;
-         }
+           const finalFilter= buildFinalFilter(filters, searchConditions, filterConditions);
+       
  
     const populateFields = [
       { path: 'departmentId' },
