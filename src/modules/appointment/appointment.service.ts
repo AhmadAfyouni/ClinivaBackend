@@ -183,7 +183,7 @@ export class AppointmentService {
       if (employee?.employeeType === 'Doctor') {
         filters.doctor = filters.employeeId;
       }else if(employee?.employeeType === 'Other'){
-        const clinicIds = employee?.clinics?.map((clinic: any) => clinic._id.toString()) || [];
+        const clinicIds = employee.clinics || [];
         filters.clinic = { $in: clinicIds };
       }
       delete filters.employeeId;
