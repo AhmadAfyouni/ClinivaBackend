@@ -48,7 +48,7 @@ export class DepartmentService {
     limit = Number(limit) || 10;
   
     // تحديد حقل الفرز الافتراضي
-    const sortField: string = sortBy ?? 'createdAt';
+    const sortField: string = sortBy ?? 'id';
     const sort: Record<string, number> = {
       [sortField]: order === 'asc' ? 1 : -1,
     };
