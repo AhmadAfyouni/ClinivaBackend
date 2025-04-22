@@ -178,16 +178,7 @@ export class AppointmentService {
       addDateFilter(filters, 'datetime', searchConditions);
     
     // تنظيف الفلتر من حقل البحث
-    if (filters.employeeId) {
-      const employee = await this.doctorModel.findById(filters.employeeId.toString());
-      if (employee?.employeeType === 'Doctor') {
-        filters.doctor = filters.employeeId;
-      }else if(employee?.employeeType === 'Other'){
-        const clinicIds = employee.clinics || [];
-        filters.clinic = { $in: clinicIds };
-      }
-      delete filters.employeeId;
-    }
+  await this.viewWonerAppointment(filters)
     const fieldsToDelete = ['search', 'status', 'doctorName','patientName','datetime','employeeId'];
     fieldsToDelete.forEach(field => delete filters[field]);
   
@@ -211,7 +202,18 @@ export class AppointmentService {
 
     return result;
   }
-
+  private async  viewWonerAppointment(filters:any){
+  if (filters.employeeId) {
+    const employee = await this.doctorModel.findById(filters.employeeId.toString());
+    if (employee?.employeeType === 'Doctor') {
+      filters.doctor = filters.employeeId;
+    }else if(employee?.employeeType === 'Other'){
+      const clinicIds = employee.clinics || [];
+      filters.clinic = { $in: clinicIds };
+    }
+    delete filters.employeeId;
+  }
+}
   async getAppointmentById(id: string): Promise<ApiGetResponse<Appointment>> {
     const appointment = await this.appointmentModel
       .findById(id)
