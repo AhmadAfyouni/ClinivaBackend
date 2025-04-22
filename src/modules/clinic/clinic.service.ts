@@ -94,25 +94,12 @@ export class ClinicService {
         }
          const fieldsToDelete = ['search', 'isActive','specializationName',];
          fieldsToDelete.forEach(field => delete filters[field])
-         const finalFilter: any = { $and: [] };
 
-         if (Object.keys(filters).length > 0) {
-           finalFilter.$and.push(filters);
-         }
-       
-         if (searchConditions.length > 0) {
-           finalFilter.$and.push({ $or: searchConditions });
-         }
-       
-         if (filterConditions.length > 0) {
-           finalFilter.$and.push(...filterConditions);
-         }
-       
-         // إذا لا يوجد شروط، احذف $and (لتجنب فلتر فارغ)
-         if (finalFilter.$and.length === 0) {
-           delete finalFilter.$and;
-         }
-   
+    const finalFilter = {
+      ...filters,
+      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+      ...(filterConditions.length > 0 ? { $and: filterConditions } : {}),
+    };
 
     const populateFields = [
       { path: 'departmentId' },
