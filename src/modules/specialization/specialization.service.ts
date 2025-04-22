@@ -70,14 +70,30 @@ export class SpecializationService {
   
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
   addDateFilter(filters, 'updatedAt', searchConditions);
+  if (filters.specializationsId) {
+    filters._id = filters.specializationsId; 
+    
+  }
     const fieldsToDelete = ['search', 'isActive','updatedAt'];
     fieldsToDelete.forEach(field => delete filters[field]);
-    // دمج الفلاتر مع شروط البحث
-    const finalFilter = {
-      ...filters,
-      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
-      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
-    };
+    const finalFilter: any = { $and: [] };
+
+    if (Object.keys(filters).length > 0) {
+      finalFilter.$and.push(filters);
+    }
+    
+    if (searchConditions.length > 0) {
+      finalFilter.$and.push({ $or: searchConditions });
+    }
+    
+    if (filterConditions.length > 0) {
+      finalFilter.$and.push(...filterConditions);
+    }
+    
+    if (finalFilter.$and.length === 0) {
+      delete finalFilter.$and;
+    }
+   
     // Get paginated specializations
     const result = await paginate(
       this.specializationModel,
