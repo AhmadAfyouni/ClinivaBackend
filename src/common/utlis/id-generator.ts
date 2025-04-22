@@ -17,6 +17,7 @@ export const generateUniquePublicId = async (
 ): Promise<string> => {
   let isUnique = false;
   let publicId = '';
+  console.log("")
 
   while (!isUnique) {
     const random = generateId();
