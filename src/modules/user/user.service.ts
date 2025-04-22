@@ -50,7 +50,7 @@ export class UserService {
     limit = Number(limit) || 10;
   
     // تحديد حقل الفرز الافتراضي
-    const sortField: string = sortBy ?? 'createdAt';
+    const sortField: string = sortBy ?? 'id';
     const sort: { [key: string]: 1 | -1 } = {
       [sortField]: order === 'asc' ? 1 : -1, // تحديد الاتجاه بناءً على 'asc' أو 'desc'
     };
