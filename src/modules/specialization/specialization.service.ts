@@ -70,11 +70,8 @@ export class SpecializationService {
   
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
   addDateFilter(filters, 'updatedAt', searchConditions);
-  if (filters.specializationsId) {
-    filters._id = filters.specializationsId; 
-    
-  }
-    const fieldsToDelete = ['search', 'isActive','updatedAt','specializationsId'];
+  
+    const fieldsToDelete = ['search', 'isActive','updatedAt'];
     fieldsToDelete.forEach(field => delete filters[field]);
     
     const finalFilter= buildFinalFilter(filters, searchConditions, filterConditions);

@@ -30,23 +30,10 @@ export class SpecializationController {
   }
 
   @Get()
-  async findAll(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any,@Request() req) {
-      const userId= req.user.userId
-        const response = await this.userService.getUserById(userId)
-      if (!response.data || Array.isArray(response.data)) {
-          throw new NotFoundException('User not found');
-        }
-        const user = response.data;
-        const employeeId = user.employeeId;
-        const employee = await this.employeeService.getEmployeeById(
-          employeeId.toString(),
-        );
-        console.log(employee)
-        const specializationsId = employee.data?.specializations || [];
+  async findAll(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any) {
+  
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-    if (specializationsId.length > 0) {
-      filters.specializationsId = specializationsId;
-    }
+    
     return this.specializationService.getAllSpecializations(paginationDto, filters);
   }
 
