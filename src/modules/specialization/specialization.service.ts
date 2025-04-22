@@ -74,7 +74,7 @@ export class SpecializationService {
     filters._id = filters.specializationsId; 
     
   }
-    const fieldsToDelete = ['search', 'isActive','updatedAt'];
+    const fieldsToDelete = ['search', 'isActive','updatedAt','specializationsId'];
     fieldsToDelete.forEach(field => delete filters[field]);
     const finalFilter: any = { $and: [] };
 
