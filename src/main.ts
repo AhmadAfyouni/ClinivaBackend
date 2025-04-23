@@ -9,12 +9,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter());           // Apply globally
   app.setGlobalPrefix('api/v1');                              // Set Global API Prefix (e.g., /api/v1/)
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      transform: true, // 👈 هذا هو المفتاح
-      whitelist: true,
-    }),
-  );
+ 
   // Enable Swagger
   const config = new DocumentBuilder()
     .setTitle('Clinic Management API')
