@@ -158,7 +158,19 @@ export function addDateFilter(
   const date = new Date(rawValue);
 
   if (rawValue && !isNaN(date.getTime())) {
-    searchConditions.push({ [key]: { [operator]: date } });
+    if (operator === '$eq') {
+      const startOfDay = new Date(date);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(date);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      searchConditions.push({
+        [key]: { $gte: startOfDay, $lte: endOfDay },
+      });
+    } else {
+      searchConditions.push({ [key]: { [operator]: date } });
+    }
   }
 }
 
