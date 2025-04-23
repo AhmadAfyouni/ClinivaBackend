@@ -63,11 +63,29 @@ export class ClinicCollectionService {
     // const rawSortField = sortBy ?? defaultSortField;
     // const sortField = this.clinicCollectionModel.schema.path(rawSortField) ? rawSortField : defaultSortField;
     // const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
-    const sortField: string = sortBy ?? 'id';
-    const sort: Record<string, number> = {
-      [sortField]: order === 'asc' ? 1 : -1,
-    };
-    const searchConditions: any[] = [];
+    // const sortField: string = sortBy ?? 'id';
+    // const sort: Record<string, number> = {
+    //   [sortField]: order === 'asc' ? 1 : -1,
+    // };
+     const searchConditions: any[] = [];
+    const defaultSortField = '_id';
+  const sort: Record<string, any> = {};
+    if (sortBy === '_id') {
+      sort['_id'] = order === 'asc' ? 1 : -1;
+    } else {
+      if(sortBy){ sort[sortBy] = order === 'asc' ? 1 : -1;
+        
+        // Check if the provided sortBy field exists in the schema
+        const isValidField = this.clinicCollectionModel.schema.path(sortBy);
+        if (isValidField) {
+          sort[sortBy] = order === 'asc' ? 1 : -1;
+        } else {
+          // Fallback to default sorting by _id
+          sort['_id'] = -1;
+          console.warn(`Invalid sort field '${sortBy}'. Defaulting to _id.`);
+        }}
+       
+    }
 
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
