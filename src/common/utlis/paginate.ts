@@ -94,7 +94,7 @@ export async function applyModelFilter<T>(
     const filterValue = filters[filterKey];
 
     if (filterValue === 'undefined' || filterValue === 'null') {
-      // تجاهل الفلتر في هذه الحالة ولا ترجع شيء
+   
       return;
     }
     const query: Record<string, any> = {};
