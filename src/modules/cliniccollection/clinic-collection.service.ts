@@ -64,9 +64,9 @@ console.log(paginationDto.order)
     // const sortField = this.clinicCollectionModel.schema.path(rawSortField) ? rawSortField : defaultSortField;
     // const sort: Record<string, number> = { [sortField]: order === 'desc' ? -1 : 1 };
     const sortField: string = sortBy ?? '_id';
-    order = order || 'desc';
+    order = order || 'asc';
     const sort: Record<string, number> = {
-      [sortField]: order === 'desc' ? 1 : -1,
+      [sortField]: order === 'asc' ? 1 : -1,
     };
     const searchConditions: any[] = [];
 
