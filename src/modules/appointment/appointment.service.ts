@@ -93,23 +93,17 @@ export class AppointmentService {
     paginationDto: PaginationAndFilterDto,
     filters: any,
   ) {
-    let { page, limit, allData} = paginationDto;
+    let { page, limit, allData, sortBy, order } = paginationDto;
 
     // تحويل الباجينيشين إلى أرقام
     page = Number(page) || 1;
     limit = Number(limit) || 10;
 
-    let order: 'asc' | 'desc' = 'asc';
-    // تعيين قيمة ثابتة لـ order
-    let sortBy: string = '_id';
-// الحقول الصالحة للتصنيف
-const validSortFields = Object.keys(this.appointmentModel.schema.paths);
-const defaultSortField = '_id';
-const sortField = validSortFields.includes(sortBy) ? sortBy : defaultSortField;  // التحقق من وجود sortBy في الحقول الصالحة
+    const sortField: string = sortBy ?? 'id';
+    const sort: Record<string, number> = {
+      [sortField]: order === 'asc' ? 1 : -1,
+    };
 
-// تحديد ترتيب التصفية (تصاعدي أو تنازلي)
-const sortOrder = order === 'asc' ? 1 : -1;
-const sort: Record<string, number> = { [sortField]: sortOrder };
     let doctorIds: string[] = [];
     let patientIds: string[] = [];
     const searchConditions: any[] = [];

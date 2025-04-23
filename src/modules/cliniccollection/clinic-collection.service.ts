@@ -52,7 +52,7 @@ export class ClinicCollectionService {
     filters: any,
   ) {
     console.log('getAllClinicCollections');
-    let { page, limit, allData } = paginationDto;
+    let { page, limit, allData, sortBy, order } = paginationDto;
 console.log(paginationDto.order)
     // Convert page & limit to numbers
     page = Number(page) || 1;
@@ -63,18 +63,12 @@ console.log(paginationDto.order)
     // const rawSortField = sortBy ?? defaultSortField;
     // const sortField = this.clinicCollectionModel.schema.path(rawSortField) ? rawSortField : defaultSortField;
     // const sort: Record<string, number> = { [sortField]: order === 'desc' ? -1 : 1 };
-    console.log('Original order:', paginationDto.order);
-    let order: 'asc' | 'desc' = 'asc';
-     // تعيين قيمة ثابتة لـ order
-     let sortBy: string = '_id';
-// الحقول الصالحة للتصنيف
-const validSortFields = Object.keys(this.clinicCollectionModel.schema.paths);
-const defaultSortField = '_id';
-const sortField = validSortFields.includes(sortBy) ? sortBy : defaultSortField;  // التحقق من وجود sortBy في الحقول الصالحة
-
-// تحديد ترتيب التصفية (تصاعدي أو تنازلي)
-const sortOrder = order === 'asc' ? 1 : -1;
-const sort: Record<string, number> = { [sortField]: sortOrder };
+    order = order || 'asc';
+   console.log(order)
+    const sortField: string = sortBy ?? '_id';
+    const sort: Record<string, number> = {
+      [sortField]: order === 'asc' ? 1 : -1,
+    };
     const searchConditions: any[] = [];
 
     if (filters.search) {
