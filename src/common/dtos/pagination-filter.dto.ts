@@ -31,5 +31,6 @@ export class PaginationAndFilterDto {
   @ApiPropertyOptional({ description: 'Sorting order (asc or desc)', example: 'asc' })
   @IsOptional()
   @IsString()
+  @Transform(({ value }) => value?.toLowerCase())
   order?: 'asc' | 'desc' = 'desc';
 }
