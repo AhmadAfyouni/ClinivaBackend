@@ -69,7 +69,9 @@ export class ClinicCollectionService {
     };
      const searchConditions: any[] = [];
   
-
+     console.log('sortBy:', sortBy, 'order:', order);
+     console.log('Final Sort Object:', sort);
+     
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
 
