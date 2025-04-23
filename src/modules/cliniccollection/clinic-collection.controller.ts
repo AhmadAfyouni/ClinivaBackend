@@ -65,9 +65,7 @@ export class ClinicCollectionController {
     @Query() paginationDto: PaginationAndFilterDto,
     @Query() queryParams: any,
   ) {
-    const { page, limit, allData, sortBy, order } = paginationDto;
-    const { search, ...filters } = queryParams;
-
+    const { page, limit, allData, sortBy, order, ...filters } = queryParams;
 
     return this.clinicCollectionService.getAllClinicCollections(
       paginationDto,
