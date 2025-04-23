@@ -10,6 +10,7 @@ export interface ApiListResponse<T> {
     total_pages: number;
     total_items: number;
     items_per_page: number;
+    limit_number_allPage:number
     has_next_page: boolean;
     has_previous_page: boolean;
   };
@@ -72,7 +73,8 @@ export async function paginate<T>(
       current_page: pageNumber,
       total_pages: totalPages,
       total_items: totalItems,
-      items_per_page: limitNumber, // Ensures it matches the number of items returned
+      items_per_page: data.length, // Ensures it matches the number of items returned
+      limit_number_allPage:limitNumber,
       has_next_page: pageNumber * limitNumber < totalItems,
       has_previous_page: pageNumber > 1,
     },
