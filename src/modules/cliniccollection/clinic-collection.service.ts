@@ -103,7 +103,6 @@ export class ClinicCollectionService {
       finalFilter,
       sort,
     );
-    console.log('First 3 sorted _id before addClinicCounts:', result.data.slice(0, 3).map(x => x._id.toString()));
 
     if (result.data) {
       const clinicCollections = result.data;
@@ -114,7 +113,6 @@ export class ClinicCollectionService {
       );
       result.data = updatedClinicCollections;
     }
-    console.log('First 3 sorted _id after addClinicCounts:', result.data.slice(0, 3).map(x => x._id.toString()));
 
     return result;
   }
