@@ -33,9 +33,8 @@ export class PaginationAndFilterDto {
   @IsString()
   @Transform(({ value }) => {
     const val = String(value).toLowerCase();
-    if (val === 'asc') return 'asc';
-    if (val === 'desc') return 'desc';
-    return 'desc'; // default fallback
+    return val === 'asc' || val === 'desc' ? val : 'desc';
   })
   order?: 'asc' | 'desc' = 'desc';
+
 }
