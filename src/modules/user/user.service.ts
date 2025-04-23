@@ -79,6 +79,7 @@ export class UserService {
     } else {
       return { data: [], total: 0, page, limit, totalPages: 0 };
     }
+    delete filters.search
   }
   
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
