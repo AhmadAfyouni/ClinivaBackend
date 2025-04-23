@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { addDateFilter, ApiGetResponse, applyBooleanFilter, applyModelFilter, paginate } from 'src/common/utlis/paginate';
+import { addDateFilter, ApiGetResponse, applyBooleanFilter, applyModelFilter, buildFinalFilter, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { RoleDocument,Role } from '../role/schemas/role.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
@@ -98,11 +98,8 @@ export class UserService {
     const fieldsToDelete = ['search', 'isActive','roleName','createdAt'];
     fieldsToDelete.forEach(field => delete filters[field]);
     // دمج الفلاتر مع شروط البحث
-    const finalFilter = {
-      ...filters,
-      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
-      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
-    };
+       const finalFilter= buildFinalFilter(filters, searchConditions, filterConditions);
+   
   
     // استخدم paginate مع populate
     const result = await paginate(
