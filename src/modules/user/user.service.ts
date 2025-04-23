@@ -93,7 +93,7 @@ export class UserService {
             page,
             limit
           );
-       
+          if (roleResult) return roleResult;
     
     const fieldsToDelete = ['search', 'isActive','roleName','createdAt'];
     fieldsToDelete.forEach(field => delete filters[field]);
