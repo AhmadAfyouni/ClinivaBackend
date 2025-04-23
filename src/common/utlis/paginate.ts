@@ -72,7 +72,7 @@ export async function paginate<T>(
       current_page: pageNumber,
       total_pages: totalPages,
       total_items: totalItems,
-      items_per_page: data.length, // Ensures it matches the number of items returned
+      items_per_page: limitNumber, // Ensures it matches the number of items returned
       has_next_page: pageNumber * limitNumber < totalItems,
       has_previous_page: pageNumber > 1,
     },
