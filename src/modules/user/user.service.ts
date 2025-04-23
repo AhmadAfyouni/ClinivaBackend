@@ -60,27 +60,25 @@ export class UserService {
     let RoleIds: string[] = [];
    await applyBooleanFilter(filters, 'isActive', filterConditions)
  
-  if (filters.search) {
+   if (filters.search) {
     const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
-
-    // إضافة شروط البحث للحقول النصية
-    searchConditions.push(
-      { name: regex },         // البحث في الحقل name
-      { email: regex },        // البحث في الحقل email
-    );
+  
+    const searchOrConditions: Record<string, any>[] = [
+      { name: regex },
+      { email: regex },
+    ];
+  
     const Roles = await this.roleModel.find({ name: regex }).select('_id');
-    RoleIds = Roles.map(role => role._id.toString());
-    const searchOrConditions: Record<string, any>[] = [];
+    const RoleIds = Roles.map(role => role._id.toString());
+  
     if (RoleIds.length) {
       searchOrConditions.push({ roleIds: { $in: RoleIds } });
     }
-    if (searchOrConditions.length) {
-      searchConditions.push({ $or: searchOrConditions });
-    } else {
-      return { data: [], total: 0, page, limit, totalPages: 0 };
-    }
-   
+  
+    // هنا نضيف $or مرة وحدة فقط بكل الشروط المحتملة
+    searchConditions.push({ $or: searchOrConditions });
   }
+  
   
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
    addDateFilter(filters, 'createdAt', searchConditions);
