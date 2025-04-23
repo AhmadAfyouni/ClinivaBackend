@@ -57,22 +57,15 @@ export class ClinicCollectionService {
     // Convert page & limit to numbers
     page = Number(page) || 1;
     limit = Number(limit) || 10;
- 
+
     // Determine valid sort field; ignore invalid fields
-    // const defaultSortField = 'id';
-    // const rawSortField = sortBy ?? defaultSortField;
-    // const sortField = this.clinicCollectionModel.schema.path(rawSortField) ? rawSortField : defaultSortField;
-    //const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
-    const sortField: string = sortBy ?? 'id';
-    const sort: Record<string, number> = {
-      [sortField]: order === 'asc' ? 1 : -1,
-    };
-    
-     const searchConditions: any[] = [];
-  
-     console.log('sortBy:', sortBy, 'order:', order);
-     console.log('Final Sort Object:', sort);
-     
+    const defaultSortField = 'id';
+    const rawSortField = sortBy ?? defaultSortField;
+    const sortField = this.clinicCollectionModel.schema.path(rawSortField) ? rawSortField : defaultSortField;
+    const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
+
+    const searchConditions: any[] = [];
+
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
 
