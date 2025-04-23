@@ -151,28 +151,38 @@ export function extractId(field: any): string | null {
 export function addDateFilter(
   filters: Record<string, any>,
   key: string,
-  searchConditions: any[],
-  operator: '$gte' | '$lte' | '$eq' = '$gte'
+  searchConditions: any[]
 ) {
   const rawValue = filters[key];
-  const date = new Date(rawValue);
 
-  if (rawValue && !isNaN(date.getTime())) {
-    if (operator === '$eq') {
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
+  if (!rawValue) return;
 
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
+  const dateOnly = new Date(rawValue);
+  if (isNaN(dateOnly.getTime())) return;
 
-      searchConditions.push({
-        [key]: { $gte: startOfDay, $lte: endOfDay },
-      });
-    } else {
-      searchConditions.push({ [key]: { [operator]: date } });
+  // ضبط بداية اليوم ونهايته (UTC) لتفادي مشاكل التوقيت المحلي
+  const startOfDay = new Date(Date.UTC(
+    dateOnly.getUTCFullYear(),
+    dateOnly.getUTCMonth(),
+    dateOnly.getUTCDate(),
+    0, 0, 0, 0
+  ));
+
+  const endOfDay = new Date(Date.UTC(
+    dateOnly.getUTCFullYear(),
+    dateOnly.getUTCMonth(),
+    dateOnly.getUTCDate(),
+    23, 59, 59, 999
+  ));
+
+  searchConditions.push({
+    [key]: {
+      $gte: startOfDay,
+      $lte: endOfDay
     }
-  }
+  });
 }
+
 
 export function buildFinalFilter(
   filters: Record<string, any>,
