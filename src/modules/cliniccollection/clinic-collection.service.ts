@@ -62,7 +62,7 @@ export class ClinicCollectionService {
     const defaultSortField = 'id';
     const rawSortField = sortBy ?? defaultSortField;
     const sortField = this.clinicCollectionModel.schema.path(rawSortField) ? rawSortField : defaultSortField;
-    const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
+    const sort: Record<string, number> = { [sortField]: order === 'desc' ? -1 : 1 };
 
     const searchConditions: any[] = [];
 
