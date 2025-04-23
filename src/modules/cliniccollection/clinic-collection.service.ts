@@ -53,7 +53,7 @@ export class ClinicCollectionService {
   ) {
     console.log('getAllClinicCollections');
     let { page, limit, allData, sortBy, order } = paginationDto;
-    order = order || 'desc';
+
     // Convert page & limit to numbers
     page = Number(page) || 1;
     limit = Number(limit) || 10;
