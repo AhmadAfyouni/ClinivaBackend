@@ -57,7 +57,7 @@ export class ClinicCollectionService {
     // Convert page & limit to numbers
     page = Number(page) || 1;
     limit = Number(limit) || 10;
-    sortBy = sortBy || 'id';
+    sortBy = sortBy || '_id';
     order = order || 'desc'; //
     // Determine valid sort field; ignore invalid fields
     // const defaultSortField = 'id';
