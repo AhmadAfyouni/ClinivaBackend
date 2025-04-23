@@ -18,6 +18,7 @@ import {
   DepartmentDocument,
 } from '../department/schemas/department.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+
 @Injectable()
 export class ClinicCollectionService {
   constructor(
@@ -32,14 +33,12 @@ export class ClinicCollectionService {
   async createClinicCollection(
     createClinicCollectionDto: CreateClinicCollectionDto,
   ): Promise<ApiGetResponse<ClinicCollection>> {
-        const publicId = await generateUniquePublicId(this.clinicCollectionModel, 'com');
-    
-    const newClinicCollection = new this.clinicCollectionModel(
-     { 
+    const publicId = await generateUniquePublicId(this.clinicCollectionModel, 'com');
+
+    const newClinicCollection = new this.clinicCollectionModel({
       ...createClinicCollectionDto,
-      publicId
-    }
-    );
+      publicId,
+    });
     const savedClinicCollection = await newClinicCollection.save();
     return {
       success: true,
@@ -52,16 +51,18 @@ export class ClinicCollectionService {
     paginationDto: PaginationAndFilterDto,
     filters: any,
   ) {
+    console.log('getAllClinicCollections');
     let { page, limit, allData, sortBy, order } = paginationDto;
 
     // Convert page & limit to numbers
     page = Number(page) || 1;
     limit = Number(limit) || 10;
 
-    const sortField: string = sortBy ?? 'id';
-    const sort: Record<string, number> = {
-      [sortField]: order === 'asc' ? 1 : -1,
-    };
+    // Determine valid sort field; ignore invalid fields
+    const defaultSortField = 'id';
+    const rawSortField = sortBy ?? defaultSortField;
+    const sortField = this.clinicCollectionModel.schema.path(rawSortField) ? rawSortField : defaultSortField;
+    const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
 
     const searchConditions: any[] = [];
 
@@ -138,7 +139,7 @@ export class ClinicCollectionService {
           config.model,
           config.foreignKey,
         );
-        console.log(`- ${config.resultKey}: ${count}`);
+        // console.log(`- ${config.resultKey}: ${count}`);
         return { [config.resultKey]: count };
       }),
     );
