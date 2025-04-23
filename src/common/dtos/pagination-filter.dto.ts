@@ -31,12 +31,5 @@ export class PaginationAndFilterDto {
   @ApiPropertyOptional({ description: 'Sorting order (asc or desc)', example: 'asc' })
   @IsOptional()
   @IsString()
-  @IsOptional()
-@IsString()
-@Transform(({ value }) => {
-  if (value === 'asc' || value === 'desc') return value;
-  return 'desc'; // ✅ القيمة الافتراضية هنا
-})
-order?: 'asc' | 'desc';
-
+  order?: 'asc' | 'desc' = 'desc';
 }
