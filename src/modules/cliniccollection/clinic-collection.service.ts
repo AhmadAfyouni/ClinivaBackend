@@ -65,8 +65,9 @@ export class ClinicCollectionService {
     //const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
     const sortField: string = sortBy ?? 'id';
     const sort: Record<string, number> = {
-      [sortField]: order === 'asc' ? 1 : -1,
+      [sortField]: (order === 'asc' ? 1 : -1),
     };
+    
      const searchConditions: any[] = [];
   
      console.log('sortBy:', sortBy, 'order:', order);
