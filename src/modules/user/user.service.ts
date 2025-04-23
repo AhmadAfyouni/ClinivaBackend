@@ -59,9 +59,9 @@ export class UserService {
     const filterConditions: any[] = [];
     let RoleIds: string[] = [];
    await applyBooleanFilter(filters, 'isActive', filterConditions)
- 
    if (filters.search) {
     const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
+  
   
     const searchOrConditions: Record<string, any>[] = [
       { name: regex },
@@ -69,16 +69,16 @@ export class UserService {
     ];
   
     const Roles = await this.roleModel.find({ name: regex }).select('_id');
-    const RoleIds = Roles.map(role => role._id.toString());
+    RoleIds = Roles.map(role => role._id.toString());
   
-    if (RoleIds.length) {
+
+    if (RoleIds.length > 0) {
       searchOrConditions.push({ roleIds: { $in: RoleIds } });
     }
   
-    // هنا نضيف $or مرة وحدة فقط بكل الشروط المحتملة
+  
     searchConditions.push({ $or: searchOrConditions });
   }
-  
   
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
    addDateFilter(filters, 'createdAt', searchConditions);
