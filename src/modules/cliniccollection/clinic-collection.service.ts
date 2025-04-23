@@ -66,7 +66,7 @@ console.log(paginationDto.order)
     console.log('Original order:', paginationDto.order);
     order = order || 'asc';
     console.log('Processed order:', order);
-   console.log(order)
+   
     const sortField: string = sortBy ?? '_id';
     const sort: Record<string, number> = {
       [sortField]: order === 'asc' ? 1 : -1,
