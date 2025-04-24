@@ -69,6 +69,7 @@ console.log(paginationDto.order)
    const sortField: string = allowedSortFields.includes(sortBy || '')
   ? sortBy!
   : '_id';
+  console.log(sortField)
     const sort: Record<string, number> = {
       [sortField]: order === 'asc' ? 1 : -1,
     };
