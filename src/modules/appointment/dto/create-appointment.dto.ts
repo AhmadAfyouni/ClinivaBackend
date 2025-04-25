@@ -21,14 +21,23 @@ export class CreateAppointmentDto {
   @IsMongoId()
   clinic: Types.ObjectId;
 
-    @ApiProperty({
-        description: 'Doctor ID (MongoDB ObjectId) - The doctor is an employee',
-        example: '60f7c7b84f1a2c001c8b7890',
-        required: false
-    })
-    @IsOptional()
-    @IsMongoId()
-    doctor?: Types.ObjectId;
+  @ApiProperty({
+    description: 'Service ID (MongoDB ObjectId)',
+    example: '60f7c7b84f1a2c001c8b9999',
+    required: true,
+  })
+  @IsNotEmpty()
+  @IsMongoId()
+  service: Types.ObjectId;
+
+  @ApiProperty({
+    description: 'Doctor ID (MongoDB ObjectId) - The doctor is an employee',
+    example: '60f7c7b84f1a2c001c8b7890',
+    required: false
+  })
+  @IsOptional()
+  @IsMongoId()
+  doctor?: Types.ObjectId;
 
   @ApiProperty({
     description: 'Scheduled appointment datetime',
@@ -60,12 +69,12 @@ export class CreateAppointmentDto {
   status?: string;
 
  
-    @ApiProperty({
-      description: 'Reason for cancellation',
-      example: 'The patient is unable to attend',
-        required: false,
-      })
-      @IsOptional()
-      @IsString()
-      cancellationReason?: string;  // سبب إلغاء الحجز
+  @ApiProperty({
+    description: 'Reason for cancellation',
+    example: 'The patient is unable to attend',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  cancellationReason?: string;  // سبب إلغاء الحجز
 }

@@ -13,14 +13,17 @@ import { User, UserSchema } from '../user/schemas/user.schema';
 import { forwardRef } from '@nestjs/common';
 import { Clinic,ClinicSchema } from '../clinic/schemas/clinic.schema';
 import { ClinicModule } from '../clinic/clinic.module';
+import { Service, ServiceSchema } from '../service/schemas/service.schema';
+
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Appointment.name, schema: AppointmentSchema },
+      { name: Service.name, schema: ServiceSchema },
       { name: Employee.name, schema: EmployeeSchema },
       { name: Patient.name, schema: PatientSchema },
-       { name: User.name, schema: UserSchema },
-       { name: Clinic.name, schema: ClinicSchema },
+      { name: User.name, schema: UserSchema },
+      { name: Clinic.name, schema: ClinicSchema },
     ]),
     forwardRef(() => PatientModule),
     forwardRef(() => EmployeeModule),
