@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { GlobalExceptionFilter } from './common/global-exception.filter';
 
@@ -9,7 +9,7 @@ async function bootstrap() {
   app.useGlobalFilters(new GlobalExceptionFilter());           // Apply globally
   app.setGlobalPrefix('api/v1');                              // Set Global API Prefix (e.g., /api/v1/)
 
-
+ 
   // Enable Swagger
   const config = new DocumentBuilder()
     .setTitle('Clinic Management API')

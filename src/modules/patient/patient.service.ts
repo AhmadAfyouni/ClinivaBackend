@@ -5,7 +5,7 @@ import { Patient, PatientDocument } from './schemas/patient.schema';
 import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { addDateFilter, ApiGetResponse, applyBooleanFilter, paginate } from 'src/common/utlis/paginate';
+import { addDateFilter, ApiGetResponse, applyBooleanFilter, buildFinalFilter, paginate } from 'src/common/utlis/paginate';
 import { AppointmentDocument,Appointment } from '../appointment/schemas/appointment.schema';
 import { EmployeeDocument,Employee } from '../employee/schemas/employee.schema';
 import { MedicalRecordDocument,MedicalRecord } from '../medicalrecord/schemas/medicalrecord.schema';
@@ -70,11 +70,8 @@ export class PatientService {
     const fieldsToDelete = ['search', 'isActive','dateOfBirth'];
     fieldsToDelete.forEach(field => delete filters[field])
     // دمج الفلاتر مع شروط البحث
-    const finalFilter = {
-      ...filters,
-      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
-      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
-    };
+    const finalFilter= buildFinalFilter(filters, searchConditions, filterConditions);
+  
   
     // استخدام paginate مع الشروط النهائية
     const result = await paginate(this.patientModel, [], page, limit, allData, finalFilter, sort);
