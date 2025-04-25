@@ -43,47 +43,79 @@ export class AppointmentService {
   async createAppointment(
     createAppointmentDto: CreateAppointmentDto,
   ): Promise<ApiGetResponse<Appointment>> {
-    try{
-    const appointmentDate = new Date(createAppointmentDto.datetime);
+    try {
+      const appointmentDate = new Date(createAppointmentDto.datetime);
 
-    // validate service assignment
-    const service = await this.serviceModel.findById(createAppointmentDto.service).exec();
-    if (!service) throw new NotFoundException('Service not found');
-    if (service.clinic.toString() !== createAppointmentDto.clinic.toString()) {
-      throw new BadRequestException('Service is not offered by this clinic');
-    }
-    if (
-      createAppointmentDto.doctor &&
-      !service.doctors.map(d => d.toString()).includes(createAppointmentDto.doctor.toString())
-    ) {
-      throw new BadRequestException('Doctor is not assigned to this service');
-    }
+      // validate service assignment
+      const service = await this.serviceModel
+        .findById(createAppointmentDto.service)
+        .exec();
+      if (!service) throw new NotFoundException('Service not found');
+      if (
+        service.clinic.toString() !== createAppointmentDto.clinic.toString()
+      ) {
+        throw new BadRequestException('Service is not offered by this clinic');
+      }
+      if (
+        createAppointmentDto.doctor &&
+        !service.doctors
+          .map((d) => d.toString())
+          .includes(createAppointmentDto.doctor.toString())
+      ) {
+        throw new BadRequestException('Doctor is not assigned to this service');
+      }
 
-    // conflict checks
-    await this.checkConflict('doctor', createAppointmentDto.doctor, appointmentDate);
-    await this.checkConflict('patient', createAppointmentDto.patient, appointmentDate);
-    await this.checkConflict('clinic', createAppointmentDto.clinic, appointmentDate);
-
-    // validate clinic and schedule
-    const clinic = await this.clinicModel.findById(createAppointmentDto.clinic).exec();
-    if (!clinic) throw new NotFoundException('Clinic not found');
-
-    const { description, day, startHour, endHour } = this.getClinicTimeSlot(clinic, appointmentDate);
-    if (appointmentDate.getUTCHours() < startHour || appointmentDate.getUTCHours() > endHour) {
-      throw new BadRequestException(
-        `Appointment must be within the time slot [${description}] on ${day}`,
+      // conflict checks
+      await this.checkConflict(
+        'doctor',
+        createAppointmentDto.doctor,
+        appointmentDate,
       );
-    }
+      await this.checkConflict(
+        'patient',
+        createAppointmentDto.patient,
+        appointmentDate,
+      );
+      await this.checkConflict(
+        'clinic',
+        createAppointmentDto.clinic,
+        appointmentDate,
+      );
 
-    const publicId = await generateUniquePublicId(this.appointmentModel, 'app');
-    const newAppointment = new this.appointmentModel({ ...createAppointmentDto, publicId });
-    const savedAppointment = await newAppointment.save();
+      // validate clinic and schedule
+      const clinic = await this.clinicModel
+        .findById(createAppointmentDto.clinic)
+        .exec();
+      if (!clinic) throw new NotFoundException('Clinic not found');
 
-    return {
-      success: true,
-      message: 'Appointment created successfully',
-      data: savedAppointment,
-    };
+      const { description, day, startHour, endHour } = this.getClinicTimeSlot(
+        clinic,
+        appointmentDate,
+      );
+      if (
+        appointmentDate.getUTCHours() < startHour ||
+        appointmentDate.getUTCHours() > endHour
+      ) {
+        throw new BadRequestException(
+          `Appointment must be within the time slot [${description}] on ${day}`,
+        );
+      }
+
+      const publicId = await generateUniquePublicId(
+        this.appointmentModel,
+        'app',
+      );
+      const newAppointment = new this.appointmentModel({
+        ...createAppointmentDto,
+        publicId,
+      });
+      const savedAppointment = await newAppointment.save();
+
+      return {
+        success: true,
+        message: 'Appointment created successfully',
+        data: savedAppointment,
+      };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(error.message);
@@ -99,7 +131,10 @@ export class AppointmentService {
     const windowStart = new Date(date.getTime() - 30 * 60000);
     const windowEnd = date;
     const existing = await this.appointmentModel
-      .findOne({ [field]: id, datetime: { $gte: windowStart, $lte: windowEnd } })
+      .findOne({
+        [field]: id,
+        datetime: { $gte: windowStart, $lte: windowEnd },
+      })
       .exec();
     if (existing) {
       const label = field.charAt(0).toUpperCase() + field.slice(1);
@@ -112,23 +147,39 @@ export class AppointmentService {
   private getClinicTimeSlot(
     clinic: Clinic & { WorkingHours?: any[] },
     date: Date,
-  ): { start: number; end: number; description: string; day: string ,startHour: number, endHour: number} {
-    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  ): {
+    start: number;
+    end: number;
+    description: string;
+    day: string;
+    startHour: number;
+    endHour: number;
+  } {
+    const days = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
     const day = days[date.getDay()];
     const schedule = clinic.WorkingHours?.find((w) => w.day === day);
     if (!schedule) {
       throw new BadRequestException(`Clinic is closed on ${day}`);
     }
-    const { hours: sh, minutes: sm } = this.parseTime(schedule.timeSlots.startTime);
-    const { hours: eh, minutes: em } = this.parseTime(schedule.timeSlots.endTime);
-    console.log('start', sh );
-    console.log('end', eh );
+    console.log(schedule);
+    const { hours: sh, minutes: sm } = this.parseTime(schedule.startTime);
+    const { hours: eh, minutes: em } = this.parseTime(schedule.endTime);
+    console.log('start', sh);
+    console.log('end', eh);
     return {
       start: sh * 60 + sm,
       end: eh * 60 + em,
       startHour: sh,
       endHour: eh,
-      description: `${schedule.timeSlots.startTime}-${schedule.timeSlots.endTime}`,
+      description: `${schedule.startTime}-${schedule.endTime}`,
       day,
     };
   }
@@ -167,6 +218,7 @@ export class AppointmentService {
     const searchTerm = filters.search; // استخراج searchTerm من الفلتر
     const filterConditions: any[] = [];
     const allowedStatuses = ['scheduled', 'completed', 'cancelled'];
+    console.log('step1');
     if (filters.status) {
       if (filters.status === 'null') {
       } else if (allowedStatuses.includes(filters.status)) {
@@ -177,7 +229,11 @@ export class AppointmentService {
         );
       }
     }
+    console.log('step2');
+
     if (searchTerm) {
+      console.log('step3');
+
       const searchRegex = new RegExp(searchTerm, 'i');
 
       // البحث في الأطباء

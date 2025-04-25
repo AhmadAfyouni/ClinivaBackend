@@ -11,14 +11,26 @@ export enum DayOfWeek {
 }
 
 export class WorkingHours {
-  @Prop({ required: true, enum: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] })
+  @Prop({
+    required: true,
+    enum: [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ],
+  })
   day: string; // يوم العمل
 
   @Prop({
     type: { startTime: String, endTime: String },
     default: { startTime: '', endTime: '' },
   })
-  timeSlots: { startTime: string; endTime: string }; // فترات العمل خلال اليوم
+  startTime: string; // فترات العمل خلال اليوم
+  endTime: string; // فترات العمل خلال اليوم
 }
 
 export class InsuranceCompany {
@@ -46,16 +58,16 @@ export class InsuranceCompany {
   @Prop({ required: true })
   contactPerson: string; // شخص الاتصال
 
-  @Prop({required: true, })
+  @Prop({ required: true })
   companyPhone: string; // هاتف الشركة
 
-  @Prop({required: true,})
+  @Prop({ required: true })
   companyEmail: string; // إيميل الشركة
-  
+
   @Prop()
   address?: string; // عنوان الشركة
 
-  @Prop({default: true})
+  @Prop({ default: true })
   isActive: boolean;
 }
 
@@ -72,24 +84,23 @@ export class BankAccount {
   @Prop()
   bankAddress: string; // عنوان البنك (اختياري)
 
-  @Prop({required: true, unique: true})
+  @Prop({ required: true, unique: true })
   accountNumber: string; // رقم الحساب
 
-  @Prop({ required: true, //enum: ['savings', 'checking', 'business']
-
+  @Prop({
+    required: true, //enum: ['savings', 'checking', 'business']
   })
   accountType: string; // نوع الحساب (مدخرات، جاري، تجاري)
 
-  @Prop({default: true})
+  @Prop({ default: true })
   isActive: boolean;
-
 }
 
 export class CashBox {
   @Prop({ required: true })
   name: string; // اسم الصندوق
 
-  @Prop({default: true})
+  @Prop({ default: true })
   isActive: boolean;
 
   @Prop({ required: true })
@@ -107,7 +118,10 @@ export class CashBox {
   @Prop()
   createdBy: string; // أنشئ بواسطة
 
-  @Prop({ type: [{ date: Date, amount: Number, description: String }], default: [] })
+  @Prop({
+    type: [{ date: Date, amount: Number, description: String }],
+    default: [],
+  })
   transactionHistory: { date: Date; amount: number; description: string }[]; // سجل المعاملات
 }
 
@@ -118,7 +132,10 @@ export class OnlinePaymentMethod {
   @Prop({ required: true, enum: ['deposit', 'withdrawal', 'transfer'] })
   transactionType: string; // نوع المعاملة (إيداع، سحب، تحويل)
 
-  @Prop({ required: true, enum: ['credit_card', 'bank_transfer', 'digital_wallet'] })
+  @Prop({
+    required: true,
+    enum: ['credit_card', 'bank_transfer', 'digital_wallet'],
+  })
   type: string; // نوع الدفع (بطاقة ائتمان، تحويل بنكي، محفظة رقمية)
 
   @Prop({ type: [String], required: true })
@@ -130,9 +147,8 @@ export class OnlinePaymentMethod {
   @Prop({ type: [String], default: [] })
   securityFeatures: string[]; // ميزات الأمان
 
-  @Prop({default: true})
+  @Prop({ default: true })
   isActive: boolean;
-
 }
 
 export class CommercialRecord {
@@ -164,13 +180,14 @@ export class Holiday {
 }
 
 export class ContactInfo {
-
-  @Prop({ required: true, enum: ['email', 'phone', 'socialMedia', 'CompanyWebsite'] })
+  @Prop({
+    required: true,
+    enum: ['email', 'phone', 'socialMedia', 'CompanyWebsite'],
+  })
   type: string;
 
   @Prop({ required: true })
   value: string;
-
 
   @Prop({ required: true })
   isPublic: boolean;
@@ -216,11 +233,9 @@ export class WorkingDays {
 
 export class Vacation {
   @Prop({ required: true, type: Date })
-
   leaveStartDate: Date; // تاريخ بدء الإجازة
 
   @Prop({ required: true, type: Date })
-
   leaveEndDate: Date; // تاريخ انتهاء الإجازة
 
   @Prop({ required: true, enum: ['Vacation', 'Sick Leave', 'Emergency'] })
@@ -231,44 +246,42 @@ export class Vacation {
 }
 
 export class Medication {
-  @Prop({ required: true, })
+  @Prop({ required: true })
   name: string;
-  
-  @Prop({ required: true, })
+
+  @Prop({ required: true })
   dosage: string;
 }
 
 export class BreakTime {
   @Prop({ required: true })
-  startTime: string; // 
-  
+  startTime: string; //
+
   @Prop({ required: true })
-  endTime: string; // 
+  endTime: string; //
 }
 
 export class MedicalTestResult {
-  
   @Prop({ required: true, type: String })
   filePath: string; // مسار الملف المحمل في النظام
 }
 
 export class Certificate {
-  
   @Prop({ required: true })
   certificateName: string; // اسم الشهادة
-  
+
   @Prop({ required: true })
   institution: string; // الجهة المانحة للشهادة
-  
+
   @Prop({ required: true })
   issueDate: Date; // تاريخ إصدار الشهادة
-  
+
   @Prop()
   expiryDate?: Date; // تاريخ انتهاء الشهادة (اختياري)
-  
+
   @Prop({ required: true })
   certificateImageUrl: string; // رابط الصورة المخزنة للشهادة
-  
+
   @Prop({ enum: ['pending', 'approved', 'rejected'], default: 'pending' })
   status: string; // حالة التحقق من الشهادة
 }
