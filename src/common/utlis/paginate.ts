@@ -10,6 +10,7 @@ export interface ApiListResponse<T> {
     total_pages: number;
     total_items: number;
     items_per_page: number;
+    current_page_items_count:number
     has_next_page: boolean;
     has_previous_page: boolean;
   };
@@ -72,7 +73,8 @@ export async function paginate<T>(
       current_page: pageNumber,
       total_pages: totalPages,
       total_items: totalItems,
-      items_per_page: data.length, // Ensures it matches the number of items returned
+      items_per_page: limitNumber, // Ensures it matches the number of items returned
+      current_page_items_count:data.length,
       has_next_page: pageNumber * limitNumber < totalItems,
       has_previous_page: pageNumber > 1,
     },
@@ -92,7 +94,7 @@ export async function applyModelFilter<T>(
     const filterValue = filters[filterKey];
 
     if (filterValue === 'undefined' || filterValue === 'null') {
-      // تجاهل الفلتر في هذه الحالة ولا ترجع شيء
+   
       return;
     }
     const query: Record<string, any> = {};
@@ -151,16 +153,38 @@ export function extractId(field: any): string | null {
 export function addDateFilter(
   filters: Record<string, any>,
   key: string,
-  searchConditions: any[],
-  operator: '$gte' | '$lte' | '$eq' = '$gte'
+  searchConditions: any[]
 ) {
   const rawValue = filters[key];
-  const date = new Date(rawValue);
 
-  if (rawValue && !isNaN(date.getTime())) {
-    searchConditions.push({ [key]: { [operator]: date } });
-  }
+  if (!rawValue) return;
+
+  const dateOnly = new Date(rawValue);
+  if (isNaN(dateOnly.getTime())) return;
+
+  // ضبط بداية اليوم ونهايته (UTC) لتفادي مشاكل التوقيت المحلي
+  const startOfDay = new Date(Date.UTC(
+    dateOnly.getUTCFullYear(),
+    dateOnly.getUTCMonth(),
+    dateOnly.getUTCDate(),
+    0, 0, 0, 0
+  ));
+
+  const endOfDay = new Date(Date.UTC(
+    dateOnly.getUTCFullYear(),
+    dateOnly.getUTCMonth(),
+    dateOnly.getUTCDate(),
+    23, 59, 59, 999
+  ));
+
+  searchConditions.push({
+    [key]: {
+      $gte: startOfDay,
+      $lte: endOfDay
+    }
+  });
 }
+
 
 export function buildFinalFilter(
   filters: Record<string, any>,

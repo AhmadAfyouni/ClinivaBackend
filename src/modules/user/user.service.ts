@@ -9,7 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { addDateFilter, ApiGetResponse, applyBooleanFilter, applyModelFilter, paginate } from 'src/common/utlis/paginate';
+import { addDateFilter, ApiGetResponse, applyBooleanFilter, applyModelFilter, buildFinalFilter, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { RoleDocument,Role } from '../role/schemas/role.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
@@ -59,26 +59,25 @@ export class UserService {
     const filterConditions: any[] = [];
     let RoleIds: string[] = [];
    await applyBooleanFilter(filters, 'isActive', filterConditions)
- 
-  if (filters.search) {
+   if (filters.search) {
     const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
-
-    // إضافة شروط البحث للحقول النصية
-    searchConditions.push(
-      { name: regex },         // البحث في الحقل name
-      { email: regex },        // البحث في الحقل email
-    );
+  
+  
+    const searchOrConditions: Record<string, any>[] = [
+      { name: regex },
+      { email: regex },
+    ];
+  
     const Roles = await this.roleModel.find({ name: regex }).select('_id');
     RoleIds = Roles.map(role => role._id.toString());
-    const searchOrConditions: Record<string, any>[] = [];
-    if (RoleIds.length) {
+  
+
+    if (RoleIds.length > 0) {
       searchOrConditions.push({ roleIds: { $in: RoleIds } });
     }
-    if (searchOrConditions.length) {
-      searchConditions.push({ $or: searchOrConditions });
-    } else {
-      return { data: [], total: 0, page, limit, totalPages: 0 };
-    }
+  
+  
+    searchConditions.push({ $or: searchOrConditions });
   }
   
     // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
@@ -98,11 +97,8 @@ export class UserService {
     const fieldsToDelete = ['search', 'isActive','roleName','createdAt'];
     fieldsToDelete.forEach(field => delete filters[field]);
     // دمج الفلاتر مع شروط البحث
-    const finalFilter = {
-      ...filters,
-      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
-      ...(filterConditions.length > 0 ? { $and: filterConditions } : {})
-    };
+       const finalFilter= buildFinalFilter(filters, searchConditions, filterConditions);
+   
   
     // استخدم paginate مع populate
     const result = await paginate(
