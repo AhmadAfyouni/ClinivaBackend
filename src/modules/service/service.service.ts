@@ -6,7 +6,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, isValidObjectId } from 'mongoose';
+import { Model, Types, isValidObjectId } from 'mongoose';
 import { Service } from './schemas/service.schema';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { Clinic } from '../clinic/schemas/clinic.schema';
@@ -87,22 +87,51 @@ export class ServiceService {
   async findAll(paginationDto: PaginationAndFilterDto, filters: any) {
     try {
       let { page, limit, allData, sortBy, order } = paginationDto;
+  
+      // Default pagination values
       page = Number(page) || 1;
       limit = Number(limit) || 10;
-      const sortField: string = sortBy ?? 'id';
-      const sort: Record<string, number> = {
-        [sortField]: order === 'asc' ? 1 : -1,
-      };
-      const result = await paginate(this.serviceModel, [], page, limit, allData, filters, sort);
+      const sortField = sortBy ?? 'id';
+      const sort = { [sortField]: order === 'asc' ? 1 : -1 };
+  
+      // Handle doctorId filter: convert to ObjectId and build $in query
+      if (filters.doctorId) {
+        if (!isValidObjectId(filters.doctorId)) {
+          throw new BadRequestException('Invalid doctor ID provided.');
+        }
+        filters.doctors = { $in: [new Types.ObjectId(filters.doctorId)] };
+        delete filters.doctorId;
+      }
+  
+      // Populate clinic with only name & address, and doctors with name & specialization
+      const populateOptions = [
+        { path: 'clinic', model: 'Clinic', select: 'name address' },
+        { path: 'doctors', model: 'Employee', select: 'name specializations' },
+      ];
+      const result = await paginate(
+        this.serviceModel,
+        populateOptions,
+        page,
+        limit,
+        allData,
+        filters,
+        sort,
+      );
+  
       return {
         success: true,
         message: 'Services retrieved successfully',
         data: result,
       };
     } catch (error) {
+      console.error(error);
+      if (error instanceof HttpException) {
+        throw error;
+      }
       throw new InternalServerErrorException('Failed to fetch services');
     }
   }
+  
 
   async findOne(id: string): Promise<any> {
     try {
@@ -161,5 +190,3 @@ export class ServiceService {
     }
   }
 }
-
-  
