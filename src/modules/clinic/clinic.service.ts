@@ -1,10 +1,21 @@
-import { HttpException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  HttpException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Clinic, ClinicDocument } from './schemas/clinic.schema';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
-import { ApiGetResponse, applyBooleanFilter, applyModelFilter, buildFinalFilter, paginate } from 'src/common/utlis/paginate';
+import {
+  ApiGetResponse,
+  applyBooleanFilter,
+  applyModelFilter,
+  buildFinalFilter,
+  paginate,
+} from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import {
   Appointment,
@@ -14,9 +25,15 @@ import {
   MedicalRecord,
   MedicalRecordDocument,
 } from '../medicalrecord/schemas/medicalrecord.schema';
-import { SpecializationDocument,Specialization } from '../specialization/schemas/specialization.schema';
+import {
+  SpecializationDocument,
+  Specialization,
+} from '../specialization/schemas/specialization.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
-import { Employee, EmployeeDocument } from '../employee/schemas/employee.schema';
+import {
+  Employee,
+  EmployeeDocument,
+} from '../employee/schemas/employee.schema';
 
 @Injectable()
 export class ClinicService {
@@ -33,11 +50,12 @@ export class ClinicService {
   async createClinic(
     createClinicDto: CreateClinicDto,
   ): Promise<ApiGetResponse<Clinic>> {
-   const publicId = await generateUniquePublicId(this.clinicModel, 'cli');
-    
+    const publicId = await generateUniquePublicId(this.clinicModel, 'cli');
+
     const newClinic = new this.clinicModel({
       ...createClinicDto,
-      publicId});
+      publicId,
+    });
     const savedClinic = await newClinic.save();
     return {
       success: true,
@@ -59,41 +77,44 @@ export class ClinicService {
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
     let specializationIds: string[] = [];
-   await applyBooleanFilter(filters, 'isActive', filterConditions)
+    await applyBooleanFilter(filters, 'isActive', filterConditions);
 
-   if (filters.search) {
-    const regex = new RegExp(filters.search, 'i');
-    searchConditions.push({ name: regex });
-  
-    const specializations = await this.specializationModel.find({ name: regex }).select('_id');
-    specializationIds = specializations.map(spec => spec._id.toString());
-  
-    if (specializationIds.length) {
-      searchConditions.push({ specializations: { $in: specializationIds } });
+    if (filters.search) {
+      const regex = new RegExp(filters.search, 'i');
+      searchConditions.push({ name: regex });
+
+      const specializations = await this.specializationModel
+        .find({ name: regex })
+        .select('_id');
+      specializationIds = specializations.map((spec) => spec._id.toString());
+
+      if (specializationIds.length) {
+        searchConditions.push({ specializations: { $in: specializationIds } });
+      }
     }
-  }
-  
-   
-       await applyModelFilter(
-           this.specializationModel,
-           filters,
-           'specializationName',
-           'name',
-           'specializations',
-           filterConditions,
-           page,
-           limit
-         );
-     
-      
-         const fieldsToDelete = ['search', 'isActive','specializationName'];
-         fieldsToDelete.forEach(field => delete filters[field])
-           const finalFilter= buildFinalFilter(filters, searchConditions, filterConditions);
-       
- 
+
+    await applyModelFilter(
+      this.specializationModel,
+      filters,
+      'specializationName',
+      'name',
+      'specializations',
+      filterConditions,
+      page,
+      limit,
+    );
+
+    const fieldsToDelete = ['search', 'isActive', 'specializationName'];
+    fieldsToDelete.forEach((field) => delete filters[field]);
+    const finalFilter = buildFinalFilter(
+      filters,
+      searchConditions,
+      filterConditions,
+    );
+
     const populateFields = [
       { path: 'departmentId' },
-      { path: 'specializations' ,select:'name'},
+      { path: 'specializations', select: 'name' },
       { path: 'insuranceCompany' },
     ];
 
@@ -150,53 +171,50 @@ export class ClinicService {
     };
   }
 
-  async getEmployeeCountByDoctorType(clinicId: string, doctorType: string = 'Doctor'): Promise<number> {
+  async getEmployeeCountByDoctorType(
+    clinicId: string,
+    doctorType: string = 'Doctor',
+  ): Promise<number> {
     const count = await this.employeeModel.countDocuments({
       clinics: clinicId,
-      employeeType: doctorType
+      employeeType: doctorType,
     });
     return count;
   }
   async getClinicById(id: string): Promise<ApiGetResponse<Clinic>> {
-    
     try {
-    
-    const [clinic, patientCount, employeeCounts] = await Promise.all([
-      this.clinicModel
-        .findById(id)
+      const [clinic, patientCount, employeeCounts] = await Promise.all([
+        this.clinicModel
+          .findById(id)
 
-        .populate([
-          'departmentId',
-          'specializations',
-          'insuranceCompany'
+          .populate(['departmentId', 'specializations', 'insuranceCompany']),
+        this.appointmentModel.countDocuments({ clinic: id }),
+        Promise.all([
+          this.getEmployeeCountByDoctorType(id, 'Doctor'),
+          this.getEmployeeCountByDoctorType(id, 'Nurse'),
+          this.getEmployeeCountByDoctorType(id, 'Technician'),
+          this.getEmployeeCountByDoctorType(id, 'Administrative'),
         ]),
-      this.appointmentModel.countDocuments({ clinic: id }),
-      Promise.all([
-        this.getEmployeeCountByDoctorType( id,  'Doctor' ),
-        this.getEmployeeCountByDoctorType( id,  'Nurse' ),
-        this.getEmployeeCountByDoctorType( id,  'Technician' ),
-        this.getEmployeeCountByDoctorType( id,  'Administrative' )
-      ])
-    ]);
+      ]);
 
-    if (!clinic) throw new NotFoundException('Clinic not found');
+      if (!clinic) throw new NotFoundException('Clinic not found');
 
-    const clinicObj = clinic.toObject();
-    clinicObj['patientCount'] = patientCount;
-    clinicObj['employeeCounts'] = {
-      doctors: employeeCounts[0],
-      nurses: employeeCounts[1],
-      technicians: employeeCounts[2],
-      administrative: employeeCounts[3],
-      total: employeeCounts.reduce((a, b) => a + b, 0)
-    };
+      const clinicObj = clinic.toObject();
+      clinicObj['patientCount'] = patientCount;
+      clinicObj['employeeCounts'] = {
+        doctors: employeeCounts[0],
+        nurses: employeeCounts[1],
+        technicians: employeeCounts[2],
+        administrative: employeeCounts[3],
+        total: employeeCounts.reduce((a, b) => a + b, 0),
+      };
 
-    return {
-      success: true,
-      message: 'Clinic retrieved successfully',
-      data: clinicObj,
-    };}
-    catch (error) {
+      return {
+        success: true,
+        message: 'Clinic retrieved successfully',
+        data: clinicObj,
+      };
+    } catch (error) {
       console.log(error);
       if (error instanceof HttpException) {
         throw error;

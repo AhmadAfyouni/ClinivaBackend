@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get, Param, Patch, Delete } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Patch, Delete, Query } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
 
@@ -13,8 +13,9 @@ export class ServiceController {
   }
 
   @Get()
-  async findAll(@Body() paginationDto: any) {
-    return await this.serviceService.findAll(paginationDto, {});
+  async findAll(@Query() query: any) {
+    const { page, limit, allData, sortBy, order, ...filters } = query;
+    return await this.serviceService.findAll({ page, limit, allData, sortBy, order }, filters);
   }
 
   @Get(':id')
