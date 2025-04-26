@@ -35,17 +35,17 @@ export class AppointmentController {
     @Query() queryParams: any,
     @Request() req,
   ) {
-    // const userId = req.user.userId
-    // const response = await this.userService.getUserById(userId)
+    const userId = req.user.userId
+     const response = await this.userService.getUserById(userId)
 
     //     if (!response.data || Array.isArray(response.data)) {
     //       throw new NotFoundException('User not found');
     //     }
-    //   const user=response.data
-    // const employeeId = user.employeeId;
+       const user=response.data
+     const employeeId = user.employeeId;
 
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-    // filters.employeeId = employeeId.toString();
+   filters.employeeId = employeeId.toString();
     return this.appointmentService.getAllAppointments(paginationDto, filters);
   }
 
