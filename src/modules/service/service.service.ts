@@ -28,7 +28,10 @@ export class ServiceService {
       if (!isValidObjectId(createServiceDto.clinic)) {
         throw new BadRequestException('Invalid clinic ID.');
       }
-      if (!Array.isArray(createServiceDto.doctors) || createServiceDto.doctors.length === 0) {
+      if (
+        !Array.isArray(createServiceDto.doctors) ||
+        createServiceDto.doctors.length === 0
+      ) {
         throw new BadRequestException('Doctors list must not be empty.');
       }
       for (const doctorId of createServiceDto.doctors) {
@@ -40,7 +43,9 @@ export class ServiceService {
         .findOne({ _id: createServiceDto.clinic, isActive: true })
         .exec();
       if (!clinic) {
-        throw new BadRequestException('Clinic does not exist or is not active.');
+        throw new BadRequestException(
+          'Clinic does not exist or is not active.',
+        );
       }
       const hasComplex = !!clinic.collection;
       const doctors = await this.employeeModel.find({
@@ -64,7 +69,9 @@ export class ServiceService {
         doctors: { $in: createServiceDto.doctors },
       });
       if (existingService) {
-        throw new BadRequestException('A service with this name already exists for the same clinic and doctor.');
+        throw new BadRequestException(
+          'A service with this name already exists for the same clinic and doctor.',
+        );
       }
      const publicId = await generateUniquePublicId(this.serviceModel, 'ser');
       
@@ -91,13 +98,13 @@ export class ServiceService {
   async findAll(paginationDto: PaginationAndFilterDto, filters: any) {
     try {
       let { page, limit, allData, sortBy, order } = paginationDto;
-  
+
       // Default pagination values
       page = Number(page) || 1;
       limit = Number(limit) || 10;
       const sortField = sortBy ?? 'id';
       const sort = { [sortField]: order === 'asc' ? 1 : -1 };
-  
+
       // Handle doctorId filter: convert to ObjectId and build $in query
       if (filters.doctorId) {
         if (!isValidObjectId(filters.doctorId)) {
@@ -106,7 +113,7 @@ export class ServiceService {
         filters.doctors = { $in: [new Types.ObjectId(filters.doctorId)] };
         delete filters.doctorId;
       }
-  
+
       // Populate clinic with only name & address, and doctors with name & specialization
       const populateOptions = [
         { path: 'clinic', model: 'Clinic', select: 'name address' },
@@ -121,12 +128,8 @@ export class ServiceService {
         filters,
         sort,
       );
-  
-      return {
-        success: true,
-        message: 'Services retrieved successfully',
-        data: result,
-      };
+
+      return result;
     } catch (error) {
       console.error(error);
       if (error instanceof HttpException) {
@@ -135,7 +138,6 @@ export class ServiceService {
       throw new InternalServerErrorException('Failed to fetch services');
     }
   }
-  
 
   async findOne(id: string): Promise<any> {
     try {
@@ -158,7 +160,9 @@ export class ServiceService {
 
   async update(id: string, updateServiceDto: any): Promise<any> {
     try {
-      const updatedService = await this.serviceModel.findByIdAndUpdate(id, updateServiceDto, { new: true }).exec();
+      const updatedService = await this.serviceModel
+        .findByIdAndUpdate(id, updateServiceDto, { new: true })
+        .exec();
       if (!updatedService) {
         throw new NotFoundException(`Service with ID ${id} not found`);
       }
