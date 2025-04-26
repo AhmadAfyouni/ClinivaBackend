@@ -50,10 +50,10 @@ export class UserService {
     limit = Number(limit) || 10;
   
     // تحديد حقل الفرز الافتراضي
-    const sortField = sortBy && ['id', 'name', 'email'].includes(sortBy) ? sortBy : 'id'; 
+    const sortField: string = sortBy ?? 'id';
     const sort: { [key: string]: 1 | -1 } = {
-      [sortField]: order === 'asc' ? 1 : -1,
-    };
+      [sortField]: order === 'asc' ? 1 : -1,} // تحديد الاتجاه بناءً على 'asc' أو 'desc'
+   
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
     let RoleIds: string[] = [];
