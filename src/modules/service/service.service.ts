@@ -13,6 +13,7 @@ import { Clinic } from '../clinic/schemas/clinic.schema';
 import { Employee } from '../employee/schemas/employee.schema';
 import { paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
+import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 
 @Injectable()
 export class ServiceService {
@@ -65,9 +66,12 @@ export class ServiceService {
       if (existingService) {
         throw new BadRequestException('A service with this name already exists for the same clinic and doctor.');
       }
+     const publicId = await generateUniquePublicId(this.serviceModel, 'ser');
+      
       const service = new this.serviceModel({
         ...createServiceDto,
         isActive: true,
+        publicId,
       });
       const savedService = await service.save();
       return {
