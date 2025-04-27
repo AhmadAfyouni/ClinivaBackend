@@ -159,12 +159,14 @@ export class DepartmentService {
     if (!department) throw new NotFoundException('Department not found');
     const clinics= await this.clinicModel.find({departmentId:id}).select('name')
       const clinicCount=clinics.length
+      const countSpecializations=department.specializations.length
     return {
       success: true,
       message: 'department retrieved successfully',
       data: department,
       clinics :clinics,
-      clinicCount:clinicCount
+      clinicCount:clinicCount,
+      countSpecializations:countSpecializations
     };
   }
 
