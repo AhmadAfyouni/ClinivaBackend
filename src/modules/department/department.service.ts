@@ -155,9 +155,10 @@ export class DepartmentService {
     const department = await this.departmentModel
       .findById(id)
       .populate(['clinicCollectionId', 'specializations']);
-      const clinics= await this.clinicModel.find({departmentId:id}).select('name')
-      const clinicCount=clinics.length
+      
     if (!department) throw new NotFoundException('Department not found');
+    const clinics= await this.clinicModel.find({departmentId:id}).select('name')
+      const clinicCount=clinics.length
     return {
       success: true,
       message: 'department retrieved successfully',
