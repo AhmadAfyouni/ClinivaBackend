@@ -65,14 +65,11 @@ console.log(paginationDto.order)
     // const sort: Record<string, number> = { [sortField]: order === 'desc' ? -1 : 1 };
     order = order || 'asc';
    console.log(order)
-   const allowedSortFields = ['_id'];
-   const sortField: string = allowedSortFields.includes(sortBy || '')
-  ? sortBy!
-  : '_id';
+   const sortField: string = sortBy ?? 'id';
+    const sort: { [key: string]: 1 | -1 } = {
+      [sortField]: order === 'asc' ? 1 : -1,} 
   console.log(sortField)
-    const sort: Record<string, number> = {
-      [sortField]: order === 'asc' ? 1 : -1,
-    };
+ 
     const searchConditions: any[] = [];
 
     if (filters.search) {
