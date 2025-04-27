@@ -116,7 +116,7 @@ export class UserService {
   
 
   async getUserById(id: string): Promise<ApiGetResponse<User>> {
-    const user = await this.userModel.findById(id).populate(['roleIds']).exec();
+    const user = await this.userModel.findById(id).populate(['roleIds','employeeId']).exec();
 
     if (!user) throw new NotFoundException('User not found');
 
