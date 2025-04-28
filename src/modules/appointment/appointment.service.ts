@@ -170,6 +170,8 @@ export class AppointmentService {
       throw new BadRequestException(`Clinic is closed on ${day}`);
     }
     console.log(schedule);
+    console.log(schedule.endTime);
+    // console.log(schedule.timeSlot);
     const { hours: sh, minutes: sm } = this.parseTime(schedule.startTime);
     const { hours: eh, minutes: em } = this.parseTime(schedule.endTime);
     console.log('start', sh);

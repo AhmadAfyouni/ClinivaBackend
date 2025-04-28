@@ -13,6 +13,7 @@ import { addDateFilter, ApiGetResponse, applyBooleanFilter, applyModelFilter, bu
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { RoleDocument,Role } from '../role/schemas/role.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { Employee } from '../employee/schemas/employee.schema';
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -96,14 +97,12 @@ export class UserService {
     
     const fieldsToDelete = ['search', 'isActive','roleName','createdAt'];
     fieldsToDelete.forEach(field => delete filters[field]);
-    // دمج الفلاتر مع شروط البحث
        const finalFilter= buildFinalFilter(filters, searchConditions, filterConditions);
    
   
-    // استخدم paginate مع populate
     const result = await paginate(
       this.userModel,
-      [{path:"roleIds",select:'name'}], 
+      [{path:"roleIds",select:'name'},{path:"employeeId"}], 
       page,
       limit,
       allData,
@@ -117,7 +116,7 @@ export class UserService {
   
 
   async getUserById(id: string): Promise<ApiGetResponse<User>> {
-    const user = await this.userModel.findById(id).populate(['roleIds']).exec();
+    const user = await this.userModel.findById(id).populate(['roleIds','employeeId']).exec();
 
     if (!user) throw new NotFoundException('User not found');
 
