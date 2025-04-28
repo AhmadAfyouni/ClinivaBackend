@@ -187,7 +187,7 @@ export class ClinicService {
         this.clinicModel
           .findById(id)
 
-          .populate(['departmentId', 'specializations', 'insuranceCompany']),
+          .populate(['departmentId', 'specializations', 'insuranceCompany','employeeId']),
         this.appointmentModel.countDocuments({ clinic: id }),
         Promise.all([
           this.getEmployeeCountByDoctorType(id, 'Doctor'),
