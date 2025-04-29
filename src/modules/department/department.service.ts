@@ -106,7 +106,7 @@ export class DepartmentService {
     return result;
   }
   async addStatsToDepartment(department: any) {
-    console.log(`🔍 Department: ${department.name} (ID: ${department._id})`);
+    // console.log(`🔍 Department: ${department.name} (ID: ${department._id})`);
   
     // 1. Get clinics associated with this department only
     const clinics = await this.clinicModel.find({
@@ -116,8 +116,8 @@ export class DepartmentService {
     const clinicIds = clinics.map(c => c._id.toString());
     const clinicCount = clinicIds.length;
   
-    console.log(`🏥 Number of clinics for the department "${department.name}": ${clinicCount}`);
-    console.log(`🏥 Clinics for department "${department.name}":`, clinicIds);
+    // console.log(`🏥 Number of clinics for the department "${department.name}": ${clinicCount}`);
+    // console.log(`🏥 Clinics for department "${department.name}":`, clinicIds);
   
     let patientCount = 0;
   
@@ -129,8 +129,8 @@ export class DepartmentService {
   
       const appointmentIds = appointments.map(a => a._id.toString());
   
-      console.log(`📅 Number of appointments for clinics in department "${department.name}": ${appointmentIds.length}`);
-      console.log(`📅 Appointments for department "${department.name}":`, appointmentIds);
+      // console.log(`📅 Number of appointments for clinics in department "${department.name}": ${appointmentIds.length}`);
+      // console.log(`📅 Appointments for department "${department.name}":`, appointmentIds);
   
       if (appointmentIds.length > 0) {
         // 3. Count the medical records related to these appointments only
@@ -138,7 +138,7 @@ export class DepartmentService {
           appointment: { $in: appointmentIds },
         });
   
-        console.log(`🩺 Number of patients (medical records) in department "${department.name}": ${patientCount}`);
+        // console.log(`🩺 Number of patients (medical records) in department "${department.name}": ${patientCount}`);
       }
     }
   
@@ -151,15 +151,28 @@ export class DepartmentService {
   }
   
   
-  async getDepartmentById(id: string): Promise<ApiGetResponse<Department>> {
+  async getDepartmentById(id: string): Promise<ApiGetResponse<any>> {
     const department = await this.departmentModel
       .findById(id)
-      .populate(['clinicCollectionId', 'specializations']);
+      .populate(['clinicCollectionId', 'specializations'])
+      .exec();
     if (!department) throw new NotFoundException('Department not found');
+
+    // compute clinic and patient stats
+    const departmentWithStats = await this.addStatsToDepartment(department);
+
+    const assignedClinics = await this.clinicModel
+      .find({ departmentId: id })
+      .exec();
+      
+
     return {
       success: true,
       message: 'department retrieved successfully',
-      data: department,
+      data: {
+        ...departmentWithStats,
+        assignedClinics,
+      },
     };
   }
 

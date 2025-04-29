@@ -18,6 +18,8 @@ import { Employee, EmployeeSchema } from '../employee/schemas/employee.schema';
 import { UserModule } from '../user/user.module';
 import { UserSchema,User } from '../user/schemas/user.schema';
 import { EmployeeModule } from '../employee/employee.module';
+import { ServiceModule } from '../service/service.module';
+import { Service, ServiceSchema } from '../service/schemas/service.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -27,11 +29,13 @@ import { EmployeeModule } from '../employee/employee.module';
       { name: Specialization.name, schema: SpecializationSchema },
       { name: Employee.name, schema: EmployeeSchema },
       { name: User.name, schema: UserSchema },
+      { name: Service.name, schema: ServiceSchema },
     ]),
     forwardRef(() => MedicalRecordModule),
     forwardRef(() => SpecializationModule),
     forwardRef(() => UserModule),
     forwardRef(() => EmployeeModule),
+    forwardRef(() => ServiceModule),
   ],
 
   controllers: [ClinicController],

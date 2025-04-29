@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, HttpException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -17,6 +17,8 @@ import {
   Department,
   DepartmentDocument,
 } from '../department/schemas/department.schema';
+import { Clinic, ClinicDocument } from '../clinic/schemas/clinic.schema';
+import { Appointment, AppointmentDocument } from '../appointment/schemas/appointment.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 
 @Injectable()
@@ -28,6 +30,8 @@ export class ClinicCollectionService {
     private employeeModel: Model<EmployeeDocument>,
     @InjectModel(Department.name)
     private departmentModel: Model<DepartmentDocument>,
+    @InjectModel(Clinic.name) private clinicModel: Model<ClinicDocument>,
+    @InjectModel(Appointment.name) private appointmentModel: Model<AppointmentDocument>,
   ) {}
 
   async createClinicCollection(
@@ -162,22 +166,48 @@ console.log(paginationDto.order)
   async getClinicCollectionById(
     id: string,
   ): Promise<ApiGetResponse<ClinicCollection>> {
-    const clinicCollection = await this.clinicCollectionModel
-      .findById(id)
-      .populate(['companyId', 'specializations'])
-      .exec();
+    try {
+      const collection = await this.clinicCollectionModel
+        .findById(id)
+        .populate(['companyId', 'specializations'])
+        .exec();
+      if (!collection) throw new NotFoundException('Clinic Collection not found');
 
-    if (!clinicCollection)
-      throw new NotFoundException('Clinic Collection not found');
+      const base = await this.addClinicCounts(collection);
 
-    const clinicCollectionWithCounts =
-      await this.addClinicCounts(clinicCollection);
+      const departments = await this.departmentModel.find({ clinicCollectionId: id }).exec();
+      const clinics = await this.clinicModel.find({ departmentId: { $in: departments.map(d => d._id) } }).exec();
+      const uniquePatients = await this.appointmentModel.distinct('patient', {
+        clinic: { $in: clinics.map(c => c._id) },
+      });
+      const doctors = await this.employeeModel.find({
+        clinics: { $in: clinics.map(c => c._id) },
+        employeeType: 'Doctor',
+      }).exec();
+      const staff = await this.employeeModel.find({
+        clinics: { $in: clinics.map(c => c._id) },
+      }).exec();
 
-    return {
-      success: true,
-      message: 'clinic Collection retrieved successfully',
-      data: clinicCollectionWithCounts,
-    };
+      return {
+        success: true,
+        message: 'Clinic Collection retrieved successfully',
+        data: {
+          ...base,
+          clinicsCount: clinics.length,
+          patientsCount: uniquePatients.length,
+          doctorsCount: doctors.length,
+          staffCount: staff.length,
+          assignedDepartments: departments,
+          assignedClinics: clinics,
+          assignedSpecializations: collection.specializations,
+          assignedDoctors: doctors,
+          assignedStaff: staff,
+        },
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new InternalServerErrorException('Failed to retrieve clinic collection');
+    }
   }
 
   async updateClinicCollection(

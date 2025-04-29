@@ -24,6 +24,7 @@ import { Patient, PatientDocument } from '../patient/schemas/patient.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 import { Clinic, ClinicDocument } from '../clinic/schemas/clinic.schema';
 import { Service } from '../service/schemas/service.schema';
+const { ObjectId } = require('mongodb');
 
 @Injectable()
 export class AppointmentService {
@@ -326,6 +327,10 @@ export class AppointmentService {
     return result;
   }
   private async viewWonerAppointment(filters: any) {
+    console.log("@@",filters)
+    // const Ofilter=new ObjectId(filters)
+    // console.log("@!!!!@",Ofilter )
+try{
     if (filters.employeeId) {
       const employee = await this.doctorModel.findById(
         filters.employeeId.toString(),
@@ -338,6 +343,10 @@ export class AppointmentService {
       }
       delete filters.employeeId;
     }
+}
+catch(error){
+    console.log(error)
+}
   }
   async getAppointmentById(id: string): Promise<ApiGetResponse<Appointment>> {
     const appointment = await this.appointmentModel
