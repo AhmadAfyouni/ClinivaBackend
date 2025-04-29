@@ -45,6 +45,11 @@ export class ClinicController {
     return this.clinicService.getClinicById(id);
   }
 
+  @Get('by-department/:deptId')
+  async getClinicsByDepartment(@Param('deptId') deptId: string) {
+    return this.clinicService.getClinicsByDepartment(deptId);
+  }
+
   @Put(':id')
   async updateClinic(
     @Param('id') id: string,

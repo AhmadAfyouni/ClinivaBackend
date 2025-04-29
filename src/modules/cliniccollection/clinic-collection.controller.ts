@@ -78,6 +78,11 @@ export class ClinicCollectionController {
     return this.clinicCollectionService.getClinicCollectionById(id);
   }
 
+  @Get(':id/complex')
+  async getMedicalComplexById(@Param('id') id: string) {
+    return this.clinicCollectionService.getClinicCollectionById(id);
+  }
+
   @Put(':id')
   async updateClinicCollection(
     @Param('id') id: string,
