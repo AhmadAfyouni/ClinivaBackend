@@ -39,7 +39,8 @@ export class EmployeeService {
   
     page = Number(page) || 1;
     limit = Number(limit) || 10;
-  
+    console.log(filters)
+    console.log(filters)
     const sortField: string = sortBy ?? 'id';
     const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
   
@@ -60,6 +61,12 @@ export class EmployeeService {
       }
     }
   
+    // filter by clinic id
+    if (filters.clinicId) {
+      filterConditions.push({ clinics: filters.clinicId });
+      delete filters.clinicId;
+    }
+
     // استخدام الدالة الموحدة لفلترة المجمع الطبي
     const clinicResult = await applyModelFilter(
       this.clinicCollectionModel,
