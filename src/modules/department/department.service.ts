@@ -151,30 +151,44 @@ export class DepartmentService {
   }
   
   
-  async getDepartmentById(id: string): Promise<ApiGetResponse<any>> {
-    const department = await this.departmentModel
-      .findById(id)
-      .populate(['clinicCollectionId', 'specializations'])
-      .exec();
-    if (!department) throw new NotFoundException('Department not found');
+ async getDepartmentById(id: string): Promise<ApiGetResponse<any>> {
+  const department = await this.departmentModel
+    .findById(id)
+    .populate(['clinicCollectionId', 'specializations'])
+    .exec();
 
-    // compute clinic and patient stats
-    const departmentWithStats = await this.addStatsToDepartment(department);
+  if (!department) throw new NotFoundException('Department not found');
 
-    const assignedClinics = await this.clinicModel
-      .find({ departmentId: id })
-      .exec();
-      
+  // compute clinic and patient stats from main
+  const departmentWithStats = await this.addStatsToDepartment(department);
 
-    return {
-      success: true,
-      message: 'department retrieved successfully',
-      data: {
-        ...departmentWithStats,
-        assignedClinics,
-      },
-    };
-  }
+  // get full clinics (from main)
+  const assignedClinics = await this.clinicModel
+    .find({ departmentId: id })
+    .exec();
+
+  // get clinic names (from M-test-1)
+  const clinics = await this.clinicModel
+    .find({ departmentId: id })
+    .select('name')
+    .exec();
+
+  const clinicCount = clinics.length;
+  const countSpecializations = department.specializations.length;
+
+  return {
+    success: true,
+    message: 'department retrieved successfully',
+    data: {
+      ...departmentWithStats,
+      assignedClinics,           // from main
+      clinics,                   // from M-test-1
+      clinicCount,               // from M-test-1
+      countSpecializations,      // from M-test-1
+    },
+  };
+}
+
 
   async updateDepartment(
     id: string,
