@@ -8,6 +8,7 @@ import { ApiGetResponse, paginate,applyModelFilter, applyBooleanFilter } from '.
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
 import { ClinicCollectionDocument,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
 import { DepartmentDocument,Department } from '../department/schemas/department.schema';
+import { User, UserDocument } from '../user/schemas/user.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 
 @Injectable()
@@ -16,6 +17,7 @@ export class EmployeeService {
     @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
     @InjectModel(ClinicCollection.name) private clinicCollectionModel: Model<ClinicCollectionDocument>,
     @InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
   async createEmployee(
@@ -179,6 +181,21 @@ export class EmployeeService {
       success: true,
       message: 'Employee remove successfully',
       data: {} as Employee,
+    };
+  }
+
+  async getEmployeesWithoutUser(): Promise<ApiGetResponse<Employee[]>> {
+    // fetch all user-linked employee IDs
+    const users = await this.userModel.find().select('employeeId').exec();
+    const userEmpIds = users.map(u => u.employeeId.toString());
+    // find employees not in user table
+    const employees = await this.employeeModel.find({
+      _id: { $nin: userEmpIds },
+    }).exec();
+    return {
+      success: true,
+      message: 'Employees without user retrieved successfully',
+      data: employees,
     };
   }
 }
