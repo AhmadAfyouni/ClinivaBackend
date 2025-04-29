@@ -1,13 +1,28 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Employee, EmployeeDocument } from './schemas/employee.schema';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
-import { ApiGetResponse, paginate,applyModelFilter, applyBooleanFilter } from '../../common/utlis/paginate';
+import {
+  ApiGetResponse,
+  paginate,
+  applyModelFilter,
+  applyBooleanFilter,
+} from '../../common/utlis/paginate';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
-import { ClinicCollectionDocument,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
-import { DepartmentDocument,Department } from '../department/schemas/department.schema';
+import {
+  ClinicCollectionDocument,
+  ClinicCollection,
+} from '../cliniccollection/schemas/cliniccollection.schema';
+import {
+  DepartmentDocument,
+  Department,
+} from '../department/schemas/department.schema';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 
@@ -15,18 +30,20 @@ import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 export class EmployeeService {
   constructor(
     @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
-    @InjectModel(ClinicCollection.name) private clinicCollectionModel: Model<ClinicCollectionDocument>,
-    @InjectModel(Department.name) private departmentModel: Model<DepartmentDocument>,
+    @InjectModel(ClinicCollection.name)
+    private clinicCollectionModel: Model<ClinicCollectionDocument>,
+    @InjectModel(Department.name)
+    private departmentModel: Model<DepartmentDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
   async createEmployee(
     createEmployeeDto: CreateEmployeeDto,
   ): Promise<ApiGetResponse<Employee>> {
-    const publicId = await generateUniquePublicId(this.employeeModel, 'emp'); 
+    const publicId = await generateUniquePublicId(this.employeeModel, 'emp');
     const newEmployee = new this.employeeModel({
       ...createEmployeeDto,
-      publicId
+      publicId,
     });
     const savedEmployee = await newEmployee.save();
     return {
@@ -38,31 +55,43 @@ export class EmployeeService {
 
   async getAllEmployees(paginationDto: PaginationAndFilterDto, filters: any) {
     let { page, limit, allData, sortBy, order } = paginationDto;
-  
+
     page = Number(page) || 1;
     limit = Number(limit) || 10;
-    console.log(filters)
-    console.log(filters)
+    console.log(filters);
+    console.log(filters);
     const sortField: string = sortBy ?? 'id';
-    const sort: Record<string, number> = { [sortField]: order === 'asc' ? 1 : -1 };
-  
+    const sort: Record<string, number> = {
+      [sortField]: order === 'asc' ? 1 : -1,
+    };
+
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
-    const allowedEmployeeTypes = ['Doctor', 'Nurse', 'Technician', 'Administrative', 'Employee', 'Other'];
-  
+    const allowedEmployeeTypes = [
+      'Doctor',
+      'Nurse',
+      'Technician',
+      'Administrative',
+      'Employee',
+      'PIC',
+      'Other',
+    ];
+
     // معالجة isActive
-   await applyBooleanFilter(filters, 'isActive', filterConditions)
-  
+    await applyBooleanFilter(filters, 'isActive', filterConditions);
+
     // employeeType
     if (filters.employeeType) {
-      if(filters.employeeType === 'null'){}
-      else if (allowedEmployeeTypes.includes(filters.employeeType)) {
+      if (filters.employeeType === 'null') {
+      } else if (allowedEmployeeTypes.includes(filters.employeeType)) {
         filterConditions.push({ employeeType: filters.employeeType });
       } else {
-        throw new Error(`Invalid employeeType. Allowed values: ${allowedEmployeeTypes.join(', ')}`);
+        throw new BadRequestException(
+          `Invalid employeeType. Allowed values: ${allowedEmployeeTypes.join(', ')}`,
+        );
       }
     }
-  
+
     // filter by clinic id
     if (filters.clinicId) {
       filterConditions.push({ clinics: filters.clinicId });
@@ -78,10 +107,10 @@ export class EmployeeService {
       'clinicCollectionId',
       filterConditions,
       page,
-      limit
+      limit,
     );
     if (clinicResult) return clinicResult;
-  
+
     // استخدام الدالة الموحدة لفلترة القسم
     const departmentResult = await applyModelFilter(
       this.departmentModel,
@@ -91,10 +120,10 @@ export class EmployeeService {
       'departmentId',
       filterConditions,
       page,
-      limit
+      limit,
     );
     if (departmentResult) return departmentResult;
-  
+
     // البحث المرن
     if (filters.search) {
       const regex = new RegExp(filters.search, 'i');
@@ -108,16 +137,22 @@ export class EmployeeService {
         { professional_experience: regex },
       );
     }
-  
+
     // حذف الحقول بعد معالجتها
-    const fieldsToDelete = ['search', 'isActive', 'employeeType', 'clinicCollectionName', 'departmentName'];
-    fieldsToDelete.forEach(field => delete filters[field]);
-  
+    const fieldsToDelete = [
+      'search',
+      'isActive',
+      'employeeType',
+      'clinicCollectionName',
+      'departmentName',
+    ];
+    fieldsToDelete.forEach((field) => delete filters[field]);
+
     const finalFilter = {
       ...(searchConditions.length > 0 && { $or: searchConditions }),
-      ...(filterConditions.length > 0 && { $and: filterConditions })
+      ...(filterConditions.length > 0 && { $and: filterConditions }),
     };
-  
+
     return paginate(
       this.employeeModel,
       [
@@ -131,11 +166,9 @@ export class EmployeeService {
       limit,
       allData,
       finalFilter,
-      sort
+      sort,
     );
   }
-  
-  
 
   async getEmployeeById(id: string): Promise<ApiGetResponse<Employee>> {
     const employee = await this.employeeModel
@@ -187,11 +220,13 @@ export class EmployeeService {
   async getEmployeesWithoutUser(): Promise<ApiGetResponse<Employee[]>> {
     // fetch all user-linked employee IDs
     const users = await this.userModel.find().select('employeeId').exec();
-    const userEmpIds = users.map(u => u.employeeId.toString());
+    const userEmpIds = users.map((u) => u.employeeId.toString());
     // find employees not in user table
-    const employees = await this.employeeModel.find({
-      _id: { $nin: userEmpIds },
-    }).exec();
+    const employees = await this.employeeModel
+      .find({
+        _id: { $nin: userEmpIds },
+      })
+      .exec();
     return {
       success: true,
       message: 'Employees without user retrieved successfully',
