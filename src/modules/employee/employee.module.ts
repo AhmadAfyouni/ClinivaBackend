@@ -8,17 +8,19 @@ import { ClinicCollectionSchema,ClinicCollection } from '../cliniccollection/sch
 import { DepartmentModule } from '../department/department.module';
 import { Department,DepartmentSchema } from '../department/schemas/department.schema';
 import { forwardRef } from '@nestjs/common';
+import { User, UserSchema } from '../user/schemas/user.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Employee.name, schema: EmployeeSchema },
       { name: ClinicCollection.name, schema: ClinicCollectionSchema },
       { name: Department.name, schema: DepartmentSchema },
+      { name: User.name, schema: UserSchema },
     ]), forwardRef(() => ClinicCollectionModule),
     forwardRef(() => DepartmentModule),
   ],
   controllers: [EmployeeController],
   providers: [EmployeeService],
-  exports: [EmployeeService], // تصدير الخدمة لاستخدامها في وحدات أخرى إذا لزم الأمر
+  exports: [EmployeeService],
 })
 export class EmployeeModule {}
