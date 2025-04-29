@@ -34,6 +34,7 @@ import {
   Employee,
   EmployeeDocument,
 } from '../employee/schemas/employee.schema';
+import { Service } from '../service/schemas/service.schema';
 
 @Injectable()
 export class ClinicService {
@@ -46,6 +47,7 @@ export class ClinicService {
     @InjectModel(Specialization.name)
     private specializationModel: Model<SpecializationDocument>,
     @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
+    @InjectModel(Service.name) private serviceModel: Model<Service>,
   ) {}
   async createClinic(
     createClinicDto: CreateClinicDto,
@@ -183,10 +185,15 @@ export class ClinicService {
   }
   async getClinicById(id: string): Promise<ApiGetResponse<Clinic>> {
     try {
-      const [clinic, patientCount, employeeCounts] = await Promise.all([
+      const [
+        clinic,
+        patientCount,
+        employeeCounts,
+        doctors,
+        services,
+      ] = await Promise.all([
         this.clinicModel
           .findById(id)
-
           .populate(['departmentId', 'specializations', 'insuranceCompany']),
         this.appointmentModel.countDocuments({ clinic: id }),
         Promise.all([
@@ -195,6 +202,13 @@ export class ClinicService {
           this.getEmployeeCountByDoctorType(id, 'Technician'),
           this.getEmployeeCountByDoctorType(id, 'Administrative'),
         ]),
+        // fetch full doctor details for this clinic
+        this.employeeModel
+          .find({ clinics: id, employeeType: 'Doctor' })
+          .populate(['departmentId', 'specializations']),
+        this.serviceModel
+          .find({ clinic: id })
+          .populate(['doctors']),
       ]);
 
       if (!clinic) throw new NotFoundException('Clinic not found');
@@ -208,6 +222,8 @@ export class ClinicService {
         administrative: employeeCounts[3],
         total: employeeCounts.reduce((a, b) => a + b, 0),
       };
+      clinicObj['doctors'] = doctors;
+      clinicObj['services'] = services;
 
       return {
         success: true,
@@ -281,6 +297,18 @@ export class ClinicService {
       success: true,
       message: 'Patient count retrieved successfully',
       data: { patientCount: uniquePatients.length },
+    };
+  }
+
+  async getClinicsByDepartment(departmentId: string): Promise<ApiGetResponse<any>> {
+    const clinics = await this.clinicModel
+      .find({ departmentId })
+      .populate(['departmentId', 'specializations', 'insuranceCompany'])
+      .exec();
+    return {
+      success: true,
+      message: 'Clinics by department retrieved successfully',
+      data: clinics,
     };
   }
 }
