@@ -53,9 +53,8 @@ export class UserService {
     // تحديد حقل الفرز الافتراضي
     const sortField: string = sortBy ?? 'id';
     const sort: { [key: string]: 1 | -1 } = {
-      [sortField]: order === 'asc' ? 1 : -1, // تحديد الاتجاه بناءً على 'asc' أو 'desc'
-    };
-  
+      [sortField]: order === 'asc' ? 1 : -1,} // تحديد الاتجاه بناءً على 'asc' أو 'desc'
+   console.log(sortField)
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
     let RoleIds: string[] = [];
