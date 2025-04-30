@@ -91,7 +91,7 @@ export class Employee {
   @Prop({ type: [Certificate], default: [] })
   certifications?: Certificate[]; //الشهادات
 
-  @Prop({ required: true, default: '' })
+  @Prop({ required: true, default: 'Qualifications' })
   Qualifications: string; // المؤهلات
   
   @Prop({ required: true, default: 0 })
