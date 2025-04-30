@@ -149,4 +149,30 @@ export class CreateCompanyDto {
     @IsOptional()
     @IsObject()
     locationGoogl?: { x: number; y: number };
+    @ApiProperty({
+        description: 'Key member of the organization',
+        example: 'John Doe',
+        required: true,
+      })
+      @IsString()
+      @IsNotEmpty()
+      Key_member: string;
+    
+      @ApiProperty({
+        description: 'Founder of the organization',
+        example: 'Jane Smith',
+        required: true,
+      })
+      @IsString()
+      @IsNotEmpty()
+      Founder: string;
+    
+      @ApiProperty({
+        description: 'Key executives of the organization (comma-separated if multiple)',
+        example: 'Alice Johnson, Robert Lee',
+        required: true,
+      })
+      @IsString()
+      @IsNotEmpty()
+      Executives: string;
 }
