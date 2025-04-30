@@ -25,7 +25,7 @@ export class Employee {
   @Prop({ required: true, enum: ['male', 'female'] })
   gender: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   identity?: string; // National ID or Passport
 
   @Prop({ required: true })
@@ -94,14 +94,13 @@ export class Employee {
 
   @Prop({ required: true, default: 'Qualifications' })
   Qualifications: string; // المؤهلات
-  
+
   @Prop({ required: true, default: 0 })
   consultation_fee: number; // رسوم الاستشارة
-  
+
   @Prop({ default: true })
   on_call: boolean; // الإتاحة
-  
-  
+
   @Prop({ required: true, enum: ['FULL_TIME', 'PART_TIME'] })
   jobType: string; //  نوع التوظيف (دوام كامل/جزئي)
 
