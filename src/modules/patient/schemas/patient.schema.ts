@@ -68,7 +68,7 @@ export class Patient {
     type: [
       {
         name: { type: String, required: true },
-        phone: { type: String, required: true, match: /^[0-9]{10,15}$/ }, // Optional phone number validation
+        phone: { type: String, required: true },
         relationToPatient: { type: String, required: true },
       },
     ],
