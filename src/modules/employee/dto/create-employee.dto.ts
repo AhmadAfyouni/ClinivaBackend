@@ -265,5 +265,25 @@ export class CreateEmployeeDto {
       @IsArray()
       @IsMongoId({ each: true })
       @IsNotEmpty()
-      specializations: Types.ObjectId[];      
+      specializations: Types.ObjectId[];  
+      @ApiProperty({
+        description: 'Doctor qualifications (e.g., MBBS, MD)',
+        example: 'MBBS, MD',
+      })
+      @IsString()
+      Qualifications: string;
+      @ApiProperty({ description: 'Consultation fee in currency (e.g., 50 USD)', example: 0, required: true })
+      @IsNumber()
+      @IsOptional()
+     
+      consultation_fee: string;
+    
+      @ApiProperty({
+        description: 'Doctor availability for on-call duties',
+        example: true,
+        required: false,
+      })
+      @IsBoolean()
+      @IsOptional()
+      on_call?: boolean;    
 }
