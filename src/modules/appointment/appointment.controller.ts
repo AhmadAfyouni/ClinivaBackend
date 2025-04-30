@@ -42,6 +42,7 @@ export class AppointmentController {
     //       throw new NotFoundException('User not found');
     //     }
        const user=response.data
+       console.log(user)
      const employeeId = user.employeeId;
 
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;

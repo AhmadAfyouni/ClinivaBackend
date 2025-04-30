@@ -62,6 +62,16 @@ export class Company {
 
   @Prop({ type: Object })
   locationGoogl: { x: number; y: number };
+  @Prop({ required: true, default: 'Key_member' })
+  Key_member: string; // العضو الرئيسي
+  
+  @Prop({ required: true, default: ' Founder' })
+  Founder: string; // المؤسس
+  
+  @Prop({ required: true, default: 'Executives' })
+  Executives: string; // التنفيذيون
+  
+  
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);

@@ -109,7 +109,15 @@ export class Patient {
       @Prop({ unique: true, required: true })
       publicId: string;
  
-
+      @Prop({})
+      Surgical_History: Date; // التاريخ الجراحي
+      
+      @Prop({})
+      Current_Medications: string; // الأدوية الحالية
+      
+      @Prop({ default: false })
+      Smoking: boolean; // التدخين
+      
 }
 
 export const PatientSchema = SchemaFactory.createForClass(Patient);

@@ -92,6 +92,16 @@ export class Employee {
   @Prop({ type: [Certificate], default: [] })
   certifications?: Certificate[]; //الشهادات
 
+  @Prop({ required: true, default: 'Qualifications' })
+  Qualifications: string; // المؤهلات
+  
+  @Prop({ required: true, default: 0 })
+  consultation_fee: number; // رسوم الاستشارة
+  
+  @Prop({ default: true })
+  on_call: boolean; // الإتاحة
+  
+  
   @Prop({ required: true, enum: ['FULL_TIME', 'PART_TIME'] })
   jobType: string; //  نوع التوظيف (دوام كامل/جزئي)
 

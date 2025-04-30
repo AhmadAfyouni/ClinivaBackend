@@ -199,5 +199,31 @@ export class CreatePatientDto {
     @IsArray()
     @IsOptional()
     familyMedicalHistory?: string[];
-
+    @ApiProperty({
+        description: 'Patient smoking status (true if the patient smokes)',
+        example: true,
+        required: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    Smoking?: boolean;
+    
+    @ApiProperty({
+        description: 'Current medications the patient is taking',
+        example: 'Panadol',
+        required: false,
+    })
+    @IsString()
+    @IsOptional()
+    Current_Medications?: string;
+    
+    @ApiProperty({
+        description: 'Date of the last surgical procedure (optional)',
+        example: '2022-11-15T00:00:00Z',
+        required: false,
+      })
+      @IsOptional()
+      @IsDate()
+      Surgical_History?: Date;
+      
 }
