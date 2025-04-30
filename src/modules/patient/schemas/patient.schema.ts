@@ -109,10 +109,10 @@ export class Patient {
       @Prop({ unique: true, required: true })
       publicId: string;
  
-      @Prop()
+      @Prop({default:"Surgical_History"})
       Surgical_History: string; // التاريخ الجراحي
       
-      @Prop()
+      @Prop({default:"Current_Medications"})
       Current_Medications: string; // الأدوية الحالية
       
       @Prop({ default: false })
