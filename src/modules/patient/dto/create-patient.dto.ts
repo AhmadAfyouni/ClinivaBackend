@@ -218,13 +218,12 @@ export class CreatePatientDto {
     Current_Medications?: string;
     
     @ApiProperty({
-        description: 'Patient surgical history',
-        example: 'Appendectomy in 2015',
+        description: 'Date of the last surgical procedure (optional)',
+        example: '2022-11-15T00:00:00Z',
         required: false,
-    })
-    @IsString()
-    @IsOptional()
-    Surgical_History?: string;
-    
-    
+      })
+      @IsOptional()
+      @IsDate()
+      Surgical_History?: Date;
+      
 }

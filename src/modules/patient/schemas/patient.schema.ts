@@ -110,7 +110,7 @@ export class Patient {
       publicId: string;
  
       @Prop({})
-      Surgical_History: string; // التاريخ الجراحي
+      Surgical_History: Date; // التاريخ الجراحي
       
       @Prop({})
       Current_Medications: string; // الأدوية الحالية
