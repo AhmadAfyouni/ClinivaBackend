@@ -86,7 +86,7 @@ export class DepartmentService {
     // استخدام paginate مع populate
     const result = await paginate(
       this.departmentModel,
-      [ { path: 'clinicCollectionId', select: 'name' },, 'specializations'], // الحقول المرتبطة التي سيتم تحميلها
+      [ { path: 'clinicCollectionId', select: 'name' }, 'specializations','PIC'], // الحقول المرتبطة التي سيتم تحميلها
       page,
       limit,
       allData,
