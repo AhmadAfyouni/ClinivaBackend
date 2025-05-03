@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, InternalServerErrorException, HttpException } from '@nestjs/common';
+import { Injectable, NotFoundException, InternalServerErrorException, HttpException, BadRequestException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -37,19 +37,25 @@ export class ClinicCollectionService {
   async createClinicCollection(
     createClinicCollectionDto: CreateClinicCollectionDto,
   ): Promise<ApiGetResponse<ClinicCollection>> {
+   try{
+    console.log('createClinicCollection');
     const publicId = await generateUniquePublicId(this.clinicCollectionModel, 'com');
-
+    console.log('publicId',publicId);
     const newClinicCollection = new this.clinicCollectionModel({
       ...createClinicCollectionDto,
       publicId,
     });
+    console.log('newClinicCollection',newClinicCollection);
     const savedClinicCollection = await newClinicCollection.save();
     return {
       success: true,
       message: 'clinic Collection created successfully',
       data: savedClinicCollection,
     };
-  }
+  }catch(error){
+    if(error instanceof HttpException) throw error;
+    throw new BadRequestException('Failed to create clinic collection',error.message);
+  }}
 
   async getAllClinicCollections(
     paginationDto: PaginationAndFilterDto,
