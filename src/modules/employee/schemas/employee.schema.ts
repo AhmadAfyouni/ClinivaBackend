@@ -73,6 +73,7 @@ export class Employee {
       'Technician',
       'Administrative',
       'Employee',
+      'PIC',
       'Other',
     ],
     required: true,

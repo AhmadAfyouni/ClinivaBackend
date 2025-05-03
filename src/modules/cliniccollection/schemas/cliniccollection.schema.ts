@@ -83,6 +83,9 @@ export class ClinicCollection {
     @Prop({ type: [Types.ObjectId], ref: 'Specialization', required: true })
     specializations: Types.ObjectId[];  // قائمة بمعرفات الاختصاصات المرتبطة بالمجمع
   
+    @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
+    PIC: Types.ObjectId;
+
     @Prop({ unique: true, required: true })
     publicId: string;
 }

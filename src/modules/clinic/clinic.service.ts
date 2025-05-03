@@ -214,7 +214,7 @@ export class ClinicService {
           this.employeeModel
           .find({ clinics: id })
           .select('name') 
-          .populate(['departmentId']),
+          
       ]);
 
       if (!clinic) throw new NotFoundException('Clinic not found');
