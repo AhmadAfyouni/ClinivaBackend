@@ -50,6 +50,9 @@ export class Department {
   specializations: Types.ObjectId[];  // قائمة بمعرفات الاختصاصات المرتبطة بالقسم
   @Prop({ unique: true, required: true })
   publicId: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
+  PIC: Types.ObjectId;
 }
 
 export const DepartmentSchema = SchemaFactory.createForClass(Department);
