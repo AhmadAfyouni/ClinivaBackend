@@ -101,7 +101,7 @@ console.log(paginationDto.order)
 
     const result = await paginate(
       this.clinicCollectionModel,
-      ['companyId', 'specializations'],
+      ['companyId', 'specializations','PIC'],
       page,
       limit,
       allData,
