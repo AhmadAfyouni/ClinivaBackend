@@ -191,6 +191,8 @@ export class ClinicService {
         employeeCounts,
         doctors,
         services,
+        employees,
+        ,
       ] = await Promise.all([
         this.clinicModel
           .findById(id)
@@ -209,6 +211,10 @@ export class ClinicService {
         this.serviceModel
           .find({ clinic: id })
           .populate(['doctors']),
+          this.employeeModel
+          .find({ clinics: id })
+          .select('name') 
+          
       ]);
 
       if (!clinic) throw new NotFoundException('Clinic not found');
@@ -224,6 +230,8 @@ export class ClinicService {
       };
       clinicObj['doctors'] = doctors;
       clinicObj['services'] = services;
+      clinicObj['employees'] = employees;
+    
 
       return {
         success: true,

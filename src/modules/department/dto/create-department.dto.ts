@@ -142,4 +142,11 @@ export class CreateDepartmentDto {
   @IsMongoId({ each: true })
   @IsNotEmpty()
   specializations: Types.ObjectId[];
+    @ApiProperty({
+      description: 'ID of the employee assigned as the Person in Charge (PIC)',
+      example: '6634dce923f91b8f7761d8f2',
+      required: true,
+    })
+    @IsMongoId()
+    PIC: string;
 }
