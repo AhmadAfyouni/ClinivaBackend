@@ -21,6 +21,10 @@ export class EmployeeController {
     return this.employeeService.getAllEmployees(paginationDto, filters);
   }
 
+  @Get('without-user')
+  async getEmployeesWithoutUser() {
+    return this.employeeService.getEmployeesWithoutUser();
+  }
 
   @Get(':id')
   async getEmployeeById(@Param('id') id: string) {
@@ -37,8 +41,8 @@ export class EmployeeController {
     return this.employeeService.deleteEmployee(id);
   }
 
-    /*@Get('count-doctor/by-cliniccollection/:clinicCollectionId')
-    getDepartmentCount(@Param('clinicCollectionId') clinicCollectionId: string) {
-      return this.employeeService.getCountDoctorByClinicCollectionId(clinicCollectionId);
-    }*/
-  }
+  /*@Get('count-doctor/by-cliniccollection/:clinicCollectionId')
+  getDepartmentCount(@Param('clinicCollectionId') clinicCollectionId: string) {
+    return this.employeeService.getCountDoctorByClinicCollectionId(clinicCollectionId);
+  }*/
+}

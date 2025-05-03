@@ -1,7 +1,10 @@
-import {Prop, Schema, SchemaFactory} from '@nestjs/mongoose';
-import {Document, Types} from 'mongoose';
-import {ContactInfo, Insurance, MedicalTestResult} from "../../../common/utlis/helper";
-
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
+import {
+  ContactInfo,
+  Insurance,
+  MedicalTestResult,
+} from '../../../common/utlis/helper';
 
 export type PatientDocument = Patient & Document;
 
@@ -21,14 +24,14 @@ export class Patient {
   @Prop({ required: true, enum: ['male', 'female'] })
   gender: string;
 
-  @Prop({ required: true, unique: true })
+  @Prop({ required: true })
   identity: string; // National ID or Passport
 
-    @Prop({required: true})
-    nationality?: string;
-//
-    // @Prop()
-    // image?: string;
+  @Prop({ required: true })
+  nationality?: string;
+  //
+  // @Prop()
+  // image?: string;
 
   @Prop({
     type: String,
@@ -55,7 +58,6 @@ export class Patient {
   @Prop()
   notes?: string;
 
-
   @Prop({ default: true })
   isActive: boolean;
 
@@ -63,61 +65,63 @@ export class Patient {
   address?: string;
 
   @Prop({
-    type: {
-      name: { type: String, required: true },
-      phone: { type: String, required: true },
-      relationToPatient: { type: String, required: true },
-    },
-    required: false, // Emergency contact is optional
+    type: [
+      {
+        name: { type: String, required: true },
+        phone: { type: String, required: true },
+        relationToPatient: { type: String, required: true },
+      },
+    ],
+    default: [], // Default to an empty array
+    required: false, // Emergency contacts are optional
   })
-  emergencyContact?: {
+  emergencyContacts?: {
     name: string;
     phone: string;
     relationToPatient: string;
-  };
+  }[];
 
   @Prop({ type: [{ disease_name: String }], default: [] })
   ChronicDiseases?: { disease_name: string }[];
 
-    @Prop({type: [Insurance], default: []})
-    insurances?: Insurance[];
+  @Prop({ type: [Insurance], default: [] })
+  insurances?: Insurance[];
 
-    @Prop({type: [MedicalTestResult], default: []})
-    medicalTestResults?: MedicalTestResult[];// نتائج الاختبارات الطبية
+  @Prop({ type: [MedicalTestResult], default: [] })
+  medicalTestResults?: MedicalTestResult[]; // نتائج الاختبارات الطبية
 
-    @Prop({
-        type: [String],
-        default: [],
-      })
-      allergies: string[];//  الحساسية
-    
-      @Prop({
-        type: String,
-        default: 'Arabic',
-      })
-      preferredLanguage: string;// اللغة المفضلة 
-     
-      @Prop()
-      lifestyleFactors: string;//العوامل الحياتية (التدخين، استهلاك الكحول، ممارسة الرياضة)
-    
-      @Prop({
-        type: [String],
-        default: [],
-      })
-      familyMedicalHistory: string[]; // قائمة بالأمراض الوراثية في العائلة
-    
-      @Prop({ unique: true, required: true })
-      publicId: string;
- 
-      @Prop({})
-      Surgical_History: Date; // التاريخ الجراحي
-      
-      @Prop({})
-      Current_Medications: string; // الأدوية الحالية
-      
-      @Prop({ default: false })
-      Smoking: boolean; // التدخين
-      
+  @Prop({
+    type: [String],
+    default: [],
+  })
+  allergies: string[]; //  الحساسية
+
+  @Prop({
+    type: String,
+    default: 'Arabic',
+  })
+  preferredLanguage: string; // اللغة المفضلة
+
+  @Prop()
+  lifestyleFactors: string; //العوامل الحياتية (التدخين، استهلاك الكحول، ممارسة الرياضة)
+
+  @Prop({
+    type: [String],
+    default: [],
+  })
+  familyMedicalHistory: string[]; // قائمة بالأمراض الوراثية في العائلة
+
+  @Prop({ unique: true, required: true })
+  publicId: string;
+
+  @Prop({})
+  Surgical_History: Date; // التاريخ الجراحي
+
+  @Prop({})
+  Current_Medications: string; // الأدوية الحالية
+
+  @Prop({ default: false })
+  Smoking: boolean; // التدخين
 }
 
 export const PatientSchema = SchemaFactory.createForClass(Patient);

@@ -9,6 +9,8 @@ import {
   Query,
   Request,
   NotFoundException,
+  HttpException,
+  BadRequestException,
 } from '@nestjs/common';
 import { ClinicCollectionService } from './clinic-collection.service';
 import { CreateClinicCollectionDto } from './dto/create-clinic-collection.dto';
@@ -30,35 +32,27 @@ export class ClinicCollectionController {
     @Body() createClinicCollectionDto: CreateClinicCollectionDto,
     @Request() req,
   ) {
+    try{
     const userId = req.user.userId;
-    console.log('first', userId);
     const response = await this.userService.getUserById(userId);
-
-    if (!response.data || Array.isArray(response.data)) {
-      throw new NotFoundException('User not found or response is invalid');
-    }
-
     const user = response.data;
     const employeeId = user.employeeId;
-    console.log('Employee ID:', employeeId);
     const employee = await this.employeeService.getEmployeeById(
-      employeeId.toString(),
+      employeeId._id.toString(),
     );
-    console.log(0);
 
     if (!employee) {
       throw new NotFoundException('Employee not found');
     }
-    console.log(1);
-    // Get the companyId from the employee record
     const companyId = employee;
-    console.log('Company ID:', companyId.data.name);
-    console.log(2);
 
     return this.clinicCollectionService.createClinicCollection(
       createClinicCollectionDto,
     );
-  }
+  }catch(error){
+    if(error instanceof HttpException) throw error;
+    throw new BadRequestException('Failed to create clinic collection',error.message);
+  }}
 
   @Get()
   async getAllClinicCollections(
