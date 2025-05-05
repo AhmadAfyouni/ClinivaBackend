@@ -10,6 +10,7 @@ import {
   Request,
   NotFoundException,
   BadRequestException,
+  UseGuards,
 } from '@nestjs/common';
 import { ClinicCollectionService } from './clinic-collection.service';
 import { CreateClinicCollectionDto } from './dto/create-clinic-collection.dto';
@@ -17,8 +18,12 @@ import { UpdateClinicCollectionDto } from './dto/update-clinic-collection.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { UserService } from '../user/user.service';
 import { EmployeeService } from '../employee/employee.service';
+import { Permissions } from 'src/config/permissions.decorator';
 
+import { PermissionsEnum } from 'src/config/permission.enum';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 @Controller('cliniccollections')
+@UseGuards(PermissionsGuard)
 export class ClinicCollectionController {
   constructor(
     private readonly clinicCollectionService: ClinicCollectionService,
@@ -27,6 +32,7 @@ export class ClinicCollectionController {
   ) {}
 
   @Post()
+  @Permissions(PermissionsEnum.ADMIN)
   async createClinicCollection(
     @Body() createClinicCollectionDto: CreateClinicCollectionDto,
     @Request() req,
@@ -65,6 +71,7 @@ export class ClinicCollectionController {
   }
 
   @Get()
+  @Permissions(PermissionsEnum.ADMIN)
   async getAllClinicCollections(
     @Query() paginationDto: PaginationAndFilterDto,
     @Query() queryParams: any,
@@ -78,16 +85,19 @@ export class ClinicCollectionController {
   }
 
   @Get(':id')
+  @Permissions(PermissionsEnum.ADMIN)
   async getClinicCollectionById(@Param('id') id: string) {
     return this.clinicCollectionService.getClinicCollectionById(id);
   }
 
   @Get(':id/complex')
+  @Permissions(PermissionsEnum.ADMIN)
   async getMedicalComplexById(@Param('id') id: string) {
     return this.clinicCollectionService.getClinicCollectionById(id);
   }
 
   @Put(':id')
+  @Permissions(PermissionsEnum.ADMIN)
   async updateClinicCollection(
     @Param('id') id: string,
     @Body() updateClinicCollectionDto: UpdateClinicCollectionDto,
@@ -99,6 +109,7 @@ export class ClinicCollectionController {
   }
 
   @Delete(':id')
+  @Permissions(PermissionsEnum.ADMIN)
   async deleteClinicCollection(@Param('id') id: string) {
     return this.clinicCollectionService.deleteClinicCollection(id);
   }
