@@ -7,6 +7,7 @@ import { Role, RoleDocument } from '../role/schemas/role.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ApiGetResponse } from 'src/common/utlis/paginate';
+import { PermissionsEnum } from 'src/config/permission.enum';
 
 @Injectable()
 export class AuthService {
@@ -56,12 +57,17 @@ export class AuthService {
       .find({ _id: { $in: user.roleIds } })
       .lean();
     const permissions = roles.flatMap((role) => role.permissions || []);
+    const isAdmin = roles.some((r) => r.name?.toLowerCase() === 'admin');
+    if (isAdmin && !permissions.includes(PermissionsEnum.ADMIN)) {
+      permissions.push(PermissionsEnum.ADMIN);
+    }
     const uniquePermissions = [...new Set(permissions)];
 
     // Create JWT payload
     const payload = {
       sub: user._id.toString(),
       email: user.email,
+      permissions: uniquePermissions,
     };
 
     const accessToken = this.jwtService.sign(payload, { expiresIn: '30d' });

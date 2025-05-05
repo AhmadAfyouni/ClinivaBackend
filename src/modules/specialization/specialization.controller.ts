@@ -8,7 +8,8 @@ import {
   Put,
   Query,
   Request,
-  NotFoundException
+  NotFoundException,
+  UseGuards
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SpecializationService } from './specialization.service';
@@ -17,7 +18,11 @@ import { UpdateSpecializationDto } from './dto/update-specialization.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { UserService } from '../user/user.service';
 import { EmployeeService } from '../employee/employee.service';
+import { PermissionsEnum } from 'src/config/permission.enum';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/config/permissions.decorator';
 @Controller('specializations')
+@UseGuards(PermissionsGuard)
 export class SpecializationController {
   constructor(private readonly specializationService: SpecializationService,
     private readonly userService: UserService,
@@ -25,11 +30,13 @@ export class SpecializationController {
   ) {}
 
   @Post()
+    @Permissions(PermissionsEnum.ADMIN)
   async create(@Body() createSpecializationDto: CreateSpecializationDto) {
     return this.specializationService.createSpecialization(createSpecializationDto);
   }
 
   @Get()
+  @Permissions(PermissionsEnum.ADMIN)
   async findAll(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any) {
   
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
@@ -38,11 +45,13 @@ export class SpecializationController {
   }
 
   @Get(':id')
+  @Permissions(PermissionsEnum.ADMIN)
   async findOne(@Param('id') id: string) {
     return this.specializationService.getSpecializationById(id);
   }
 
   @Put(':id')
+  @Permissions(PermissionsEnum.ADMIN)
   async updateRole(
     @Param('id') id: string,
     @Body() updateRoleDto: UpdateSpecializationDto,
@@ -50,6 +59,7 @@ export class SpecializationController {
     return this.specializationService.updateSpecialization(id, updateRoleDto);
   }
   @Delete(':id')
+  @Permissions(PermissionsEnum.ADMIN)
   async delete(@Param('id') id: string) {
     return this.specializationService.deleteSpecialization(id);
   }

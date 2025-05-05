@@ -1,20 +1,25 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, UseGuards } from '@nestjs/common';
 import { EmployeeService } from './employee.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
-
+import { PermissionsEnum } from 'src/config/permission.enum';
+import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { Permissions } from 'src/config/permissions.decorator';
 @Controller('employees')
+@UseGuards(PermissionsGuard)
 export class EmployeeController {
   constructor(private readonly employeeService: EmployeeService) {
   }
 
   @Post()
+  @Permissions(PermissionsEnum.ADMIN)
   async createEmployee(@Body() createEmployeeDto: CreateEmployeeDto) {
     return this.employeeService.createEmployee(createEmployeeDto);
   }
 
   @Get()
+  @Permissions(PermissionsEnum.ADMIN)
   async getAllEmployees(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any) {
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
 
@@ -22,21 +27,25 @@ export class EmployeeController {
   }
 
   @Get('without-user')
+  @Permissions(PermissionsEnum.ADMIN)
   async getEmployeesWithoutUser() {
     return this.employeeService.getEmployeesWithoutUser();
   }
 
   @Get(':id')
+    @Permissions(PermissionsEnum.ADMIN)
   async getEmployeeById(@Param('id') id: string) {
     return this.employeeService.getEmployeeById(id);
   }
 
   @Put(':id')
+  @Permissions(PermissionsEnum.ADMIN)
   async updateEmployee(@Param('id') id: string, @Body() updateEmployeeDto: UpdateEmployeeDto) {
     return this.employeeService.updateEmployee(id, updateEmployeeDto);
   }
 
   @Delete(':id')
+    @Permissions(PermissionsEnum.ADMIN)
   async deleteEmployee(@Param('id') id: string) {
     return this.employeeService.deleteEmployee(id);
   }
