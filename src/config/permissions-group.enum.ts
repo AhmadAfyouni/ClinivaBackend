@@ -86,9 +86,9 @@ export const PermissionsGroupMap: Record<string, PermissionsEnum[]> = {
   MEDICAL_RECORD_ACCESS: [
     PermissionsEnum.MEDICAL_RECORD_VIEW,
     PermissionsEnum.MEDICAL_RECORD_UPDATE,
+    PermissionsEnum.MEDICAL_RECORD_DELETE,
+    PermissionsEnum.MEDICAL_RECORD_CREATE,
   ],
 
-  REPORTS_ACCESS: [
-    PermissionsEnum.REPORTS_VIEW,
-  ],
+  REPORTS_ACCESS: [PermissionsEnum.REPORTS_VIEW],
 };

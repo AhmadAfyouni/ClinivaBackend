@@ -62,6 +62,12 @@ export enum PermissionsEnum {
 
   MEDICAL_RECORD_VIEW = 'medical_record_view',
   MEDICAL_RECORD_UPDATE = 'medical_record_update',
+  MEDICAL_RECORD_DELETE = 'medical_record_delete',
+  MEDICAL_RECORD_CREATE = 'medical_record_create',
 
+  SERVICE_CREATE = 'service_create',
+  SERVICE_UPDATE = 'service_update',
+  SERVICE_DELETE = 'service_delete',
+  
   REPORTS_VIEW = 'reports_view',
 }
