@@ -204,6 +204,7 @@ export class AppointmentService {
     paginationDto: PaginationAndFilterDto,
     filters: any,
   ) {
+    try{
     let { page, limit, allData, sortBy, order } = paginationDto;
 
     // تحويل الباجينيشين إلى أرقام
@@ -325,6 +326,10 @@ export class AppointmentService {
     );
 
     return result;
+  }catch(error){
+    console.log(error)
+    throw new BadRequestException(error)
+  }
   }
   private async viewWonerAppointment(filters: any) {
     console.log("@@",filters)
@@ -346,9 +351,11 @@ try{
 }
 catch(error){
     console.log(error)
+    throw new BadRequestException(error.message)
 }
   }
   async getAppointmentById(id: string): Promise<ApiGetResponse<Appointment>> {
+    try{
     const appointment = await this.appointmentModel
       .findById(id)
       .populate('patient clinic doctor');
@@ -358,12 +365,17 @@ catch(error){
       message: 'Appointment retrieved successfully',
       data: appointment,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error.message)
+    }
   }
 
   async updateAppointment(
     id: string,
     updateAppointmentDto: UpdateAppointmentDto,
   ): Promise<ApiGetResponse<Appointment>> {
+    try{
     const updatedAppointment = await this.appointmentModel
       .findByIdAndUpdate(id, updateAppointmentDto, { new: true })
       .exec();
@@ -374,18 +386,30 @@ catch(error){
       message: 'Appointment update successfully',
       data: updatedAppointment,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error.message)
+    }
   }
 
-  async deleteAppointment(id: string): Promise<ApiGetResponse<Appointment>> {
-    const deletedAppointment = await this.appointmentModel
-      .findByIdAndDelete(id)
-      .exec();
-    if (!deletedAppointment)
-      throw new NotFoundException('Appointment not found');
-    return {
-      success: true,
-      message: 'Appointment remove successfully',
-      data: {} as Appointment,
-    };
+  
+async deleteAppointment(id: string): Promise<ApiGetResponse<Appointment>> {
+  try{
+  const appointment = await this.appointmentModel.findById(id).exec();
+  if (!appointment) throw new NotFoundException('Appointment not found');
+
+  appointment.deleted = true;
+  const deletedAppointment = await appointment.save();
+
+  return {
+    success: true,
+    message: 'Appointment marked as deleted successfully',
+    data: deletedAppointment,
+  };  
+  }catch(error){
+    console.log(error)
+    throw new BadRequestException(error.message)
   }
+}
+
 }

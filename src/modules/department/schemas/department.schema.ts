@@ -53,6 +53,9 @@ export class Department {
 
   @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
   PIC: Types.ObjectId;
+
+  @Prop({ type: Boolean, default: false })
+  deleted: boolean;
 }
 
 export const DepartmentSchema = SchemaFactory.createForClass(Department);

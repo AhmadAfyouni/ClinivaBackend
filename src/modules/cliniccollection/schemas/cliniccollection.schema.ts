@@ -88,6 +88,9 @@ export class ClinicCollection {
 
     @Prop({ unique: true, required: true })
     publicId: string;
+    
+    @Prop({ type: Boolean, default: false })
+    deleted: boolean;   
 }
 
 export const ClinicCollectionSchema = SchemaFactory.createForClass(ClinicCollection);

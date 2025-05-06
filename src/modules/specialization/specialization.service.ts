@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import {
@@ -26,6 +26,7 @@ export class SpecializationService {
   async createSpecialization(
     createSpecializationDto: CreateSpecializationDto,
   ): Promise<ApiGetResponse<Specialization>> {
+    try{
     const publicId = await generateUniquePublicId(this.specializationModel, 'sp');
     const newSpecialization = new this.specializationModel({
       ...createSpecializationDto,
@@ -37,18 +38,22 @@ export class SpecializationService {
       message: 'Specialization created successfully',
       data: savedSpecialization,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
   async getAllSpecializations(
     paginationDto: PaginationAndFilterDto,
     filters: any,
   ) {
+    try{
     let { page, limit, allData, sortBy, order } = paginationDto;
 
     // Convert page & limit to numbers
     page = Number(page) || 1;
     limit = Number(limit) || 10;
-
     const sortField: string = sortBy ?? 'id';
     const sort: Record<string, number> = {
       [sortField]: order === 'asc' ? 1 : -1,
@@ -56,6 +61,13 @@ export class SpecializationService {
     
     const searchConditions: any[] = [];
     const filterConditions: any[] = [];
+    // By default, filter out deleted specializations unless explicitly requested
+    if (!filters.hasOwnProperty('deleted')) {
+      filterConditions.push({ deleted: false });
+    } else {
+      await applyBooleanFilter(filters, 'deleted', filterConditions);
+    }
+    
   await applyBooleanFilter(filters, 'isActive', filterConditions)
   // تحقق إذا كان يوجد نص للبحث في الحقول النصية (name, email)
   if (filters.search) {
@@ -124,11 +136,16 @@ export class SpecializationService {
     });
 
     return result;
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
   async getSpecializationById(
     id: string,
   ): Promise<ApiGetResponse<Specialization>> {
+    try{
     const specialization = await this.specializationModel.findById(id).exec();
     if (!specialization)
       throw new NotFoundException('Specialization not found');
@@ -159,12 +176,17 @@ export class SpecializationService {
       message: 'Specialization retrieved successfully',
       data: specObj,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
   async updateSpecialization(
     id: string,
     updateSpecializationDto: UpdateSpecializationDto,
   ): Promise<ApiGetResponse<Specialization>> {
+    try{
     const updatedSpecialization = await this.specializationModel
       .findByIdAndUpdate(id, updateSpecializationDto, { new: true })
       .exec();
@@ -176,20 +198,29 @@ export class SpecializationService {
       message: 'Specialization updated successfully',
       data: updatedSpecialization,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
-  async deleteSpecialization(
-    id: string,
-  ): Promise<ApiGetResponse<Specialization>> {
-    const deletedSpecialization = await this.specializationModel
-      .findByIdAndDelete(id)
-      .exec();
-    if (!deletedSpecialization)
-      throw new NotFoundException('Specialization not found');
+async deleteSpecialization(id: string): Promise<ApiGetResponse<Specialization>> {
+    try{
+    const specialization = await this.specializationModel.findById(id).exec();
+    if (!specialization) throw new NotFoundException('Specialization not found');
+
+    specialization.deleted = true;
+    const deletedSpecialization = await specialization.save();
+
     return {
       success: true,
-      message: 'Specialization removed successfully',
-      data: {} as Specialization,
+      message: 'Specialization marked as deleted successfully',
+      data: deletedSpecialization,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
+
 }

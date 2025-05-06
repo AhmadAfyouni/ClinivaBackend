@@ -1,4 +1,5 @@
 export enum PermissionsEnum {
+  NOT_ALLOW = 'not_allow',
   ADMIN = 'admin',
 
   USER_VIEW = 'user_view',
