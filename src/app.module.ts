@@ -24,6 +24,7 @@ import { APP_GUARD } from '@nestjs/core';
 import { PermissionsGuard } from './common/guards/permissions.guard';
 import { SpecializationModule } from './modules/specialization/specialization.module';
 import { ServiceModule } from './modules/service/service.module';
+import { PermissionModule } from './modules/permission/permission.module';
 
 // Security & Middleware
 
@@ -50,6 +51,7 @@ import { ServiceModule } from './modules/service/service.module';
     MedicalRecordModule,
     SpecializationModule,
     ServiceModule,
+    PermissionModule,
   ],
   providers: [
     {

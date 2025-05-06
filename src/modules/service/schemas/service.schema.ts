@@ -20,8 +20,12 @@ export class Service extends Document {
 
   @Prop({ default: true })
   isActive: boolean;
-    @Prop({ unique: true, required: true })
-      publicId: string;
+
+  @Prop({ unique: true, required: true })
+    publicId: string;
+
+  @Prop({ type: Boolean, default: false })
+  deleted: boolean;
 }
 
 export const ServiceSchema = SchemaFactory.createForClass(Service);

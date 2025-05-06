@@ -66,6 +66,9 @@ export class MedicalRecord {
   recordStatus: string;  // حالة السجل (مسودة أو نهائي)
   @Prop({ unique: true, required: true })
       publicId: string;
+
+  @Prop({ type: Boolean, default: false })
+    deleted: boolean;
 }
 
 export const MedicalRecordSchema = SchemaFactory.createForClass(MedicalRecord);

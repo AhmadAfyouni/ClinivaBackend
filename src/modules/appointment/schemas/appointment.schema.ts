@@ -39,6 +39,9 @@ export class Appointment {
 
   @Prop({ type: Boolean, default: false })
   reminderSent: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  deleted: boolean;
 }
 
 export const AppointmentSchema = SchemaFactory.createForClass(Appointment);

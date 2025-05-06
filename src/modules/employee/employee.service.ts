@@ -40,6 +40,7 @@ export class EmployeeService {
   async createEmployee(
     createEmployeeDto: CreateEmployeeDto,
   ): Promise<ApiGetResponse<Employee>> {
+    try{
     const publicId = await generateUniquePublicId(this.employeeModel, 'emp');
     const newEmployee = new this.employeeModel({
       ...createEmployeeDto,
@@ -51,9 +52,14 @@ export class EmployeeService {
       message: 'Employee created successfully',
       data: savedEmployee,
     };
+  }catch(error){
+    console.log(error)
+    throw new BadRequestException(error)
+  }
   }
 
   async getAllEmployees(paginationDto: PaginationAndFilterDto, filters: any) {
+    try{
     let { page, limit, allData, sortBy, order } = paginationDto;
 
     page = Number(page) || 1;
@@ -168,9 +174,14 @@ export class EmployeeService {
       finalFilter,
       sort,
     );
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
   async getEmployeeById(id: string): Promise<ApiGetResponse<Employee>> {
+    try{
     const employee = await this.employeeModel
       .findById(id)
       .populate([
@@ -187,12 +198,17 @@ export class EmployeeService {
       message: 'Employee retrieved successfully',
       data: employee,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
   async updateEmployee(
     id: string,
     updateEmployeeDto: UpdateEmployeeDto,
   ): Promise<ApiGetResponse<Employee>> {
+    try{
     const updatedEmployee = await this.employeeModel
       .findByIdAndUpdate(id, updateEmployeeDto, { new: true })
       .exec();
@@ -203,21 +219,33 @@ export class EmployeeService {
       message: 'Employee update successfully',
       data: updatedEmployee,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
-  async deleteEmployee(id: string): Promise<ApiGetResponse<Employee>> {
-    const deletedEmployee = await this.employeeModel
-      .findByIdAndDelete(id)
-      .exec();
-    if (!deletedEmployee) throw new NotFoundException('Employee not found');
+async deleteEmployee(id: string): Promise<ApiGetResponse<Employee>> {
+    try{
+    const employee = await this.employeeModel.findById(id).exec();
+    if (!employee) throw new NotFoundException('Employee not found');
+
+    employee.deleted = true;
+    const deletedEmployee = await employee.save();
+
     return {
       success: true,
-      message: 'Employee remove successfully',
-      data: {} as Employee,
-    };
+      message: 'Employee marked as deleted successfully',
+      data: deletedEmployee,
+    };  
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
   async getEmployeesWithoutUser(): Promise<ApiGetResponse<Employee[]>> {
+    try{
     // fetch all user-linked employee IDs
     const users = await this.userModel.find().select('employeeId').exec();
     const userEmpIds = users.map((u) => u.employeeId.toString());
@@ -232,5 +260,9 @@ export class EmployeeService {
       message: 'Employees without user retrieved successfully',
       data: employees,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 }

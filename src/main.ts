@@ -1,12 +1,16 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { Logger, ValidationPipe } from '@nestjs/common';
+import { APP_GUARD } from '@nestjs/core';
+// import { PermissionsGuard } from './config/permissions.guard';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { GlobalExceptionFilter } from './common/global-exception.filter';
+import { ResponseInterceptor } from './common/response.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
   app.useGlobalFilters(new GlobalExceptionFilter());           // Apply globally
+  // app.useGlobalInterceptors(new ResponseInterceptor());     // Global response transformer
   app.setGlobalPrefix('api/v1');                              // Set Global API Prefix (e.g., /api/v1/)
 
  

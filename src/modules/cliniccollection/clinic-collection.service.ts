@@ -229,18 +229,19 @@ console.log(paginationDto.order)
       data: updatedClinicCollection,
     };
   }
-
-  async deleteClinicCollection(
-    id: string,
-  ): Promise<ApiGetResponse<ClinicCollection>> {
-    const deletedClinicCollection =
-      await this.clinicCollectionModel.findByIdAndDelete(id);
-    if (!deletedClinicCollection)
-      throw new NotFoundException('Clinic Collection not found');
-    return {
-      success: true,
-      message: 'Clinic Collection remove successfully',
-      data: {} as ClinicCollection,
-    };
-  }
+  
+  async deleteClinicCollection(id: string): Promise<ApiGetResponse<ClinicCollection>> {
+      const clinicCollection = await this.clinicCollectionModel.findById(id).exec();
+      if (!clinicCollection) throw new NotFoundException('Clinic Collection not found');
+  
+      clinicCollection.deleted = true;
+      const deletedClinicCollection = await clinicCollection.save();
+  
+      return {
+        success: true,
+        message: 'Clinic Collection marked as deleted successfully',
+        data: deletedClinicCollection,
+      };  
+    }
+  
 }
