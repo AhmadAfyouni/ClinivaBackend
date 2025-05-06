@@ -188,26 +188,28 @@ export class UserService {
     id: string,
     updateUserDto: UpdateUserDto,
   ): Promise<ApiGetResponse<User>> {
-    try{
-    const updatedUser = await this.userModel
+    try {
+      if (updateUserDto.password) {
+        const salt = await bcrypt.genSalt();
+        updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
+      }
+
+      const updatedUser = await this.userModel
       .findByIdAndUpdate(id, updateUserDto, { new: true })
       .exec();
     if (!updatedUser) throw new NotFoundException('User not found');
 
-    // Log the update action
     try {
       const logEntry: CreateLogDto = {
         userId: updatedUser._id.toString(),
         action: SystemLogAction.USER_PROFILE_UPDATE,
-        details: { updatedFields: Object.keys(updateUserDto) } // Log which fields were in the DTO
+        details: { updatedFields: Object.keys(updateUserDto) } 
       };
-      // Optional: Add ipAddress and userAgent if available from the request context
       // logEntry.ipAddress = request?.ip;
       // logEntry.userAgent = request?.headers?.['user-agent'];
       await this.systemLogService.createLog(logEntry);
     } catch (logError) {
       console.error('Failed to create system log for user update:', logError);
-      // Decide if you want to throw an error or just log it and continue
     }
 
     return {
@@ -230,11 +232,10 @@ export class UserService {
     user.isActive = false;
     const deletedUser = await user.save();
 
-    // Log the delete action
     try {
       const logEntry: CreateLogDto = {
         userId: deletedUser._id.toString(),
-        action: SystemLogAction.USER_PROFILE_UPDATE, // Or a more specific USER_DELETE_SOFT if you add it to the enum
+        action: SystemLogAction.USER_PROFILE_UPDATE, 
         details: { reason: 'User soft deleted' }
       };
       await this.systemLogService.createLog(logEntry);
