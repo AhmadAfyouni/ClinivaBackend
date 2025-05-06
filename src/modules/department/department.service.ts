@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Department, DepartmentDocument } from './schemas/department.schema';
@@ -27,6 +27,7 @@ export class DepartmentService {
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
   ): Promise<ApiGetResponse<Department>> {
+    try{
     const publicId = await generateUniquePublicId(this.departmentModel, 'dep');
     
     const newDepartment = new this.departmentModel({
@@ -39,8 +40,13 @@ export class DepartmentService {
       message: 'Department created successfully',
       data: savedDepartment,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
   async getAllDepartments(paginationDto: PaginationAndFilterDto, filters: any, ) {
+    try{
     let { page, limit, allData, sortBy, order } = paginationDto;
   
     // Convert page & limit to numbers
@@ -104,6 +110,10 @@ export class DepartmentService {
     }
   
     return result;
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
   async addStatsToDepartment(department: any) {
     // console.log(`🔍 Department: ${department.name} (ID: ${department._id})`);
@@ -152,6 +162,7 @@ export class DepartmentService {
   
   
  async getDepartmentById(id: string): Promise<ApiGetResponse<any>> {
+  try{
   const department = await this.departmentModel
     .findById(id)
     .populate(['clinicCollectionId', 'specializations'])
@@ -187,6 +198,10 @@ export class DepartmentService {
       countSpecializations,      // from M-test-1
     },
   };
+  }catch(error){
+    console.log(error)
+    throw new BadRequestException(error)
+  }
 }
 
 
@@ -194,6 +209,7 @@ export class DepartmentService {
     id: string,
     updateDepartmentDto: UpdateDepartmentDto,
   ): Promise<ApiGetResponse<Department>> {
+    try{
     const updatedDepartment = await this.departmentModel
       .findByIdAndUpdate(id, updateDepartmentDto, { new: true })
       .populate(['clinicCollectionId']);
@@ -203,21 +219,35 @@ export class DepartmentService {
       message: 'Department update successfully',
       data: updatedDepartment,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
-  async deleteDepartment(id: string): Promise<ApiGetResponse<Department>> {
-    const deletedDepartment = await this.departmentModel.findByIdAndDelete(id);
-    if (!deletedDepartment) throw new NotFoundException('Department not found');
+async deleteDepartment(id: string): Promise<ApiGetResponse<Department>> {
+    try{
+    const department = await this.departmentModel.findById(id).exec();
+    if (!department) throw new NotFoundException('Department not found');
+
+    department.deleted = true;
+    const deletedDepartment = await department.save();
+
     return {
       success: true,
-      message: 'Department remove successfully',
-      data: {} as Department,
-    };
-  }
+      message: 'Department marked as deleted successfully',
+      data: deletedDepartment,
+    };  
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
+  } 
 
   async getCountByClinicCollectionId(
     clinicCollectionId: string,
   ): Promise<ApiGetResponse<{ count: number }>> {
+    try{
     const count = await this.departmentModel
       .countDocuments({ clinicCollectionId })
       .exec();
@@ -227,5 +257,10 @@ export class DepartmentService {
       message: 'Department count retrieved successfully',
       data: { count },
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
+    
   }
 }

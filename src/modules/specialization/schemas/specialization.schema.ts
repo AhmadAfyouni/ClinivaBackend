@@ -27,8 +27,12 @@ export class Specialization {
 
   @Prop({ required: true, default: true })
   isActive: boolean; // هل التخصص نشط؟
+
   @Prop({ unique: true, required: true })
   publicId: string;
+
+  @Prop({ type: Boolean, default: false })
+    deleted: boolean;
 }
 
 export const SpecializationSchema = SchemaFactory.createForClass(Specialization);

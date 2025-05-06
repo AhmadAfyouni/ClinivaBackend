@@ -60,4 +60,13 @@ export class UserController {
   async changePassword(@Param('id') id: string, @Body() dto: ChangePasswordDto) {
     return { message: await this.userService.changePassword(id, dto.currentPassword, dto.newPassword) };
   }
+
+  @Put(':id/active-status')
+  @Permissions(PermissionsEnum.ADMIN)
+  async changeActiveStatus(
+    @Param('id') id: string,
+    @Body('isActive') isActive: boolean,
+  ) {
+    return this.userService.changeActiveStatus(id, isActive);
+  }
 }

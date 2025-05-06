@@ -39,6 +39,6 @@ export class ServiceController {
   @Permissions(PermissionsEnum.ADMIN)
 
   async remove(@Param('id') id: string) {
-    return await this.serviceService.remove(id);
+    return await this.serviceService.deleteService(id);
   }
 }

@@ -11,7 +11,7 @@ import { Service } from './schemas/service.schema';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { Clinic } from '../clinic/schemas/clinic.schema';
 import { Employee } from '../employee/schemas/employee.schema';
-import { paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 
@@ -179,22 +179,24 @@ export class ServiceService {
     }
   }
 
-  async remove(id: string): Promise<any> {
-    try {
-      const result = await this.serviceModel.findByIdAndDelete(id).exec();
-      if (!result) {
-        throw new NotFoundException(`Service with ID ${id} not found`);
-      }
-      return {
-        success: true,
-        message: 'Service removed successfully',
-        data: {} as Service,
-      };
-    } catch (error) {
-      if (error instanceof HttpException) {
-        throw error;
-      }
-      throw new InternalServerErrorException('Failed to remove service');
+
+async deleteService(id: string): Promise<ApiGetResponse<Service>> {
+    try{
+    const service = await this.serviceModel.findById(id).exec();
+    if (!service) throw new NotFoundException('Service not found');
+
+    service.deleted = true;
+    const deletedService = await service.save();
+
+    return {
+      success: true,
+      message: 'Service marked as deleted successfully',
+      data: deletedService,
+    };  
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
     }
   }
+
 }

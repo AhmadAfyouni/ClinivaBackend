@@ -126,6 +126,9 @@ export class Employee {
   specializations: Types.ObjectId[]; // قائمة بمعرفات الاختصاصات المرتبطة بالعيادة
   @Prop({ unique: true, required: true })
   publicId: string;
+
+  @Prop({ type: Boolean, default: false })
+  deleted: boolean;
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);

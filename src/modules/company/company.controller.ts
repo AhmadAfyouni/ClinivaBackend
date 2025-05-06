@@ -44,7 +44,7 @@ export class CompanyController {
   }
 
   @Delete(':id')
-  @Permissions(PermissionsEnum.ADMIN)
+  @Permissions(PermissionsEnum.NOT_ALLOW)
   async remove(@Param('id') id: string) {
     return this.companyService.remove(id);
   }

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Role, RoleDocument } from './schemas/role.schema';
@@ -14,6 +14,7 @@ export class RoleService {
   async createRole(
     createRoleDto: CreateRoleDto,
   ): Promise<ApiGetResponse<Role>> {
+    try{
     const { name, permissions = [] } = createRoleDto;
 
     const uniquePermissions = Array.from(new Set(permissions));
@@ -29,9 +30,14 @@ export class RoleService {
       message: 'role created successfully',
       data: savedRole,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
   async getAllRoles(paginationDto: PaginationAndFilterDto, filters: any) {
+    try{
     let { page, limit, allData, sortBy, order } = paginationDto;
 
     page = Number(page) || 1;
@@ -43,9 +49,14 @@ export class RoleService {
     };
 
     return paginate(this.roleModel, [], page, limit, allData, filters, sort);
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
   async getRoleById(id: string): Promise<ApiGetResponse<Role>> {
+    try{
     const role = await this.roleModel.findById(id);
     if (!role) throw new NotFoundException('Role not found');
     return {
@@ -53,12 +64,17 @@ export class RoleService {
       message: 'role retrieved successfully',
       data: role,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
   async updateRole(
     id: string,
     updateRoleDto: UpdateRoleDto,
   ): Promise<ApiGetResponse<Role>> {
+    try{
     const role = await this.roleModel.findById(id).exec();
     if (!role) throw new NotFoundException('Role not found');
 
@@ -71,14 +87,23 @@ export class RoleService {
       message: 'Role update successfully',
       data: savedRole,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
   async deleteRole(id: string): Promise<ApiGetResponse<Role>> {
+    try{
     await this.roleModel.findByIdAndDelete(id);
     return {
       success: true,
       message: 'Role remove successfully',
       data: {} as Role,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 }

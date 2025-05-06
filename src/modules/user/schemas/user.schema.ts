@@ -40,6 +40,11 @@ export class User {
   @Prop({ unique: true, required: true })
   publicId: string;
 
+  @Prop({ required: true,default:"clinic",enum:["company","complex","department","clinic"] })
+  plan: string;
+
+  @Prop({ type: Boolean, default: false })
+  deleted: boolean;
 }
 
 

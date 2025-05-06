@@ -8,6 +8,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { JwtStrategy } from './jwtstrategy';
 import { RoleModule } from '../role/role.module';
+import { SystemLogModule } from '../SystemLogAction/system-log.module'; // Import SystemLogModule
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { RoleModule } from '../role/role.module';
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
     UserModule, // Import the User module
     RoleModule, // Import the Role module
+    SystemLogModule, // Add SystemLogModule to imports
   ],
   controllers: [AuthController],
   providers: [AuthService, JwtStrategy], // Services

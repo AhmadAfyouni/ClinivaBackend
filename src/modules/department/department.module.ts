@@ -26,7 +26,7 @@ import { RoleModule } from '../role/role.module';
     { name: User.name, schema: UserSchema },
   ]),forwardRef(() => ClinicModule),forwardRef(() => AppointmentModule),forwardRef(() => MedicalRecordModule),forwardRef(() => ClinicCollectionModule),forwardRef(() => UserModule),forwardRef(() => RoleModule),],
   controllers: [DepartmentController],
-  providers: [DepartmentService, EmployeeService, UserService],
+  providers: [DepartmentService, EmployeeService],
   exports: [DepartmentService],
 })
 export class DepartmentModule {
