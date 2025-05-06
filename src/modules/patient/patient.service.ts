@@ -62,6 +62,7 @@ export class PatientService {
   }
 
   async getAllPatients(paginationDto: PaginationAndFilterDto, filters: any) {
+    try{
     let { page, limit, allData, sortBy, order } = paginationDto;
 
     // Convert page & limit to numbers
@@ -133,9 +134,14 @@ export class PatientService {
     }
 
     return result;
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
   async getPatientById(id: string): Promise<ApiGetResponse<Patient>> {
+    try{
     const patient = await this.patientModel.findById(id).exec();
     if (!patient) throw new NotFoundException('Patient not found');
     return {
@@ -143,12 +149,17 @@ export class PatientService {
       message: 'patient retrieved successfully',
       data: patient,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
   async updatePatient(
     id: string,
     updatePatientDto: UpdatePatientDto,
   ): Promise<ApiGetResponse<Patient>> {
+    try{
     const updatedPatient = await this.patientModel
       .findByIdAndUpdate(id, updatePatientDto, { new: true })
       .exec();
@@ -158,15 +169,29 @@ export class PatientService {
       message: 'Patient update successfully',
       data: updatedPatient,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
-  async deletePatient(id: string): Promise<ApiGetResponse<Patient>> {
-    const deletedPatient = await this.patientModel.findByIdAndDelete(id).exec();
-    if (!deletedPatient) throw new NotFoundException('Patient not found');
+async deletePatient(id: string): Promise<ApiGetResponse<Patient>> {
+    try{
+    const patient = await this.patientModel.findById(id).exec();
+    if (!patient) throw new NotFoundException('Patient not found');
+
+    patient.deleted = true;
+    const deletedPatient = await patient.save();
+
     return {
       success: true,
-      message: 'Patient remove successfully',
-      data: {} as Patient,
-    };
+      message: 'Patient marked as deleted successfully',
+      data: deletedPatient,
+    };  
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
+
 }

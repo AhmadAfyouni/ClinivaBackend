@@ -7,16 +7,19 @@ import { PERMISSIONS_KEY } from '../../config/permissions.decorator';
 export class PermissionsGuard implements CanActivate {
   constructor(private reflector: Reflector) {
   }
-
   canActivate(context: ExecutionContext): boolean {
+    console.log("@1@PermissionsGuard");
     // Get the required permissions from the custom decorator (if any)
     const requiredPermissions =
       this.reflector.getAllAndOverride<PermissionsEnum[]>(PERMISSIONS_KEY, [
         context.getHandler(),
         context.getClass(),
       ]);
+    console.log("@2@requiredPermissions",requiredPermissions);
     // If no specific permissions are required, allow access (no auto-inference)
     if (!requiredPermissions || requiredPermissions.length === 0) {
+      console.log("@3@PermissionsGuard");
+
       return true;
     }
 
@@ -24,6 +27,7 @@ export class PermissionsGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     if (!user) {
+    console.log("@4@PermissionsGuard");
       // No user found (not logged in), deny access
       return false;
     }
@@ -34,6 +38,7 @@ export class PermissionsGuard implements CanActivate {
 
     // Allow everything if user has ADMIN permissions
     if (userPermissions.includes(PermissionsEnum.ADMIN)) {
+      console.log("@5@PermissionsGuard");
       return true;
     }
 

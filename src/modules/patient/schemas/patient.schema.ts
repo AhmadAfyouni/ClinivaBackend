@@ -122,6 +122,9 @@ export class Patient {
 
   @Prop({ default: false })
   Smoking: boolean; // التدخين
+
+  @Prop({ type: Boolean, default: false })
+  deleted: boolean;
 }
 
 export const PatientSchema = SchemaFactory.createForClass(Patient);

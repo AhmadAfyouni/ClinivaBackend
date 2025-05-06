@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   HttpException,
   Injectable,
   InternalServerErrorException,
@@ -52,6 +53,7 @@ export class ClinicService {
   async createClinic(
     createClinicDto: CreateClinicDto,
   ): Promise<ApiGetResponse<Clinic>> {
+    try{
     const publicId = await generateUniquePublicId(this.clinicModel, 'cli');
 
     const newClinic = new this.clinicModel({
@@ -64,8 +66,13 @@ export class ClinicService {
       message: 'Clinic created successfully',
       data: savedClinic,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error.message)
+    }
   }
   async getAllClinics(paginationDto: PaginationAndFilterDto, filters: any) {
+    try{
     let { page, limit, allData, sortBy, order } = paginationDto;
 
     page = Number(page) || 1;
@@ -140,6 +147,10 @@ export class ClinicService {
     }
 
     return result;
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error.message)
+    }
   }
   async addStatsToClinic(clinic: any) {
     console.log(`🔍 Clinic: ${clinic.name} (ID: ${clinic._id})`);
@@ -251,6 +262,7 @@ export class ClinicService {
     id: string,
     updateClinicDto: UpdateClinicDto,
   ): Promise<ApiGetResponse<Clinic>> {
+    try{
     const updatedClinic = await this.clinicModel
       .findByIdAndUpdate(id, updateClinicDto, { new: true })
       .populate(['departmentId']);
@@ -260,17 +272,33 @@ export class ClinicService {
       message: 'Clinic update successfully',
       data: updatedClinic,
     };
+    }catch(error){
+      console.log(error)
+      throw new BadRequestException(error.message)
+    }
   }
 
-  async deleteClinic(id: string): Promise<ApiGetResponse<Clinic>> {
-    const deletedClinic = await this.clinicModel.findByIdAndDelete(id);
-    if (!deletedClinic) throw new NotFoundException('Clinic not found');
-    return {
-      success: true,
-      message: 'Clinic remove successfully',
-      data: {} as Clinic,
-    };
+  
+async deleteClinic(id: string): Promise<ApiGetResponse<Clinic>> {
+  try{
+  const clinic = await this.clinicModel.findById(id).exec();
+  if (!clinic) throw new NotFoundException('Clinic not found');
+
+  clinic.deleted = true;
+  const deletedClinic = await clinic.save();
+
+  return {
+    success: true,
+    message: 'Clinic marked as deleted successfully',
+    data: deletedClinic,
+  };  
+  }catch(error){
+    console.log(error)
+    throw new BadRequestException(error.message)
   }
+}
+
+
   async getCountByClinicCollectionId(
     clinicCollectionId: string,
   ): Promise<ApiGetResponse<{ count: number }>> {
