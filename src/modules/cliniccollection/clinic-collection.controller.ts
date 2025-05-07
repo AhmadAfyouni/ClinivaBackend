@@ -38,27 +38,31 @@ export class ClinicCollectionController {
     @Body() createClinicCollectionDto: CreateClinicCollectionDto,
     @Request() req,
   ) {
-    try{
-    const userId = req.user.userId;
-    const response = await this.userService.getUserById(userId);
-    const user = response.data;
-    const employeeId = user.employeeId;
-    const employee = await this.employeeService.getEmployeeById(
-      employeeId._id.toString(),
-    );
+    try {
+      const userId = req.user.userId;
+      const response = await this.userService.getUserById(userId);
+      const user = response.data;
+      const employeeId = user.employeeId;
+      const employee = await this.employeeService.getEmployeeById(
+        employeeId._id.toString(),
+      );
 
-    if (!employee) {
-      throw new NotFoundException('Employee not found');
+      if (!employee) {
+        throw new NotFoundException('Employee not found');
+      }
+      const companyId = employee;
+
+      return this.clinicCollectionService.createClinicCollection(
+        createClinicCollectionDto,
+      );
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new BadRequestException(
+        'Failed to create clinic collection',
+        error.message,
+      );
     }
-    const companyId = employee;
-
-    return this.clinicCollectionService.createClinicCollection(
-      createClinicCollectionDto,
-    );
-  }catch(error){
-    if(error instanceof HttpException) throw error;
-    throw new BadRequestException('Failed to create clinic collection',error.message);
-  }}
+  }
 
   @Get()
   @Permissions(PermissionsEnum.ADMIN)

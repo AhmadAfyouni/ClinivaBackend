@@ -22,7 +22,7 @@ export class Service extends Document {
   isActive: boolean;
 
   @Prop({ unique: true, required: true })
-    publicId: string;
+  publicId: string;
 
   @Prop({ type: Boolean, default: false })
   deleted: boolean;

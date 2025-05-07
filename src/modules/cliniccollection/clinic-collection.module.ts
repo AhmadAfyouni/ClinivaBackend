@@ -9,9 +9,15 @@ import {
 import { UserModule } from '../user/user.module';
 import { EmployeeModule } from '../employee/employee.module';
 import { Employee, EmployeeSchema } from '../employee/schemas/employee.schema';
-import { Department, DepartmentSchema } from '../department/schemas/department.schema';
+import {
+  Department,
+  DepartmentSchema,
+} from '../department/schemas/department.schema';
 import { Clinic, ClinicSchema } from '../clinic/schemas/clinic.schema';
-import { Appointment, AppointmentSchema } from '../appointment/schemas/appointment.schema';
+import {
+  Appointment,
+  AppointmentSchema,
+} from '../appointment/schemas/appointment.schema';
 
 @Module({
   imports: [

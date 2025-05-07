@@ -4,9 +4,15 @@ import { EmployeeService } from './employee.service';
 import { EmployeeController } from './employee.controller';
 import { Employee, EmployeeSchema } from './schemas/employee.schema';
 import { ClinicCollectionModule } from '../cliniccollection/clinic-collection.module';
-import { ClinicCollectionSchema,ClinicCollection } from '../cliniccollection/schemas/cliniccollection.schema';
+import {
+  ClinicCollectionSchema,
+  ClinicCollection,
+} from '../cliniccollection/schemas/cliniccollection.schema';
 import { DepartmentModule } from '../department/department.module';
-import { Department,DepartmentSchema } from '../department/schemas/department.schema';
+import {
+  Department,
+  DepartmentSchema,
+} from '../department/schemas/department.schema';
 import { forwardRef } from '@nestjs/common';
 import { User, UserSchema } from '../user/schemas/user.schema';
 @Module({
@@ -16,7 +22,8 @@ import { User, UserSchema } from '../user/schemas/user.schema';
       { name: ClinicCollection.name, schema: ClinicCollectionSchema },
       { name: Department.name, schema: DepartmentSchema },
       { name: User.name, schema: UserSchema },
-    ]), forwardRef(() => ClinicCollectionModule),
+    ]),
+    forwardRef(() => ClinicCollectionModule),
     forwardRef(() => DepartmentModule),
   ],
   controllers: [EmployeeController],

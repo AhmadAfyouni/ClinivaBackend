@@ -9,7 +9,7 @@ import {
   Query,
   Request,
   NotFoundException,
-  UseGuards
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SpecializationService } from './specialization.service';
@@ -24,24 +24,32 @@ import { Permissions } from 'src/config/permissions.decorator';
 @Controller('specializations')
 @UseGuards(PermissionsGuard)
 export class SpecializationController {
-  constructor(private readonly specializationService: SpecializationService,
+  constructor(
+    private readonly specializationService: SpecializationService,
     private readonly userService: UserService,
-    private readonly employeeService: EmployeeService
+    private readonly employeeService: EmployeeService,
   ) {}
 
   @Post()
-    @Permissions(PermissionsEnum.ADMIN)
+  @Permissions(PermissionsEnum.ADMIN)
   async create(@Body() createSpecializationDto: CreateSpecializationDto) {
-    return this.specializationService.createSpecialization(createSpecializationDto);
+    return this.specializationService.createSpecialization(
+      createSpecializationDto,
+    );
   }
 
   @Get()
   @Permissions(PermissionsEnum.ADMIN)
-  async findAll(@Query() paginationDto: PaginationAndFilterDto, @Query() queryParams: any) {
-  
+  async findAll(
+    @Query() paginationDto: PaginationAndFilterDto,
+    @Query() queryParams: any,
+  ) {
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-    
-    return this.specializationService.getAllSpecializations(paginationDto, filters);
+
+    return this.specializationService.getAllSpecializations(
+      paginationDto,
+      filters,
+    );
   }
 
   @Get(':id')
