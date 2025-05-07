@@ -9,66 +9,70 @@ export class MedicalRecord {
   _id: Types.ObjectId;
 
   @Prop({ type: Types.ObjectId, ref: 'Appointment', required: true })
-  appointment: Types.ObjectId;  // مرجع إلى الموعد، يحتوي على جميع البيانات المرتبطة
+  appointment: Types.ObjectId; // مرجع إلى الموعد، يحتوي على جميع البيانات المرتبطة
 
   @Prop({ required: true })
-  diagnosis: string;  // التشخيص الطبي
+  diagnosis: string; // التشخيص الطبي
 
   @Prop()
-  Symptoms?: string;  //  الاعراض
+  Symptoms?: string; //  الاعراض
 
   @Prop()
-  treatmentPlan?: string;  //  خطة العلاج
+  treatmentPlan?: string; //  خطة العلاج
 
   @Prop({ type: [Medication], default: [] })
   medications: Medication[]; // قائمة الأدوية مع الجرعة
 
-//     @Prop({enum: ['draft', 'finalized'], default: 'draft'})
-//     recordStatus: string;  // حالة السجل (مسودة أو نهائي)
+  //     @Prop({enum: ['draft', 'finalized'], default: 'draft'})
+  //     recordStatus: string;  // حالة السجل (مسودة أو نهائي)
 
-    
-    // @Prop({type: Number, min: 1, max: 5})
-    // patientRating?: number;  // تقييم المريض للطبيب (1-5 نجوم)
+  // @Prop({type: Number, min: 1, max: 5})
+  // patientRating?: number;  // تقييم المريض للطبيب (1-5 نجوم)
 
-    // @Prop({default: ''})
-    // patientFeedback?: string;  // ملاحظات المريض عن الخدمة
+  // @Prop({default: ''})
+  // patientFeedback?: string;  // ملاحظات المريض عن الخدمة
 
-    @Prop({
-        type: String,
-        enum: ['mild', 'moderate', 'severe'],
-        required: true,
-      })
-    severityLevel: string;
+  @Prop({
+    type: String,
+    enum: ['mild', 'moderate', 'severe'],
+    required: true,
+  })
+  severityLevel: string;
 
+  @Prop()
+  startTime?: Date;
 
-    @Prop()
-    startTime?: Date;
+  @Prop()
+  endTime?: Date;
 
-    @Prop()
-    endTime?: Date;
+  @Prop({ type: Date, required: false })
+  nextAppointmentDate?: Date;
 
-    @Prop({ type: Date, required: false })
-    nextAppointmentDate?: Date;
-
-    @Prop({
-        type: String,
-        enum: ['routine check-up', 'follow-up', 'emergency', 'consultation', 'treatment'],
-        required: true,
-    })
-    visitType: string;
+  @Prop({
+    type: String,
+    enum: [
+      'routine check-up',
+      'follow-up',
+      'emergency',
+      'consultation',
+      'treatment',
+    ],
+    required: true,
+  })
+  visitType: string;
   @Prop({ type: [String], default: [] })
-  labTests: string[];  // التحاليل المطلوبة
+  labTests: string[]; // التحاليل المطلوبة
 
   @Prop({ default: '' })
-  notes?: string;  // ملاحظات إضافية من الطبيب
+  notes?: string; // ملاحظات إضافية من الطبيب
 
   @Prop({ enum: ['draft', 'finalized'], default: 'draft' })
-  recordStatus: string;  // حالة السجل (مسودة أو نهائي)
+  recordStatus: string; // حالة السجل (مسودة أو نهائي)
   @Prop({ unique: true, required: true })
-      publicId: string;
+  publicId: string;
 
   @Prop({ type: Boolean, default: false })
-    deleted: boolean;
+  deleted: boolean;
 }
 
 export const MedicalRecordSchema = SchemaFactory.createForClass(MedicalRecord);

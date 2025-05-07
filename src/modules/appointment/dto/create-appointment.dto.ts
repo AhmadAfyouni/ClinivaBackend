@@ -1,5 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsDate, IsEnum, IsMongoId, IsNotEmpty, IsNumber, IsOptional, IsString, Max, Min } from 'class-validator';
+import {
+  IsDate,
+  IsEnum,
+  IsMongoId,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+} from 'class-validator';
 import { Types } from 'mongoose';
 
 export class CreateAppointmentDto {
@@ -33,7 +43,7 @@ export class CreateAppointmentDto {
   @ApiProperty({
     description: 'Doctor ID (MongoDB ObjectId) - The doctor is an employee',
     example: '60f7c7b84f1a2c001c8b7890',
-    required: false
+    required: false,
   })
   @IsOptional()
   @IsMongoId()
@@ -47,7 +57,6 @@ export class CreateAppointmentDto {
   @IsNotEmpty()
   @IsDate()
   datetime: Date;
-
 
   @ApiProperty({
     description: 'Reason for the visit',
@@ -68,7 +77,6 @@ export class CreateAppointmentDto {
   @IsEnum(['scheduled', 'completed', 'cancelled'])
   status?: string;
 
- 
   @ApiProperty({
     description: 'Reason for cancellation',
     example: 'The patient is unable to attend',
@@ -76,5 +84,5 @@ export class CreateAppointmentDto {
   })
   @IsOptional()
   @IsString()
-  cancellationReason?: string;  // سبب إلغاء الحجز
+  cancellationReason?: string; // سبب إلغاء الحجز
 }

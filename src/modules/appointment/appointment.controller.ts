@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -31,7 +32,6 @@ export class AppointmentController {
 
   @Post()
   @Permissions(PermissionsEnum.APPOINTMENT_CREATE)
-
   async create(@Body() createAppointmentDto: CreateAppointmentDto) {
     return this.appointmentService.createAppointment(createAppointmentDto);
   }
@@ -43,31 +43,38 @@ export class AppointmentController {
     @Query() queryParams: any,
     @Request() req,
   ) {
-    const userId = req.user.userId
-     const response = await this.userService.getUserById(userId)
 
-    //     if (!response.data || Array.isArray(response.data)) {
-    //       throw new NotFoundException('User not found');
-    //     }
-       const user=response.data
-       console.log(user)
-     const employeeId = user.employeeId;
-
+    const userId = req.user?.userId;
+    if (!userId) throw new BadRequestException('User ID is missing');
+    
+    const response = await this.userService.getUserById(userId);
+    
+    const user = response?.data;
+    // if (!user || !user.employeeId) {
+    //   throw new NotFoundException('User or Employee ID not found');
+    // }
+    
+ 
+    const employeeId =
+      typeof user.employeeId === 'string'
+        ? user.employeeId
+        : user.employeeId._id?.toString() || user.employeeId.toString();
+    
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-   filters.employeeId = employeeId.toString();
+    filters.employeeId = employeeId;
+    
+
     return this.appointmentService.getAllAppointments(paginationDto, filters);
   }
 
   @Get(':id')
   @Permissions(PermissionsEnum.APPOINTMENT_VIEW)
-
   async findOne(@Param('id') id: string) {
     return this.appointmentService.getAppointmentById(id);
   }
 
   @Put(':id')
   @Permissions(PermissionsEnum.APPOINTMENT_UPDATE)
-
   async update(
     @Param('id') id: string,
     @Body() updateAppointmentDto: UpdateAppointmentDto,
@@ -77,7 +84,6 @@ export class AppointmentController {
 
   @Delete(':id')
   @Permissions(PermissionsEnum.APPOINTMENT_DELETE)
-
   async remove(@Param('id') id: string) {
     return this.appointmentService.deleteAppointment(id);
   }

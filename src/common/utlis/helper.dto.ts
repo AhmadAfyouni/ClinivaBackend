@@ -1,13 +1,19 @@
-
-
 import { ApiProperty } from '@nestjs/swagger';
 
 export class WorkingHoursDTO {
   @ApiProperty({
-    enum: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'],
+    enum: [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ],
     description: 'Day of the week',
     required: true,
-    example: 'Monday'
+    example: 'Monday',
   })
   day: string;
 
@@ -15,7 +21,7 @@ export class WorkingHoursDTO {
     type: String,
     description: 'Work start time (e.g., "04:00 PM")',
     required: true,
-    example: '08:00 AM'
+    example: '08:00 AM',
   })
   startTime: string;
 
@@ -23,7 +29,7 @@ export class WorkingHoursDTO {
     type: String,
     description: 'Work end time (e.g., "08:00 PM")',
     required: true,
-    example: '05:00 PM'
+    example: '05:00 PM',
   })
   endTime: string;
 }
@@ -33,7 +39,7 @@ export class InsuranceCompanyDTO {
     type: String,
     description: 'Name of the insurance company',
     required: true,
-    example: 'National Health Insurance'
+    example: 'National Health Insurance',
   })
   companyName: string;
 
@@ -41,7 +47,7 @@ export class InsuranceCompanyDTO {
     type: [String],
     description: 'Covered services',
     required: true,
-    example: ['Dental', 'Surgery', 'Lab Tests']
+    example: ['Dental', 'Surgery', 'Lab Tests'],
   })
   coveredServices: string[];
 
@@ -49,7 +55,7 @@ export class InsuranceCompanyDTO {
     type: String,
     description: 'Terms and conditions',
     required: true,
-    example: 'Coverage limited to network providers only'
+    example: 'Coverage limited to network providers only',
   })
   termsAndConditions: string;
 
@@ -58,7 +64,7 @@ export class InsuranceCompanyDTO {
     description: 'Coverage details (smart list)',
     required: false,
     default: [],
-    example: ['Annual limit: $10,000', 'Pre-existing conditions excluded']
+    example: ['Annual limit: $10,000', 'Pre-existing conditions excluded'],
   })
   coverageDetails?: string[];
 
@@ -68,7 +74,7 @@ export class InsuranceCompanyDTO {
     required: true,
     minimum: 0,
     maximum: 100,
-    example: 80
+    example: 80,
   })
   coveragePercentage: number;
 
@@ -76,7 +82,7 @@ export class InsuranceCompanyDTO {
     type: Date,
     description: 'Contract start date',
     required: true,
-    example: '2023-01-01T00:00:00Z'
+    example: '2023-01-01T00:00:00Z',
   })
   contractStartDate: Date;
 
@@ -84,7 +90,7 @@ export class InsuranceCompanyDTO {
     type: Date,
     description: 'Contract end date',
     required: true,
-    example: '2023-12-31T23:59:59Z'
+    example: '2023-12-31T23:59:59Z',
   })
   contractEndDate: Date;
 
@@ -92,7 +98,7 @@ export class InsuranceCompanyDTO {
     type: String,
     description: 'Contact person',
     required: true,
-    example: 'Mr. Ahmed Al-Ghamdi'
+    example: 'Mr. Ahmed Al-Ghamdi',
   })
   contactPerson: string;
 
@@ -100,7 +106,7 @@ export class InsuranceCompanyDTO {
     type: String,
     description: 'Company phone number',
     required: true,
-    example: '+966112345678'
+    example: '+966112345678',
   })
   companyPhone: string;
 
@@ -108,7 +114,7 @@ export class InsuranceCompanyDTO {
     type: String,
     description: 'Company email',
     required: true,
-    example: 'info@nationalhealth.com'
+    example: 'info@nationalhealth.com',
   })
   companyEmail: string;
 
@@ -116,7 +122,7 @@ export class InsuranceCompanyDTO {
     type: String,
     description: 'Company address',
     required: false,
-    example: '123 King Fahd Road, Riyadh'
+    example: '123 King Fahd Road, Riyadh',
   })
   address?: string;
 
@@ -124,7 +130,7 @@ export class InsuranceCompanyDTO {
     type: Boolean,
     description: 'Is the company active',
     required: false,
-    default: true
+    default: true,
   })
   isActive?: boolean;
 }
@@ -134,7 +140,7 @@ export class BankAccountDTO {
     type: String,
     description: 'Account name',
     required: true,
-    example: 'Al-Noor Medical Center'
+    example: 'Al-Noor Medical Center',
   })
   accountName: string;
 
@@ -142,7 +148,7 @@ export class BankAccountDTO {
     type: String,
     description: 'SWIFT code',
     required: true,
-    example: 'ALBISARI'
+    example: 'ALBISARI',
   })
   swiftCode: string;
 
@@ -150,7 +156,7 @@ export class BankAccountDTO {
     type: String,
     description: 'Bank name',
     required: true,
-    example: 'Al Rajhi Bank'
+    example: 'Al Rajhi Bank',
   })
   bankName: string;
 
@@ -158,7 +164,7 @@ export class BankAccountDTO {
     type: String,
     description: 'Bank address',
     required: false,
-    example: 'King Abdullah Road, Riyadh'
+    example: 'King Abdullah Road, Riyadh',
   })
   bankAddress?: string;
 
@@ -166,7 +172,7 @@ export class BankAccountDTO {
     type: String,
     description: 'Account number',
     required: true,
-    example: 'SA0380000000608010167519'
+    example: 'SA0380000000608010167519',
   })
   accountNumber: string;
 
@@ -174,7 +180,7 @@ export class BankAccountDTO {
     type: String,
     description: 'Account type (savings, checking, business)',
     required: true,
-    example: 'business'
+    example: 'business',
   })
   accountType: string;
 
@@ -182,7 +188,7 @@ export class BankAccountDTO {
     type: Boolean,
     description: 'Is the account active',
     required: false,
-    default: true
+    default: true,
   })
   isActive?: boolean;
 }
@@ -192,7 +198,7 @@ export class CashBoxDTO {
     type: String,
     description: 'Cash box name',
     required: true,
-    example: 'Main Cash Box'
+    example: 'Main Cash Box',
   })
   name: string;
 
@@ -200,7 +206,7 @@ export class CashBoxDTO {
     type: Boolean,
     description: 'Is the cash box active',
     required: false,
-    default: true
+    default: true,
   })
   isActive?: boolean;
 
@@ -208,7 +214,7 @@ export class CashBoxDTO {
     type: String,
     description: 'Location of the cash box',
     required: true,
-    example: 'Reception Area'
+    example: 'Reception Area',
   })
   location: string;
 
@@ -216,7 +222,7 @@ export class CashBoxDTO {
     type: String,
     description: 'Currency used',
     required: true,
-    example: 'SAR'
+    example: 'SAR',
   })
   currency: string;
 
@@ -224,7 +230,7 @@ export class CashBoxDTO {
     type: String,
     description: 'Person in charge (PIC)',
     required: true,
-    example: 'Mohammed Ali'
+    example: 'Mohammed Ali',
   })
   pic: string;
 
@@ -233,7 +239,7 @@ export class CashBoxDTO {
     description: 'Total balance',
     required: false,
     default: 0,
-    example: 15000.50
+    example: 15000.5,
   })
   totalBalance?: number;
 
@@ -241,7 +247,7 @@ export class CashBoxDTO {
     type: String,
     description: 'Created by user',
     required: false,
-    example: 'admin@clinic.com'
+    example: 'admin@clinic.com',
   })
   createdBy?: string;
 
@@ -250,25 +256,28 @@ export class CashBoxDTO {
     items: {
       type: 'object',
       properties: {
-        date: { type: 'string', format: 'date-time', example: '2023-05-20T14:30:00Z' },
+        date: {
+          type: 'string',
+          format: 'date-time',
+          example: '2023-05-20T14:30:00Z',
+        },
         amount: { type: 'number', example: 1500 },
-        description: { type: 'string', example: 'Payment for consultation' }
-      }
+        description: { type: 'string', example: 'Payment for consultation' },
+      },
     },
     description: 'Transaction history',
     required: false,
-    default: []
+    default: [],
   })
   transactionHistory?: { date: Date; amount: number; description: string }[];
 }
-
 
 export class OnlinePaymentMethodDTO {
   @ApiProperty({
     type: String,
     description: 'Payment company name',
     required: true,
-    example: 'Stripe Payments'
+    example: 'Stripe Payments',
   })
   companyName: string;
 
@@ -276,7 +285,7 @@ export class OnlinePaymentMethodDTO {
     enum: ['deposit', 'withdrawal', 'transfer'],
     description: 'Type of transaction',
     required: true,
-    example: 'deposit'
+    example: 'deposit',
   })
   transactionType: string;
 
@@ -284,7 +293,7 @@ export class OnlinePaymentMethodDTO {
     enum: ['credit_card', 'bank_transfer', 'digital_wallet'],
     description: 'Payment method type',
     required: true,
-    example: 'credit_card'
+    example: 'credit_card',
   })
   type: string;
 
@@ -292,7 +301,7 @@ export class OnlinePaymentMethodDTO {
     type: [String],
     description: 'Supported currencies',
     required: true,
-    example: ['SAR', 'USD', 'EUR']
+    example: ['SAR', 'USD', 'EUR'],
   })
   supportedCurrencies: string[];
 
@@ -301,7 +310,7 @@ export class OnlinePaymentMethodDTO {
     description: 'Processing fees percentage',
     required: true,
     minimum: 0,
-    example: 2.5
+    example: 2.5,
   })
   processingFees: number;
 
@@ -310,7 +319,7 @@ export class OnlinePaymentMethodDTO {
     description: 'Security features',
     required: false,
     default: [],
-    example: ['3D Secure', 'Tokenization', 'Fraud Detection']
+    example: ['3D Secure', 'Tokenization', 'Fraud Detection'],
   })
   securityFeatures?: string[];
 
@@ -318,7 +327,7 @@ export class OnlinePaymentMethodDTO {
     type: Boolean,
     description: 'Is the payment method active',
     required: false,
-    default: true
+    default: true,
   })
   isActive?: boolean;
 }
@@ -328,7 +337,7 @@ export class CommercialRecordDTO {
     type: String,
     description: 'Commercial record number',
     required: true,
-    example: 'CR-12345678'
+    example: 'CR-12345678',
   })
   recordNumber: string;
 
@@ -336,7 +345,7 @@ export class CommercialRecordDTO {
     type: Date,
     description: 'Date when the record was granted',
     required: true,
-    example: '2020-01-15T00:00:00Z'
+    example: '2020-01-15T00:00:00Z',
   })
   grantDate: Date;
 
@@ -344,7 +353,7 @@ export class CommercialRecordDTO {
     type: Date,
     description: 'Date when the record was issued',
     required: true,
-    example: '2020-01-20T00:00:00Z'
+    example: '2020-01-20T00:00:00Z',
   })
   issueDate: Date;
 
@@ -352,7 +361,7 @@ export class CommercialRecordDTO {
     type: Date,
     description: 'Expiration date of the record',
     required: true,
-    example: '2030-01-20T00:00:00Z'
+    example: '2030-01-20T00:00:00Z',
   })
   expirationDate: Date;
 
@@ -360,7 +369,7 @@ export class CommercialRecordDTO {
     type: String,
     description: 'Tax identification number',
     required: true,
-    example: '310123456700003'
+    example: '310123456700003',
   })
   taxNumber: string;
 }
@@ -370,7 +379,7 @@ export class HolidayDTO {
     type: String,
     description: 'Name of the holiday',
     required: true,
-    example: 'Eid Al-Fitr'
+    example: 'Eid Al-Fitr',
   })
   name: string;
 
@@ -378,7 +387,7 @@ export class HolidayDTO {
     type: Date,
     description: 'Date of the holiday',
     required: true,
-    example: '2023-04-21T00:00:00Z'
+    example: '2023-04-21T00:00:00Z',
   })
   date: Date;
 
@@ -386,7 +395,7 @@ export class HolidayDTO {
     type: String,
     description: 'Reason for the holiday',
     required: true,
-    example: 'Islamic religious holiday marking the end of Ramadan'
+    example: 'Islamic religious holiday marking the end of Ramadan',
   })
   reason: string;
 }
@@ -396,7 +405,7 @@ export class ContactInfoDTO {
     enum: ['email', 'phone', 'socialMedia', 'CompanyWebsite'],
     description: 'Type of contact information',
     required: true,
-    example: 'phone'
+    example: 'phone',
   })
   type: string;
 
@@ -404,7 +413,7 @@ export class ContactInfoDTO {
     type: String,
     description: 'Contact value (phone number, email, etc.)',
     required: true,
-    example: '+966501234567'
+    example: '+966501234567',
   })
   value: string;
 
@@ -412,7 +421,7 @@ export class ContactInfoDTO {
     type: Boolean,
     description: 'Is this contact information public',
     required: true,
-    example: true
+    example: true,
   })
   isPublic: boolean;
 
@@ -420,7 +429,7 @@ export class ContactInfoDTO {
     type: String,
     description: 'Sub-type of contact (work, office, personal)',
     required: false,
-    example: 'work'
+    example: 'work',
   })
   subType?: string;
 }
@@ -430,7 +439,7 @@ export class InsuranceDTO {
     type: String,
     description: 'Insurance provider name',
     required: true,
-    example: 'Tawuniya'
+    example: 'Tawuniya',
   })
   insuranceProvider: string;
 
@@ -438,7 +447,7 @@ export class InsuranceDTO {
     type: String,
     description: 'Insurance policy number',
     required: true,
-    example: 'TWN-2023-123456'
+    example: 'TWN-2023-123456',
   })
   insuranceNumber: string;
 
@@ -448,7 +457,7 @@ export class InsuranceDTO {
     required: true,
     minimum: 0,
     maximum: 100,
-    example: 80
+    example: 80,
   })
   coveragePercentage: number;
 
@@ -456,7 +465,7 @@ export class InsuranceDTO {
     type: Date,
     description: 'Expiration date of the insurance',
     required: true,
-    example: '2023-12-31T23:59:59Z'
+    example: '2023-12-31T23:59:59Z',
   })
   expiryDate: Date;
 
@@ -464,13 +473,10 @@ export class InsuranceDTO {
     enum: ['private', 'governmental', 'corporate'],
     description: 'Type of insurance',
     required: true,
-    example: 'private'
+    example: 'private',
   })
   insuranceType: string;
 }
-
-
-
 
 export enum DayOfWeek {
   Sunday = 'Sunday',
@@ -479,7 +485,7 @@ export enum DayOfWeek {
   Wednesday = 'Wednesday',
   Thursday = 'Thursday',
   Friday = 'Friday',
-  Saturday = 'Saturday'
+  Saturday = 'Saturday',
 }
 
 export class WorkingDaysDTO {
@@ -487,7 +493,7 @@ export class WorkingDaysDTO {
     enum: DayOfWeek,
     description: 'Day of the week',
     required: true,
-    example: DayOfWeek.Monday
+    example: DayOfWeek.Monday,
   })
   name: DayOfWeek;
 
@@ -495,7 +501,7 @@ export class WorkingDaysDTO {
     type: String,
     description: 'Start of working time (HH:MM format)',
     required: true,
-    example: '08:00'
+    example: '08:00',
   })
   startOfWorkingTime: string;
 
@@ -503,7 +509,7 @@ export class WorkingDaysDTO {
     type: String,
     description: 'End of working time (HH:MM format)',
     required: true,
-    example: '17:00'
+    example: '17:00',
   })
   endOfWorkingTime: string;
 }
@@ -513,7 +519,7 @@ export class VacationDTO {
     type: Date,
     description: 'Start date of leave',
     required: true,
-    example: '2023-06-01T00:00:00Z'
+    example: '2023-06-01T00:00:00Z',
   })
   leaveStartDate: Date;
 
@@ -521,7 +527,7 @@ export class VacationDTO {
     type: Date,
     description: 'End date of leave',
     required: true,
-    example: '2023-06-10T23:59:59Z'
+    example: '2023-06-10T23:59:59Z',
   })
   leaveEndDate: Date;
 
@@ -529,7 +535,7 @@ export class VacationDTO {
     enum: ['Vacation', 'Sick Leave', 'Emergency'],
     description: 'Type of leave',
     required: true,
-    example: 'Vacation'
+    example: 'Vacation',
   })
   leaveType: string;
 
@@ -538,7 +544,7 @@ export class VacationDTO {
     description: 'Status of leave request',
     required: true,
     default: 'Pending',
-    example: 'Pending'
+    example: 'Pending',
   })
   status: string;
 }
@@ -548,7 +554,7 @@ export class MedicationDTO {
     type: String,
     description: 'Name of medication',
     required: true,
-    example: 'Amoxicillin'
+    example: 'Amoxicillin',
   })
   name: string;
 
@@ -556,7 +562,7 @@ export class MedicationDTO {
     type: String,
     description: 'Dosage of medication',
     required: true,
-    example: '500mg every 8 hours'
+    example: '500mg every 8 hours',
   })
   dosage: string;
 }
@@ -566,7 +572,7 @@ export class BreakTimeDTO {
     type: String,
     description: 'Start time of break (HH:MM format)',
     required: true,
-    example: '12:00'
+    example: '12:00',
   })
   startTime: string;
 
@@ -574,13 +580,13 @@ export class BreakTimeDTO {
     type: String,
     description: 'End time of break (HH:MM format)',
     required: true,
-    example: '13:00'
+    example: '13:00',
   })
   endTime: string;
 }
 
 export class MedicalTestResultDTO {
-/*  @ApiProperty({
+  /*  @ApiProperty({
     type: String,
     description: 'Type of file (PDF, JPEG, DICOM)',
     required: true,
@@ -592,10 +598,10 @@ export class MedicalTestResultDTO {
     type: String,
     description: 'Path of uploaded file in system',
     required: true,
-    example: '/uploads/tests/patient-12345/blood-test.pdf'
+    example: '/uploads/tests/patient-12345/blood-test.pdf',
   })
   filePath: string;
-/*
+  /*
   @ApiProperty({
     type: String,
     description: 'Type of medical test',
@@ -626,7 +632,7 @@ export class CertificateDTO {
     type: String,
     description: 'Name of certificate',
     required: true,
-    example: 'Board Certification in Cardiology'
+    example: 'Board Certification in Cardiology',
   })
   certificateName: string;
 
@@ -634,7 +640,7 @@ export class CertificateDTO {
     type: String,
     description: 'Issuing institution',
     required: true,
-    example: 'Saudi Commission for Health Specialties'
+    example: 'Saudi Commission for Health Specialties',
   })
   institution: string;
 
@@ -642,7 +648,7 @@ export class CertificateDTO {
     type: Date,
     description: 'Date when certificate was issued',
     required: true,
-    example: '2020-06-15T00:00:00Z'
+    example: '2020-06-15T00:00:00Z',
   })
   issueDate: Date;
 
@@ -650,7 +656,7 @@ export class CertificateDTO {
     type: Date,
     description: 'Expiry date of certificate (optional)',
     required: false,
-    example: '2025-06-15T00:00:00Z'
+    example: '2025-06-15T00:00:00Z',
   })
   expiryDate?: Date;
 
@@ -658,7 +664,8 @@ export class CertificateDTO {
     type: String,
     description: 'URL of stored certificate image',
     required: true,
-    example: 'https://storage.example.com/certificates/dr-smith-cardiology-2020.jpg'
+    example:
+      'https://storage.example.com/certificates/dr-smith-cardiology-2020.jpg',
   })
   certificateImageUrl: string;
 
@@ -667,7 +674,7 @@ export class CertificateDTO {
     description: 'Verification status of certificate',
     required: true,
     default: 'pending',
-    example: 'approved'
+    example: 'approved',
   })
   status: string;
 }
@@ -677,7 +684,7 @@ export class ActivityLogDTO {
     type: Date,
     description: 'Date when activity occurred',
     required: true,
-    example: '2023-08-20T14:30:00Z'
+    example: '2023-08-20T14:30:00Z',
   })
   activityDate: Date;
 
@@ -685,7 +692,7 @@ export class ActivityLogDTO {
     type: String,
     description: 'Description of activity',
     required: true,
-    example: 'Updated patient medical record'
+    example: 'Updated patient medical record',
   })
   description: string;
 }
@@ -695,7 +702,7 @@ export class LoginHistoryDTO {
     type: Date,
     description: 'Date when login occurred',
     required: true,
-    example: '2023-05-20T09:15:00Z'
+    example: '2023-05-20T09:15:00Z',
   })
   loginDate: Date;
 
@@ -703,7 +710,7 @@ export class LoginHistoryDTO {
     type: String,
     description: 'IP address used for login',
     required: true,
-    example: '192.168.1.100'
+    example: '192.168.1.100',
   })
   ipAddress: string;
 
@@ -711,7 +718,7 @@ export class LoginHistoryDTO {
     type: String,
     description: 'Device used for login',
     required: true,
-    example: 'iPhone 13, iOS 16.4.1'
+    example: 'iPhone 13, iOS 16.4.1',
   })
   device: string;
 }
