@@ -31,7 +31,6 @@ export class AppointmentController {
 
   @Post()
   @Permissions(PermissionsEnum.APPOINTMENT_CREATE)
-
   async create(@Body() createAppointmentDto: CreateAppointmentDto) {
     return this.appointmentService.createAppointment(createAppointmentDto);
   }
@@ -43,31 +42,29 @@ export class AppointmentController {
     @Query() queryParams: any,
     @Request() req,
   ) {
-    const userId = req.user.userId
-     const response = await this.userService.getUserById(userId)
+    const userId = req.user.userId;
+    const response = await this.userService.getUserById(userId);
 
     //     if (!response.data || Array.isArray(response.data)) {
     //       throw new NotFoundException('User not found');
     //     }
-       const user=response.data
-       console.log(user)
-     const employeeId = user.employeeId;
+    const user = response.data;
+    console.log(user);
+    const employeeId = user.employeeId;
 
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-   filters.employeeId = employeeId.toString();
+    filters.employeeId = employeeId.toString();
     return this.appointmentService.getAllAppointments(paginationDto, filters);
   }
 
   @Get(':id')
   @Permissions(PermissionsEnum.APPOINTMENT_VIEW)
-
   async findOne(@Param('id') id: string) {
     return this.appointmentService.getAppointmentById(id);
   }
 
   @Put(':id')
   @Permissions(PermissionsEnum.APPOINTMENT_UPDATE)
-
   async update(
     @Param('id') id: string,
     @Body() updateAppointmentDto: UpdateAppointmentDto,
@@ -77,7 +74,6 @@ export class AppointmentController {
 
   @Delete(':id')
   @Permissions(PermissionsEnum.APPOINTMENT_DELETE)
-
   async remove(@Param('id') id: string) {
     return this.appointmentService.deleteAppointment(id);
   }

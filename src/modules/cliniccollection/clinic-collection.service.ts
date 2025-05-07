@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, InternalServerErrorException, HttpException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
+  HttpException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import {
@@ -18,7 +24,10 @@ import {
   DepartmentDocument,
 } from '../department/schemas/department.schema';
 import { Clinic, ClinicDocument } from '../clinic/schemas/clinic.schema';
-import { Appointment, AppointmentDocument } from '../appointment/schemas/appointment.schema';
+import {
+  Appointment,
+  AppointmentDocument,
+} from '../appointment/schemas/appointment.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 
 @Injectable()
@@ -31,31 +40,39 @@ export class ClinicCollectionService {
     @InjectModel(Department.name)
     private departmentModel: Model<DepartmentDocument>,
     @InjectModel(Clinic.name) private clinicModel: Model<ClinicDocument>,
-    @InjectModel(Appointment.name) private appointmentModel: Model<AppointmentDocument>,
+    @InjectModel(Appointment.name)
+    private appointmentModel: Model<AppointmentDocument>,
   ) {}
 
   async createClinicCollection(
     createClinicCollectionDto: CreateClinicCollectionDto,
   ): Promise<ApiGetResponse<ClinicCollection>> {
-   try{
-    console.log('createClinicCollection');
-    const publicId = await generateUniquePublicId(this.clinicCollectionModel, 'com');
-    console.log('publicId',publicId);
-    const newClinicCollection = new this.clinicCollectionModel({
-      ...createClinicCollectionDto,
-      publicId,
-    });
-    console.log('newClinicCollection',newClinicCollection);
-    const savedClinicCollection = await newClinicCollection.save();
-    return {
-      success: true,
-      message: 'clinic Collection created successfully',
-      data: savedClinicCollection,
-    };
-  }catch(error){
-    if(error instanceof HttpException) throw error;
-    throw new BadRequestException('Failed to create clinic collection',error.message);
-  }}
+    try {
+      console.log('createClinicCollection');
+      const publicId = await generateUniquePublicId(
+        this.clinicCollectionModel,
+        'com',
+      );
+      console.log('publicId', publicId);
+      const newClinicCollection = new this.clinicCollectionModel({
+        ...createClinicCollectionDto,
+        publicId,
+      });
+      console.log('newClinicCollection', newClinicCollection);
+      const savedClinicCollection = await newClinicCollection.save();
+      return {
+        success: true,
+        message: 'clinic Collection created successfully',
+        data: savedClinicCollection,
+      };
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new BadRequestException(
+        'Failed to create clinic collection',
+        error.message,
+      );
+    }
+  }
 
   async getAllClinicCollections(
     paginationDto: PaginationAndFilterDto,
@@ -63,7 +80,7 @@ export class ClinicCollectionService {
   ) {
     console.log('getAllClinicCollections');
     let { page, limit, allData, sortBy, order } = paginationDto;
-console.log(paginationDto.order)
+    console.log(paginationDto.order);
     // Convert page & limit to numbers
     page = Number(page) || 1;
     limit = Number(limit) || 10;
@@ -74,12 +91,13 @@ console.log(paginationDto.order)
     // const sortField = this.clinicCollectionModel.schema.path(rawSortField) ? rawSortField : defaultSortField;
     // const sort: Record<string, number> = { [sortField]: order === 'desc' ? -1 : 1 };
     order = order || 'asc';
-   console.log(order)
-   const sortField: string = sortBy ?? 'id';
+    console.log(order);
+    const sortField: string = sortBy ?? 'id';
     const sort: { [key: string]: 1 | -1 } = {
-      [sortField]: order === 'asc' ? 1 : -1,} 
-  console.log(sortField)
- 
+      [sortField]: order === 'asc' ? 1 : -1,
+    };
+    console.log(sortField);
+
     const searchConditions: any[] = [];
 
     if (filters.search) {
@@ -101,7 +119,7 @@ console.log(paginationDto.order)
 
     const result = await paginate(
       this.clinicCollectionModel,
-      ['companyId', 'specializations','PIC'],
+      ['companyId', 'specializations', 'PIC'],
       page,
       limit,
       allData,
@@ -174,22 +192,31 @@ console.log(paginationDto.order)
         .findById(id)
         .populate(['companyId', 'specializations'])
         .exec();
-      if (!collection) throw new NotFoundException('Clinic Collection not found');
+      if (!collection)
+        throw new NotFoundException('Clinic Collection not found');
 
       const base = await this.addClinicCounts(collection);
 
-      const departments = await this.departmentModel.find({ clinicCollectionId: id }).exec();
-      const clinics = await this.clinicModel.find({ departmentId: { $in: departments.map(d => d._id) } }).exec();
+      const departments = await this.departmentModel
+        .find({ clinicCollectionId: id })
+        .exec();
+      const clinics = await this.clinicModel
+        .find({ departmentId: { $in: departments.map((d) => d._id) } })
+        .exec();
       const uniquePatients = await this.appointmentModel.distinct('patient', {
-        clinic: { $in: clinics.map(c => c._id) },
+        clinic: { $in: clinics.map((c) => c._id) },
       });
-      const doctors = await this.employeeModel.find({
-        clinics: { $in: clinics.map(c => c._id) },
-        employeeType: 'Doctor',
-      }).exec();
-      const staff = await this.employeeModel.find({
-        clinics: { $in: clinics.map(c => c._id) },
-      }).exec();
+      const doctors = await this.employeeModel
+        .find({
+          clinics: { $in: clinics.map((c) => c._id) },
+          employeeType: 'Doctor',
+        })
+        .exec();
+      const staff = await this.employeeModel
+        .find({
+          clinics: { $in: clinics.map((c) => c._id) },
+        })
+        .exec();
 
       return {
         success: true,
@@ -209,7 +236,9 @@ console.log(paginationDto.order)
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
-      throw new InternalServerErrorException('Failed to retrieve clinic collection');
+      throw new InternalServerErrorException(
+        'Failed to retrieve clinic collection',
+      );
     }
   }
 
@@ -229,19 +258,23 @@ console.log(paginationDto.order)
       data: updatedClinicCollection,
     };
   }
-  
-  async deleteClinicCollection(id: string): Promise<ApiGetResponse<ClinicCollection>> {
-      const clinicCollection = await this.clinicCollectionModel.findById(id).exec();
-      if (!clinicCollection) throw new NotFoundException('Clinic Collection not found');
-  
-      clinicCollection.deleted = true;
-      const deletedClinicCollection = await clinicCollection.save();
-  
-      return {
-        success: true,
-        message: 'Clinic Collection marked as deleted successfully',
-        data: deletedClinicCollection,
-      };  
-    }
-  
+
+  async deleteClinicCollection(
+    id: string,
+  ): Promise<ApiGetResponse<ClinicCollection>> {
+    const clinicCollection = await this.clinicCollectionModel
+      .findById(id)
+      .exec();
+    if (!clinicCollection)
+      throw new NotFoundException('Clinic Collection not found');
+
+    clinicCollection.deleted = true;
+    const deletedClinicCollection = await clinicCollection.save();
+
+    return {
+      success: true,
+      message: 'Clinic Collection marked as deleted successfully',
+      data: deletedClinicCollection,
+    };
+  }
 }

@@ -16,7 +16,7 @@ import {
 import { SpecializationModule } from '../specialization/specialization.module';
 import { Employee, EmployeeSchema } from '../employee/schemas/employee.schema';
 import { UserModule } from '../user/user.module';
-import { UserSchema,User } from '../user/schemas/user.schema';
+import { UserSchema, User } from '../user/schemas/user.schema';
 import { EmployeeModule } from '../employee/employee.module';
 import { ServiceModule } from '../service/service.module';
 import { Service, ServiceSchema } from '../service/schemas/service.schema';

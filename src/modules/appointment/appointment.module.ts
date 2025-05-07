@@ -11,7 +11,7 @@ import { Patient, PatientSchema } from '../patient/schemas/patient.schema';
 import { UserModule } from '../user/user.module';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { forwardRef } from '@nestjs/common';
-import { Clinic,ClinicSchema } from '../clinic/schemas/clinic.schema';
+import { Clinic, ClinicSchema } from '../clinic/schemas/clinic.schema';
 import { ClinicModule } from '../clinic/clinic.module';
 import { Service, ServiceSchema } from '../service/schemas/service.schema';
 
