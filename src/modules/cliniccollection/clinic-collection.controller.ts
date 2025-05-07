@@ -37,6 +37,7 @@ export class ClinicCollectionController {
     @Body() createClinicCollectionDto: CreateClinicCollectionDto,
     @Request() req,
   ) {
+
     const userId = req.user.userId;
     console.log('first', userId);
     const response = await this.userService.getUserById(userId);

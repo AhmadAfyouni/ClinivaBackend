@@ -1,4 +1,10 @@
-import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  Catch,
+  ExceptionFilter,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { Response } from 'express';
 
 @Catch()
@@ -18,7 +24,8 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       switch (exception.code) {
         case 11000: // خطأ تكرار (Duplicate Key Error)
           status = HttpStatus.BAD_REQUEST;
-          message = 'Duplicate key error: ' + JSON.stringify(exception.keyValue);
+          message =
+            'Duplicate key error: ' + JSON.stringify(exception.keyValue);
           break;
 
         case 'ECONNREFUSED': // فشل الاتصال بقاعدة البيانات

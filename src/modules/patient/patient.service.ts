@@ -62,96 +62,96 @@ export class PatientService {
   }
 
   async getAllPatients(paginationDto: PaginationAndFilterDto, filters: any) {
-    try{
-    let { page, limit, allData, sortBy, order } = paginationDto;
+    try {
+      let { page, limit, allData, sortBy, order } = paginationDto;
 
-    // Convert page & limit to numbers
-    page = Number(page) || 1;
-    limit = Number(limit) || 10;
+      // Convert page & limit to numbers
+      page = Number(page) || 1;
+      limit = Number(limit) || 10;
 
-    const sortField: string = sortBy ?? 'id';
-    const sort: Record<string, number> = {
-      [sortField]: order === 'asc' ? 1 : -1,
-    };
+      const sortField: string = sortBy ?? 'id';
+      const sort: Record<string, number> = {
+        [sortField]: order === 'asc' ? 1 : -1,
+      };
 
-    // إعداد شروط البحث
-    const searchConditions: any[] = [];
-    const filterConditions: any[] = [];
-    await applyBooleanFilter(filters, 'isActive', filterConditions);
+      // إعداد شروط البحث
+      const searchConditions: any[] = [];
+      const filterConditions: any[] = [];
+      await applyBooleanFilter(filters, 'isActive', filterConditions);
 
-    addDateFilter(filters, 'dateOfBirth', searchConditions);
+      addDateFilter(filters, 'dateOfBirth', searchConditions);
 
-    // تحقق إذا كان يوجد نص للبحث
-    if (filters.search) {
-      const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
+      // تحقق إذا كان يوجد نص للبحث
+      if (filters.search) {
+        const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
 
-      // إضافة شروط البحث للحقول النصية مثل الاسم والحالة
-      searchConditions.push({ name: regex }, { gender: regex });
-    }
+        // إضافة شروط البحث للحقول النصية مثل الاسم والحالة
+        searchConditions.push({ name: regex }, { gender: regex });
+      }
 
-    // إزالة مفتاح البحث من الفلاتر قبل تمريرها
+      // إزالة مفتاح البحث من الفلاتر قبل تمريرها
 
-    const fieldsToDelete = ['search', 'isActive', 'dateOfBirth'];
-    fieldsToDelete.forEach((field) => delete filters[field]);
-    // دمج الفلاتر مع شروط البحث
-    const finalFilter = buildFinalFilter(
-      filters,
-      searchConditions,
-      filterConditions,
-    );
-
-    // استخدام paginate مع الشروط النهائية
-    const result = await paginate(
-      this.patientModel,
-      [],
-      page,
-      limit,
-      allData,
-      finalFilter,
-      sort,
-    );
-
-    // إضافة آخر زيارة للمريض مع اسم الطبيب
-    if (result.data) {
-      const patients = result.data;
-      const updatedPatients = await Promise.all(
-        patients.map(async (patient) => {
-          // البحث باستخدام ObjectId مباشرة دون تحويل لـ string
-          const lastAppointment = await this.appointmentModel
-            .findOne({ patient: patient._id.toString() }) // افترضنا أن patientId من نوع ObjectId
-            .sort({ datetime: -1 })
-            .select('datetime -_id') // اختيار الحقول المطلوبة فقط لتحسين الأداء
-            .lean(); // إرجاع كائن عادي بدل مستند Mongoose
-
-          return {
-            ...patient.toObject(),
-            lastVisit: lastAppointment?.datetime || null,
-          };
-        }),
+      const fieldsToDelete = ['search', 'isActive', 'dateOfBirth'];
+      fieldsToDelete.forEach((field) => delete filters[field]);
+      // دمج الفلاتر مع شروط البحث
+      const finalFilter = buildFinalFilter(
+        filters,
+        searchConditions,
+        filterConditions,
       );
 
-      result.data = updatedPatients;
-    }
+      // استخدام paginate مع الشروط النهائية
+      const result = await paginate(
+        this.patientModel,
+        [],
+        page,
+        limit,
+        allData,
+        finalFilter,
+        sort,
+      );
 
-    return result;
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+      // إضافة آخر زيارة للمريض مع اسم الطبيب
+      if (result.data) {
+        const patients = result.data;
+        const updatedPatients = await Promise.all(
+          patients.map(async (patient) => {
+            // البحث باستخدام ObjectId مباشرة دون تحويل لـ string
+            const lastAppointment = await this.appointmentModel
+              .findOne({ patient: patient._id.toString() }) // افترضنا أن patientId من نوع ObjectId
+              .sort({ datetime: -1 })
+              .select('datetime -_id') // اختيار الحقول المطلوبة فقط لتحسين الأداء
+              .lean(); // إرجاع كائن عادي بدل مستند Mongoose
+
+            return {
+              ...patient.toObject(),
+              lastVisit: lastAppointment?.datetime || null,
+            };
+          }),
+        );
+
+        result.data = updatedPatients;
+      }
+
+      return result;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 
   async getPatientById(id: string): Promise<ApiGetResponse<Patient>> {
-    try{
-    const patient = await this.patientModel.findById(id).exec();
-    if (!patient) throw new NotFoundException('Patient not found');
-    return {
-      success: true,
-      message: 'patient retrieved successfully',
-      data: patient,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+    try {
+      const patient = await this.patientModel.findById(id).exec();
+      if (!patient) throw new NotFoundException('Patient not found');
+      return {
+        success: true,
+        message: 'patient retrieved successfully',
+        data: patient,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 
@@ -159,39 +159,38 @@ export class PatientService {
     id: string,
     updatePatientDto: UpdatePatientDto,
   ): Promise<ApiGetResponse<Patient>> {
-    try{
-    const updatedPatient = await this.patientModel
-      .findByIdAndUpdate(id, updatePatientDto, { new: true })
-      .exec();
-    if (!updatedPatient) throw new NotFoundException('Patient not found');
-    return {
-      success: true,
-      message: 'Patient update successfully',
-      data: updatedPatient,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+    try {
+      const updatedPatient = await this.patientModel
+        .findByIdAndUpdate(id, updatePatientDto, { new: true })
+        .exec();
+      if (!updatedPatient) throw new NotFoundException('Patient not found');
+      return {
+        success: true,
+        message: 'Patient update successfully',
+        data: updatedPatient,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 
-async deletePatient(id: string): Promise<ApiGetResponse<Patient>> {
-    try{
-    const patient = await this.patientModel.findById(id).exec();
-    if (!patient) throw new NotFoundException('Patient not found');
+  async deletePatient(id: string): Promise<ApiGetResponse<Patient>> {
+    try {
+      const patient = await this.patientModel.findById(id).exec();
+      if (!patient) throw new NotFoundException('Patient not found');
 
-    patient.deleted = true;
-    const deletedPatient = await patient.save();
+      patient.deleted = true;
+      const deletedPatient = await patient.save();
 
-    return {
-      success: true,
-      message: 'Patient marked as deleted successfully',
-      data: deletedPatient,
-    };  
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+      return {
+        success: true,
+        message: 'Patient marked as deleted successfully',
+        data: deletedPatient,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
-
 }

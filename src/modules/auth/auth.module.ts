@@ -26,5 +26,4 @@ import { SystemLogModule } from '../SystemLogAction/system-log.module'; // Impor
   providers: [AuthService, JwtStrategy], // Services
   exports: [AuthService], // Allows other modules to use AuthService
 })
-export class AuthModule {
-}
+export class AuthModule {}

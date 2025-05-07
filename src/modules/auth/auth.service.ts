@@ -8,7 +8,10 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ApiGetResponse } from 'src/common/utlis/paginate';
 import { PermissionsEnum } from 'src/config/permission.enum';
-import { SystemLogService, CreateLogDto } from '../SystemLogAction/system-log.service'; // Added import
+import {
+  SystemLogService,
+  CreateLogDto,
+} from '../SystemLogAction/system-log.service'; // Added import
 import { SystemLogAction } from '../SystemLogAction/log_schema'; // Added import
 import { Request } from 'express'; // Added import for Request
 
@@ -29,7 +32,7 @@ export class AuthService {
 
     if (!user) throw new UnauthorizedException('Invalid email or password');
 
-    if (!user.isActive) 
+    if (!user.isActive)
       throw new UnauthorizedException('User account is inactive.');
 
     if (user.deleted)
@@ -113,7 +116,7 @@ export class AuthService {
           roles: roles.map((r) => r.name),
           permissions: uniquePermissions,
           plan: user.plan,
-            },
+        },
       },
     };
   }

@@ -53,103 +53,105 @@ export class ClinicService {
   async createClinic(
     createClinicDto: CreateClinicDto,
   ): Promise<ApiGetResponse<Clinic>> {
-    try{
-    const publicId = await generateUniquePublicId(this.clinicModel, 'cli');
+    try {
+      const publicId = await generateUniquePublicId(this.clinicModel, 'cli');
 
-    const newClinic = new this.clinicModel({
-      ...createClinicDto,
-      publicId,
-    });
-    const savedClinic = await newClinic.save();
-    return {
-      success: true,
-      message: 'Clinic created successfully',
-      data: savedClinic,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error.message)
+      const newClinic = new this.clinicModel({
+        ...createClinicDto,
+        publicId,
+      });
+      const savedClinic = await newClinic.save();
+      return {
+        success: true,
+        message: 'Clinic created successfully',
+        data: savedClinic,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error.message);
     }
   }
   async getAllClinics(paginationDto: PaginationAndFilterDto, filters: any) {
-    try{
-    let { page, limit, allData, sortBy, order } = paginationDto;
+    try {
+      let { page, limit, allData, sortBy, order } = paginationDto;
 
-    page = Number(page) || 1;
-    limit = Number(limit) || 10;
+      page = Number(page) || 1;
+      limit = Number(limit) || 10;
 
-    const sortField: string = sortBy ?? 'id';
-    const sort: Record<string, number> = {
-      [sortField]: order === 'asc' ? 1 : -1,
-    };
+      const sortField: string = sortBy ?? 'id';
+      const sort: Record<string, number> = {
+        [sortField]: order === 'asc' ? 1 : -1,
+      };
 
-    const searchConditions: any[] = [];
-    const filterConditions: any[] = [];
-    let specializationIds: string[] = [];
-    await applyBooleanFilter(filters, 'isActive', filterConditions);
+      const searchConditions: any[] = [];
+      const filterConditions: any[] = [];
+      let specializationIds: string[] = [];
+      await applyBooleanFilter(filters, 'isActive', filterConditions);
 
-    if (filters.search) {
-      const regex = new RegExp(filters.search, 'i');
-      searchConditions.push({ name: regex });
+      if (filters.search) {
+        const regex = new RegExp(filters.search, 'i');
+        searchConditions.push({ name: regex });
 
-      const specializations = await this.specializationModel
-        .find({ name: regex })
-        .select('_id');
-      specializationIds = specializations.map((spec) => spec._id.toString());
+        const specializations = await this.specializationModel
+          .find({ name: regex })
+          .select('_id');
+        specializationIds = specializations.map((spec) => spec._id.toString());
 
-      if (specializationIds.length) {
-        searchConditions.push({ specializations: { $in: specializationIds } });
+        if (specializationIds.length) {
+          searchConditions.push({
+            specializations: { $in: specializationIds },
+          });
+        }
       }
-    }
 
-    await applyModelFilter(
-      this.specializationModel,
-      filters,
-      'specializationName',
-      'name',
-      'specializations',
-      filterConditions,
-      page,
-      limit,
-    );
-
-    const fieldsToDelete = ['search', 'isActive', 'specializationName'];
-    fieldsToDelete.forEach((field) => delete filters[field]);
-    const finalFilter = buildFinalFilter(
-      filters,
-      searchConditions,
-      filterConditions,
-    );
-
-    const populateFields = [
-      { path: 'departmentId' },
-      { path: 'specializations', select: 'name' },
-      { path: 'insuranceCompany' },
-    ];
-
-    const result = await paginate(
-      this.clinicModel,
-      populateFields,
-      page,
-      limit,
-      allData,
-      finalFilter,
-      sort,
-    );
-
-    // إحصائيات لكل عيادة
-    if (result.data) {
-      const clinics = result.data;
-      const updatedClinics = await Promise.all(
-        clinics.map((clinic) => this.addStatsToClinic(clinic)),
+      await applyModelFilter(
+        this.specializationModel,
+        filters,
+        'specializationName',
+        'name',
+        'specializations',
+        filterConditions,
+        page,
+        limit,
       );
-      result.data = updatedClinics;
-    }
 
-    return result;
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error.message)
+      const fieldsToDelete = ['search', 'isActive', 'specializationName'];
+      fieldsToDelete.forEach((field) => delete filters[field]);
+      const finalFilter = buildFinalFilter(
+        filters,
+        searchConditions,
+        filterConditions,
+      );
+
+      const populateFields = [
+        { path: 'departmentId' },
+        { path: 'specializations', select: 'name' },
+        { path: 'insuranceCompany' },
+      ];
+
+      const result = await paginate(
+        this.clinicModel,
+        populateFields,
+        page,
+        limit,
+        allData,
+        finalFilter,
+        sort,
+      );
+
+      // إحصائيات لكل عيادة
+      if (result.data) {
+        const clinics = result.data;
+        const updatedClinics = await Promise.all(
+          clinics.map((clinic) => this.addStatsToClinic(clinic)),
+        );
+        result.data = updatedClinics;
+      }
+
+      return result;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error.message);
     }
   }
   async addStatsToClinic(clinic: any) {
@@ -219,13 +221,8 @@ export class ClinicService {
         this.employeeModel
           .find({ clinics: id, employeeType: 'Doctor' })
           .populate(['departmentId', 'specializations']),
-        this.serviceModel
-          .find({ clinic: id })
-          .populate(['doctors']),
-          this.employeeModel
-          .find({ clinics: id })
-          .select('name') 
-          
+        this.serviceModel.find({ clinic: id }).populate(['doctors']),
+        this.employeeModel.find({ clinics: id }).select('name'),
       ]);
 
       if (!clinic) throw new NotFoundException('Clinic not found');
@@ -242,7 +239,6 @@ export class ClinicService {
       clinicObj['doctors'] = doctors;
       clinicObj['services'] = services;
       clinicObj['employees'] = employees;
-    
 
       return {
         success: true,
@@ -262,42 +258,40 @@ export class ClinicService {
     id: string,
     updateClinicDto: UpdateClinicDto,
   ): Promise<ApiGetResponse<Clinic>> {
-    try{
-    const updatedClinic = await this.clinicModel
-      .findByIdAndUpdate(id, updateClinicDto, { new: true })
-      .populate(['departmentId']);
-    if (!updatedClinic) throw new NotFoundException('Clinic not found');
-    return {
-      success: true,
-      message: 'Clinic update successfully',
-      data: updatedClinic,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error.message)
+    try {
+      const updatedClinic = await this.clinicModel
+        .findByIdAndUpdate(id, updateClinicDto, { new: true })
+        .populate(['departmentId']);
+      if (!updatedClinic) throw new NotFoundException('Clinic not found');
+      return {
+        success: true,
+        message: 'Clinic update successfully',
+        data: updatedClinic,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error.message);
     }
   }
 
-  
-async deleteClinic(id: string): Promise<ApiGetResponse<Clinic>> {
-  try{
-  const clinic = await this.clinicModel.findById(id).exec();
-  if (!clinic) throw new NotFoundException('Clinic not found');
+  async deleteClinic(id: string): Promise<ApiGetResponse<Clinic>> {
+    try {
+      const clinic = await this.clinicModel.findById(id).exec();
+      if (!clinic) throw new NotFoundException('Clinic not found');
 
-  clinic.deleted = true;
-  const deletedClinic = await clinic.save();
+      clinic.deleted = true;
+      const deletedClinic = await clinic.save();
 
-  return {
-    success: true,
-    message: 'Clinic marked as deleted successfully',
-    data: deletedClinic,
-  };  
-  }catch(error){
-    console.log(error)
-    throw new BadRequestException(error.message)
+      return {
+        success: true,
+        message: 'Clinic marked as deleted successfully',
+        data: deletedClinic,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error.message);
+    }
   }
-}
-
 
   async getCountByClinicCollectionId(
     clinicCollectionId: string,
@@ -336,7 +330,9 @@ async deleteClinic(id: string): Promise<ApiGetResponse<Clinic>> {
     };
   }
 
-  async getClinicsByDepartment(departmentId: string): Promise<ApiGetResponse<any>> {
+  async getClinicsByDepartment(
+    departmentId: string,
+  ): Promise<ApiGetResponse<any>> {
     const clinics = await this.clinicModel
       .find({ departmentId })
       .populate(['departmentId', 'specializations', 'insuranceCompany'])

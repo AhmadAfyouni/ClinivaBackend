@@ -7,10 +7,12 @@ import { SystemLogService } from './system-log.service';
 
 @Module({
   imports: [
-    MongooseModule.forFeature([{ name: SystemLog.name, schema: SystemLogSchema }]),
+    MongooseModule.forFeature([
+      { name: SystemLog.name, schema: SystemLogSchema },
+    ]),
   ],
   providers: [SystemLogService],
-  exports: [SystemLogService], 
-//   controllers: [SystemLogController], // Will be uncommented when the controller is ready
+  exports: [SystemLogService],
+  //   controllers: [SystemLogController], // Will be uncommented when the controller is ready
 })
 export class SystemLogModule {}

@@ -22,7 +22,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
         // Handling connection errors and logging details
         try {
           const mongoose = require('mongoose');
-          mongoose.connect(mongoUri, { dbName })
+          mongoose
+            .connect(mongoUri, { dbName })
             .then(() => {
               console.log('Successfully connected to MongoDB');
             })
@@ -31,7 +32,10 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
               // process.exit(1); // Exit the process if the connection fails
             });
         } catch (error) {
-          console.error('An unexpected error occurred while connecting to MongoDB:', error.message);
+          console.error(
+            'An unexpected error occurred while connecting to MongoDB:',
+            error.message,
+          );
           // process.exit(1); // Exit the process if an unexpected error occurs
         }
 
@@ -42,5 +46,4 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   ],
   exports: [MongooseModule],
 })
-export class DatabaseModule {
-}
+export class DatabaseModule {}

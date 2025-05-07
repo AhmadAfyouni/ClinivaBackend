@@ -24,10 +24,23 @@ import {
   OnlinePaymentMethod,
   WorkingHours,
 } from '../../../common/utlis/helper';
-import { BankAccountDTO, CashBoxDTO, CommercialRecordDTO, ContactInfoDTO, HolidayDTO, InsuranceCompanyDTO, OnlinePaymentMethodDTO, WorkingHoursDTO } from 'src/common/utlis/helper.dto';
+import {
+  BankAccountDTO,
+  CashBoxDTO,
+  CommercialRecordDTO,
+  ContactInfoDTO,
+  HolidayDTO,
+  InsuranceCompanyDTO,
+  OnlinePaymentMethodDTO,
+  WorkingHoursDTO,
+} from 'src/common/utlis/helper.dto';
 
 export class CreateClinicCollectionDto {
-  @ApiProperty({ description: 'Clinic Collection name', example: 'Saudi Clinics Group', required: true })
+  @ApiProperty({
+    description: 'Clinic Collection name',
+    example: 'Saudi Clinics Group',
+    required: true,
+  })
   @IsString()
   @IsNotEmpty()
   name: string;
@@ -43,16 +56,17 @@ export class CreateClinicCollectionDto {
 
   @IsNumber()
   @IsOptional()
-  patientCapacity: number;  // قدرة استيعاب المرضى
+  patientCapacity: number; // قدرة استيعاب المرضى
 
   @ApiProperty({
     description: 'General policies of the clinic collection',
-    example: 'The clinic follows strict hygiene standards and ensures the safety of patients.',
+    example:
+      'The clinic follows strict hygiene standards and ensures the safety of patients.',
     required: false,
   })
   @IsOptional()
   @IsString()
-  policies?: string;  //  حقل السياسات العامة
+  policies?: string; //  حقل السياسات العامة
 
   @ApiProperty({
     description: 'Clinic Collection activation status',
@@ -113,7 +127,6 @@ export class CreateClinicCollectionDto {
     type: [ContactInfoDTO],
     description: 'Contact information of the clinic collection ',
     required: false,
-  
   })
   @IsArray()
   @ValidateNested({ each: true })
@@ -125,16 +138,12 @@ export class CreateClinicCollectionDto {
     type: [HolidayDTO],
     description: 'Clinic collection holidays',
     required: false,
-  
   })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => HolidayDTO)
   @IsOptional()
   holidays?: HolidayDTO[];
-
-
-
 
   @ApiProperty({
     type: [WorkingHoursDTO],
@@ -149,9 +158,9 @@ export class CreateClinicCollectionDto {
 
   @ApiProperty({
     type: [BankAccountDTO],
-    description: 'Bank accounts associated with the clinic collection  (اذا مافي شركة)',
+    description:
+      'Bank accounts associated with the clinic collection  (اذا مافي شركة)',
     required: false,
-
   })
   @IsArray()
   @ValidateNested({ each: true })
@@ -163,7 +172,6 @@ export class CreateClinicCollectionDto {
     type: [InsuranceCompanyDTO],
     description: 'Accepted insurance companies  (اذا مافي شركة)',
     required: false,
-   
   })
   @IsArray()
   @ValidateNested({ each: true })
@@ -175,26 +183,33 @@ export class CreateClinicCollectionDto {
     type: CommercialRecordDTO,
     description: 'Commercial record of the clinic collection  (اذا مافي شركة)',
     required: false,
-  
   })
   @IsOptional()
   @ValidateNested()
   @Type(() => CommercialRecordDTO)
   commercialRecord?: CommercialRecordDTO;
 
-    @ApiPropertyOptional({ type: [CashBoxDTO], description: 'Company cash boxes  (اذا مافي شركة)', required: false })
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => CashBoxDTO)
-    @IsOptional()
-    cashBoxes?: CashBoxDTO[];
- 
-    @ApiPropertyOptional({ type: [OnlinePaymentMethodDTO], description: 'Accepted online payment methods  (اذا مافي شركة)', required: false })
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => OnlinePaymentMethodDTO)
-    @IsOptional()
-    onlinePaymentMethods?: OnlinePaymentMethodDTO[];
+  @ApiPropertyOptional({
+    type: [CashBoxDTO],
+    description: 'Company cash boxes  (اذا مافي شركة)',
+    required: false,
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CashBoxDTO)
+  @IsOptional()
+  cashBoxes?: CashBoxDTO[];
+
+  @ApiPropertyOptional({
+    type: [OnlinePaymentMethodDTO],
+    description: 'Accepted online payment methods  (اذا مافي شركة)',
+    required: false,
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OnlinePaymentMethodDTO)
+  @IsOptional()
+  onlinePaymentMethods?: OnlinePaymentMethodDTO[];
 
   @ApiProperty({
     description: 'Google Maps location coordinates',
@@ -215,7 +230,8 @@ export class CreateClinicCollectionDto {
   companyId?: Types.ObjectId;
 
   @ApiProperty({
-    description: 'List of specialization IDs associated with the clinic collection',
+    description:
+      'List of specialization IDs associated with the clinic collection',
     example: ['60f7c7b84f1a2c001c8b4567', '60f7c7b84f1a2c001c8b4568'],
     required: true,
   })

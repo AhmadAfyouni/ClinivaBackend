@@ -32,7 +32,6 @@ export class AppointmentController {
 
   @Post()
   @Permissions(PermissionsEnum.APPOINTMENT_CREATE)
-
   async create(@Body() createAppointmentDto: CreateAppointmentDto) {
     return this.appointmentService.createAppointment(createAppointmentDto);
   }
@@ -44,6 +43,7 @@ export class AppointmentController {
     @Query() queryParams: any,
     @Request() req,
   ) {
+
     const userId = req.user?.userId;
     if (!userId) throw new BadRequestException('User ID is missing');
     
@@ -63,19 +63,18 @@ export class AppointmentController {
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
     filters.employeeId = employeeId;
     
+
     return this.appointmentService.getAllAppointments(paginationDto, filters);
   }
 
   @Get(':id')
   @Permissions(PermissionsEnum.APPOINTMENT_VIEW)
-
   async findOne(@Param('id') id: string) {
     return this.appointmentService.getAppointmentById(id);
   }
 
   @Put(':id')
   @Permissions(PermissionsEnum.APPOINTMENT_UPDATE)
-
   async update(
     @Param('id') id: string,
     @Body() updateAppointmentDto: UpdateAppointmentDto,
@@ -85,7 +84,6 @@ export class AppointmentController {
 
   @Delete(':id')
   @Permissions(PermissionsEnum.APPOINTMENT_DELETE)
-
   async remove(@Param('id') id: string) {
     return this.appointmentService.deleteAppointment(id);
   }

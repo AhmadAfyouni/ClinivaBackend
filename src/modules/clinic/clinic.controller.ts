@@ -31,7 +31,7 @@ export class ClinicController {
   ) {}
 
   @Post()
-   @Permissions(PermissionsEnum.ADMIN)
+  @Permissions(PermissionsEnum.ADMIN)
   async createClinic(@Body() createClinicDto: CreateClinicDto) {
     return this.clinicService.createClinic(createClinicDto);
   }
@@ -54,13 +54,13 @@ export class ClinicController {
   }
 
   @Get('by-department/:deptId')
-   @Permissions(PermissionsEnum.ADMIN)
+  @Permissions(PermissionsEnum.ADMIN)
   async getClinicsByDepartment(@Param('deptId') deptId: string) {
     return this.clinicService.getClinicsByDepartment(deptId);
   }
 
   @Put(':id')
-   @Permissions(PermissionsEnum.ADMIN)
+  @Permissions(PermissionsEnum.ADMIN)
   async updateClinic(
     @Param('id') id: string,
     @Body() updateClinicDto: UpdateClinicDto,
@@ -69,13 +69,13 @@ export class ClinicController {
   }
 
   @Delete(':id')
-   @Permissions(PermissionsEnum.ADMIN)
+  @Permissions(PermissionsEnum.ADMIN)
   async deleteClinic(@Param('id') id: string) {
     return this.clinicService.deleteClinic(id);
   }
 
   @Get('count/by-cliniccollection/:clinicCollectionId')
-   @Permissions(PermissionsEnum.ADMIN)
+  @Permissions(PermissionsEnum.ADMIN)
   getDepartmentCount(@Param('clinicCollectionId') clinicCollectionId: string) {
     return this.clinicService.getCountByClinicCollectionId(clinicCollectionId);
   }

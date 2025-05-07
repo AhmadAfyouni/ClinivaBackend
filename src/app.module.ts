@@ -45,7 +45,7 @@ import { PermissionModule } from './modules/permission/permission.module';
     EmployeeModule,
     DepartmentModule,
     ClinicModule,
-   
+
     PatientModule,
     AppointmentModule,
     MedicalRecordModule,
@@ -74,5 +74,4 @@ import { PermissionModule } from './modules/permission/permission.module';
     },
   ],
 })
-export class AppModule {
-}
+export class AppModule {}

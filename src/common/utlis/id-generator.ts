@@ -10,7 +10,7 @@ export const generateUniquePublicId = async (
 
   while (!isUnique) {
     const random = generateRandomNumber(4); // مثلاً: 9271
-    publicId = `${prefix}-${random}`;       // مثال: doc-9271
+    publicId = `${prefix}-${random}`; // مثال: doc-9271
 
     const exists = await model.findOne({ [field]: publicId });
     if (!exists) {

@@ -12,7 +12,6 @@ export enum PermissionsEnum {
   ROLE_UPDATE = 'role_update',
   ROLE_DELETE = 'role_delete',
 
-
   PATIENT_VIEW = 'patient_view',
   PATIENT_CREATE = 'patient_create',
   PATIENT_UPDATE = 'patient_update',
@@ -69,6 +68,6 @@ export enum PermissionsEnum {
   SERVICE_CREATE = 'service_create',
   SERVICE_UPDATE = 'service_update',
   SERVICE_DELETE = 'service_delete',
-  
+
   REPORTS_VIEW = 'reports_view',
 }

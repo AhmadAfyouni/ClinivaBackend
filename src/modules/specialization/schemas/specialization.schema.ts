@@ -32,7 +32,8 @@ export class Specialization {
   publicId: string;
 
   @Prop({ type: Boolean, default: false })
-    deleted: boolean;
+  deleted: boolean;
 }
 
-export const SpecializationSchema = SchemaFactory.createForClass(Specialization);
+export const SpecializationSchema =
+  SchemaFactory.createForClass(Specialization);

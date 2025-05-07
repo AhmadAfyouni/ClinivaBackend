@@ -40,167 +40,167 @@ export class EmployeeService {
   async createEmployee(
     createEmployeeDto: CreateEmployeeDto,
   ): Promise<ApiGetResponse<Employee>> {
-    try{
-    const publicId = await generateUniquePublicId(this.employeeModel, 'emp');
-    const newEmployee = new this.employeeModel({
-      ...createEmployeeDto,
-      publicId,
-    });
-    const savedEmployee = await newEmployee.save();
-    return {
-      success: true,
-      message: 'Employee created successfully',
-      data: savedEmployee,
-    };
-  }catch(error){
-    console.log(error)
-    throw new BadRequestException(error)
-  }
+    try {
+      const publicId = await generateUniquePublicId(this.employeeModel, 'emp');
+      const newEmployee = new this.employeeModel({
+        ...createEmployeeDto,
+        publicId,
+      });
+      const savedEmployee = await newEmployee.save();
+      return {
+        success: true,
+        message: 'Employee created successfully',
+        data: savedEmployee,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
+    }
   }
 
   async getAllEmployees(paginationDto: PaginationAndFilterDto, filters: any) {
-    try{
-    let { page, limit, allData, sortBy, order } = paginationDto;
+    try {
+      let { page, limit, allData, sortBy, order } = paginationDto;
 
-    page = Number(page) || 1;
-    limit = Number(limit) || 10;
-    console.log(filters);
-    console.log(filters);
-    const sortField: string = sortBy ?? 'id';
-    const sort: Record<string, number> = {
-      [sortField]: order === 'asc' ? 1 : -1,
-    };
+      page = Number(page) || 1;
+      limit = Number(limit) || 10;
+      console.log(filters);
+      console.log(filters);
+      const sortField: string = sortBy ?? 'id';
+      const sort: Record<string, number> = {
+        [sortField]: order === 'asc' ? 1 : -1,
+      };
 
-    const searchConditions: any[] = [];
-    const filterConditions: any[] = [];
-    const allowedEmployeeTypes = [
-      'Doctor',
-      'Nurse',
-      'Technician',
-      'Administrative',
-      'Employee',
-      'PIC',
-      'Other',
-    ];
+      const searchConditions: any[] = [];
+      const filterConditions: any[] = [];
+      const allowedEmployeeTypes = [
+        'Doctor',
+        'Nurse',
+        'Technician',
+        'Administrative',
+        'Employee',
+        'PIC',
+        'Other',
+      ];
 
-    // معالجة isActive
-    await applyBooleanFilter(filters, 'isActive', filterConditions);
+      // معالجة isActive
+      await applyBooleanFilter(filters, 'isActive', filterConditions);
 
-    // employeeType
-    if (filters.employeeType) {
-      if (filters.employeeType === 'null') {
-      } else if (allowedEmployeeTypes.includes(filters.employeeType)) {
-        filterConditions.push({ employeeType: filters.employeeType });
-      } else {
-        throw new BadRequestException(
-          `Invalid employeeType. Allowed values: ${allowedEmployeeTypes.join(', ')}`,
+      // employeeType
+      if (filters.employeeType) {
+        if (filters.employeeType === 'null') {
+        } else if (allowedEmployeeTypes.includes(filters.employeeType)) {
+          filterConditions.push({ employeeType: filters.employeeType });
+        } else {
+          throw new BadRequestException(
+            `Invalid employeeType. Allowed values: ${allowedEmployeeTypes.join(', ')}`,
+          );
+        }
+      }
+
+      // filter by clinic id
+      if (filters.clinicId) {
+        filterConditions.push({ clinics: filters.clinicId });
+        delete filters.clinicId;
+      }
+
+      // استخدام الدالة الموحدة لفلترة المجمع الطبي
+      const clinicResult = await applyModelFilter(
+        this.clinicCollectionModel,
+        filters,
+        'clinicCollectionName',
+        'name',
+        'clinicCollectionId',
+        filterConditions,
+        page,
+        limit,
+      );
+      if (clinicResult) return clinicResult;
+
+      // استخدام الدالة الموحدة لفلترة القسم
+      const departmentResult = await applyModelFilter(
+        this.departmentModel,
+        filters,
+        'departmentName',
+        'name',
+        'departmentId',
+        filterConditions,
+        page,
+        limit,
+      );
+      if (departmentResult) return departmentResult;
+
+      // البحث المرن
+      if (filters.search) {
+        const regex = new RegExp(filters.search, 'i');
+        searchConditions.push(
+          { name: regex },
+          { identity: regex },
+          { nationality: regex },
+          { address: regex },
+          { specialties: { $in: [regex] } },
+          { Languages: { $in: [regex] } },
+          { professional_experience: regex },
         );
       }
-    }
 
-    // filter by clinic id
-    if (filters.clinicId) {
-      filterConditions.push({ clinics: filters.clinicId });
-      delete filters.clinicId;
-    }
+      // حذف الحقول بعد معالجتها
+      const fieldsToDelete = [
+        'search',
+        'isActive',
+        'employeeType',
+        'clinicCollectionName',
+        'departmentName',
+      ];
+      fieldsToDelete.forEach((field) => delete filters[field]);
 
-    // استخدام الدالة الموحدة لفلترة المجمع الطبي
-    const clinicResult = await applyModelFilter(
-      this.clinicCollectionModel,
-      filters,
-      'clinicCollectionName',
-      'name',
-      'clinicCollectionId',
-      filterConditions,
-      page,
-      limit,
-    );
-    if (clinicResult) return clinicResult;
+      const finalFilter = {
+        ...(searchConditions.length > 0 && { $or: searchConditions }),
+        ...(filterConditions.length > 0 && { $and: filterConditions }),
+      };
 
-    // استخدام الدالة الموحدة لفلترة القسم
-    const departmentResult = await applyModelFilter(
-      this.departmentModel,
-      filters,
-      'departmentName',
-      'name',
-      'departmentId',
-      filterConditions,
-      page,
-      limit,
-    );
-    if (departmentResult) return departmentResult;
-
-    // البحث المرن
-    if (filters.search) {
-      const regex = new RegExp(filters.search, 'i');
-      searchConditions.push(
-        { name: regex },
-        { identity: regex },
-        { nationality: regex },
-        { address: regex },
-        { specialties: { $in: [regex] } },
-        { Languages: { $in: [regex] } },
-        { professional_experience: regex },
+      return paginate(
+        this.employeeModel,
+        [
+          'companyId',
+          { path: 'clinicCollectionId', select: 'name' },
+          { path: 'departmentId', select: 'name' },
+          'clinics',
+          'specializations',
+        ],
+        page,
+        limit,
+        allData,
+        finalFilter,
+        sort,
       );
-    }
-
-    // حذف الحقول بعد معالجتها
-    const fieldsToDelete = [
-      'search',
-      'isActive',
-      'employeeType',
-      'clinicCollectionName',
-      'departmentName',
-    ];
-    fieldsToDelete.forEach((field) => delete filters[field]);
-
-    const finalFilter = {
-      ...(searchConditions.length > 0 && { $or: searchConditions }),
-      ...(filterConditions.length > 0 && { $and: filterConditions }),
-    };
-
-    return paginate(
-      this.employeeModel,
-      [
-        'companyId',
-        { path: 'clinicCollectionId', select: 'name' },
-        { path: 'departmentId', select: 'name' },
-        'clinics',
-        'specializations',
-      ],
-      page,
-      limit,
-      allData,
-      finalFilter,
-      sort,
-    );
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 
   async getEmployeeById(id: string): Promise<ApiGetResponse<Employee>> {
-    try{
-    const employee = await this.employeeModel
-      .findById(id)
-      .populate([
-        'companyId',
-        'clinicCollectionId',
-        'departmentId',
-        'clinics',
-        'specializations',
-      ])
-      .exec();
-    if (!employee) throw new NotFoundException('Employee not found');
-    return {
-      success: true,
-      message: 'Employee retrieved successfully',
-      data: employee,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+    try {
+      const employee = await this.employeeModel
+        .findById(id)
+        .populate([
+          'companyId',
+          'clinicCollectionId',
+          'departmentId',
+          'clinics',
+          'specializations',
+        ])
+        .exec();
+      if (!employee) throw new NotFoundException('Employee not found');
+      return {
+        success: true,
+        message: 'Employee retrieved successfully',
+        data: employee,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 
@@ -208,61 +208,61 @@ export class EmployeeService {
     id: string,
     updateEmployeeDto: UpdateEmployeeDto,
   ): Promise<ApiGetResponse<Employee>> {
-    try{
-    const updatedEmployee = await this.employeeModel
-      .findByIdAndUpdate(id, updateEmployeeDto, { new: true })
-      .exec();
-    if (!updatedEmployee) throw new NotFoundException('Employee not found');
+    try {
+      const updatedEmployee = await this.employeeModel
+        .findByIdAndUpdate(id, updateEmployeeDto, { new: true })
+        .exec();
+      if (!updatedEmployee) throw new NotFoundException('Employee not found');
 
-    return {
-      success: true,
-      message: 'Employee update successfully',
-      data: updatedEmployee,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+      return {
+        success: true,
+        message: 'Employee update successfully',
+        data: updatedEmployee,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 
-async deleteEmployee(id: string): Promise<ApiGetResponse<Employee>> {
-    try{
-    const employee = await this.employeeModel.findById(id).exec();
-    if (!employee) throw new NotFoundException('Employee not found');
+  async deleteEmployee(id: string): Promise<ApiGetResponse<Employee>> {
+    try {
+      const employee = await this.employeeModel.findById(id).exec();
+      if (!employee) throw new NotFoundException('Employee not found');
 
-    employee.deleted = true;
-    const deletedEmployee = await employee.save();
+      employee.deleted = true;
+      const deletedEmployee = await employee.save();
 
-    return {
-      success: true,
-      message: 'Employee marked as deleted successfully',
-      data: deletedEmployee,
-    };  
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+      return {
+        success: true,
+        message: 'Employee marked as deleted successfully',
+        data: deletedEmployee,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 
   async getEmployeesWithoutUser(): Promise<ApiGetResponse<Employee[]>> {
-    try{
-    // fetch all user-linked employee IDs
-    const users = await this.userModel.find().select('employeeId').exec();
-    const userEmpIds = users.map((u) => u.employeeId.toString());
-    // find employees not in user table
-    const employees = await this.employeeModel
-      .find({
-        _id: { $nin: userEmpIds },
-      })
-      .exec();
-    return {
-      success: true,
-      message: 'Employees without user retrieved successfully',
-      data: employees,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+    try {
+      // fetch all user-linked employee IDs
+      const users = await this.userModel.find().select('employeeId').exec();
+      const userEmpIds = users.map((u) => u.employeeId.toString());
+      // find employees not in user table
+      const employees = await this.employeeModel
+        .find({
+          _id: { $nin: userEmpIds },
+        })
+        .exec();
+      return {
+        success: true,
+        message: 'Employees without user retrieved successfully',
+        data: employees,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 }

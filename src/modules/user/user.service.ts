@@ -22,7 +22,10 @@ import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { RoleDocument, Role } from '../role/schemas/role.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 import { Employee } from '../employee/schemas/employee.schema';
-import { SystemLogService, CreateLogDto } from '../SystemLogAction/system-log.service'; // Adjust path if necessary
+import {
+  SystemLogService,
+  CreateLogDto,
+} from '../SystemLogAction/system-log.service'; // Adjust path if necessary
 import { SystemLogAction } from '../SystemLogAction/log_schema'; // Corrected import for SystemLogAction
 @Injectable()
 export class UserService {
@@ -35,148 +38,148 @@ export class UserService {
   async createUser(
     createUserDto: CreateUserDto,
   ): Promise<ApiGetResponse<User>> {
-    try{
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(
-      createUserDto.password,
-      saltRounds,
-    ); // ✅ تشفير كلمة المرور
-    const publicId = await generateUniquePublicId(this.userModel, 'us');
-    const newUser = new this.userModel({
-      ...createUserDto,
-      password: hashedPassword,
-      publicId,
-    });
-    const savedUser = await newUser.save();
+    try {
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(
+        createUserDto.password,
+        saltRounds,
+      ); // ✅ تشفير كلمة المرور
+      const publicId = await generateUniquePublicId(this.userModel, 'us');
+      const newUser = new this.userModel({
+        ...createUserDto,
+        password: hashedPassword,
+        publicId,
+      });
+      const savedUser = await newUser.save();
 
-    return {
-      success: true,
-      message: 'user created successfully',
-      data: savedUser,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+      return {
+        success: true,
+        message: 'user created successfully',
+        data: savedUser,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 
   async getAllUsers(paginationDto: PaginationAndFilterDto, filters: any) {
-    try{
-    let { page, limit, allData, sortBy, order } = paginationDto;
+    try {
+      let { page, limit, allData, sortBy, order } = paginationDto;
 
-    // Convert page & limit to numbers
-    page = Number(page) || 1;
-    limit = Number(limit) || 10;
+      // Convert page & limit to numbers
+      page = Number(page) || 1;
+      limit = Number(limit) || 10;
 
-    // تحديد حقل الفرز الافتراضي
-    const sortField: string = sortBy ?? 'id';
-    const sort: { [key: string]: 1 | -1 } = {
-      [sortField]: order === 'asc' ? 1 : -1,
-    }; // تحديد الاتجاه بناءً على 'asc' أو 'desc'
-    console.log(sortField);
-    const searchConditions: any[] = [];
-    const filterConditions: any[] = [];
-    let RoleIds: string[] = [];
-    // By default, filter out deleted users    3.3
-    //  explicitly requested
-    if (!filters.hasOwnProperty('deleted')) {
-      filterConditions.push({ deleted: false });
-      console.log("deleted")
-    } else {
-      await applyBooleanFilter(filters, 'deleted', filterConditions);
-    }
-    
-    await applyBooleanFilter(filters, 'isActive', filterConditions);
-    if (filters.search) {
-      const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
-
-      const searchOrConditions: Record<string, any>[] = [
-        { name: regex },
-        { email: regex },
-      ];
-
-      const Roles = await this.roleModel.find({ name: regex }).select('_id');
-      RoleIds = Roles.map((role) => role._id.toString());
-
-      if (RoleIds.length > 0) {
-        searchOrConditions.push({ roleIds: { $in: RoleIds } });
+      // تحديد حقل الفرز الافتراضي
+      const sortField: string = sortBy ?? 'id';
+      const sort: { [key: string]: 1 | -1 } = {
+        [sortField]: order === 'asc' ? 1 : -1,
+      }; // تحديد الاتجاه بناءً على 'asc' أو 'desc'
+      console.log(sortField);
+      const searchConditions: any[] = [];
+      const filterConditions: any[] = [];
+      let RoleIds: string[] = [];
+      // By default, filter out deleted users    3.3
+      //  explicitly requested
+      if (!filters.hasOwnProperty('deleted')) {
+        filterConditions.push({ deleted: false });
+        console.log('deleted');
+      } else {
+        await applyBooleanFilter(filters, 'deleted', filterConditions);
       }
 
-      searchConditions.push({ $or: searchOrConditions });
-    }
+      await applyBooleanFilter(filters, 'isActive', filterConditions);
+      if (filters.search) {
+        const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
 
-    // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
-    addDateFilter(filters, 'createdAt', searchConditions);
-    const roleResult = await applyModelFilter(
-      this.roleModel,
-      filters,
-      'roleName',
-      'name',
-      'roleIds',
-      filterConditions,
-      page,
-      limit,
-    );
-    if (roleResult) return roleResult;
+        const searchOrConditions: Record<string, any>[] = [
+          { name: regex },
+          { email: regex },
+        ];
 
-    const fieldsToDelete = ['search', 'isActive', 'roleName', 'createdAt'];
-    fieldsToDelete.forEach((field) => delete filters[field]);
-    const finalFilter = buildFinalFilter(
-      filters,
-      searchConditions,
-      filterConditions,
-    );
+        const Roles = await this.roleModel.find({ name: regex }).select('_id');
+        RoleIds = Roles.map((role) => role._id.toString());
 
-    const result = await paginate(
-      this.userModel,
-      [{ path: 'roleIds', select: 'name' }, { path: 'employeeId' }],
-      page,
-      limit,
-      allData,
-      finalFilter,
-      sort,
-    );
+        if (RoleIds.length > 0) {
+          searchOrConditions.push({ roleIds: { $in: RoleIds } });
+        }
 
-    return result;
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+        searchConditions.push({ $or: searchOrConditions });
+      }
+
+      // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
+      addDateFilter(filters, 'createdAt', searchConditions);
+      const roleResult = await applyModelFilter(
+        this.roleModel,
+        filters,
+        'roleName',
+        'name',
+        'roleIds',
+        filterConditions,
+        page,
+        limit,
+      );
+      if (roleResult) return roleResult;
+
+      const fieldsToDelete = ['search', 'isActive', 'roleName', 'createdAt'];
+      fieldsToDelete.forEach((field) => delete filters[field]);
+      const finalFilter = buildFinalFilter(
+        filters,
+        searchConditions,
+        filterConditions,
+      );
+
+      const result = await paginate(
+        this.userModel,
+        [{ path: 'roleIds', select: 'name' }, { path: 'employeeId' }],
+        page,
+        limit,
+        allData,
+        finalFilter,
+        sort,
+      );
+
+      return result;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 
   async getUserById(id: string): Promise<ApiGetResponse<User>> {
-    try{
-    const user = await this.userModel
-      .findOne({ _id: id, deleted: false })
-      .populate(['roleIds', 'employeeId'])
-      .exec();
+    try {
+      const user = await this.userModel
+        .findOne({ _id: id, deleted: false })
+        .populate(['roleIds', 'employeeId'])
+        .exec();
 
-    if (!user) throw new NotFoundException('User not found or has been deleted');
+      if (!user)
+        throw new NotFoundException('User not found or has been deleted');
 
-    return {
-      success: true,
-      message: 'user retrieved successfully',
-      data: user,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+      return {
+        success: true,
+        message: 'user retrieved successfully',
+        data: user,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
-//   async getUserById(id: string): Promise<ApiGetResponse<User>> {
-//     const user = await this.userModel.findById(id).populate(['roleIds', 'employeeId']).exec();
+  //   async getUserById(id: string): Promise<ApiGetResponse<User>> {
+  //     const user = await this.userModel.findById(id).populate(['roleIds', 'employeeId']).exec();
 
-//     if (!user) throw new NotFoundException('User not found');
+  //     if (!user) throw new NotFoundException('User not found');
 
-//     return {
-//       success: true,
-//       message: 'user retrieved successfully',
-//       data: user,
-//     };
-// }
+  //     return {
+  //       success: true,
+  //       message: 'user retrieved successfully',
+  //       data: user,
+  //     };
+  // }
 
   async getUserByEmail(email: string): Promise<User> {
-    
     const user = await this.userModel.findOne({ email }).exec();
     if (!user) {
       throw new NotFoundException(`User with email ${email} not found`);
@@ -191,66 +194,69 @@ export class UserService {
     try {
       if (updateUserDto.password) {
         const salt = await bcrypt.genSalt();
-        updateUserDto.password = await bcrypt.hash(updateUserDto.password, salt);
+        updateUserDto.password = await bcrypt.hash(
+          updateUserDto.password,
+          salt,
+        );
       }
 
       const updatedUser = await this.userModel
-      .findByIdAndUpdate(id, updateUserDto, { new: true })
-      .exec();
-    if (!updatedUser) throw new NotFoundException('User not found');
+        .findByIdAndUpdate(id, updateUserDto, { new: true })
+        .exec();
+      if (!updatedUser) throw new NotFoundException('User not found');
 
-    try {
-      const logEntry: CreateLogDto = {
-        userId: updatedUser._id.toString(),
-        action: SystemLogAction.USER_PROFILE_UPDATE,
-        details: { updatedFields: Object.keys(updateUserDto) } 
+      try {
+        const logEntry: CreateLogDto = {
+          userId: updatedUser._id.toString(),
+          action: SystemLogAction.USER_PROFILE_UPDATE,
+          details: { updatedFields: Object.keys(updateUserDto) },
+        };
+        // logEntry.ipAddress = request?.ip;
+        // logEntry.userAgent = request?.headers?.['user-agent'];
+        await this.systemLogService.createLog(logEntry);
+      } catch (logError) {
+        console.error('Failed to create system log for user update:', logError);
+      }
+
+      return {
+        success: true,
+        message: 'User update successfully',
+        data: updatedUser,
       };
-      // logEntry.ipAddress = request?.ip;
-      // logEntry.userAgent = request?.headers?.['user-agent'];
-      await this.systemLogService.createLog(logEntry);
-    } catch (logError) {
-      console.error('Failed to create system log for user update:', logError);
-    }
-
-    return {
-      success: true,
-      message: 'User update successfully',
-      data: updatedUser,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 
   async deleteUser(id: string): Promise<ApiGetResponse<User>> {
-    try{
-    const user = await this.userModel.findById(id).exec();
-    if (!user) throw new NotFoundException('User not found');
-
-    user.deleted = true;
-    user.isActive = false;
-    const deletedUser = await user.save();
-
     try {
-      const logEntry: CreateLogDto = {
-        userId: deletedUser._id.toString(),
-        action: SystemLogAction.USER_PROFILE_UPDATE, 
-        details: { reason: 'User soft deleted' }
-      };
-      await this.systemLogService.createLog(logEntry);
-    } catch (logError) {
-      console.error('Failed to create system log for user delete:', logError);
-    }
+      const user = await this.userModel.findById(id).exec();
+      if (!user) throw new NotFoundException('User not found');
 
-    return {
-      success: true,
-      message: 'User marked as deleted successfully',
-      data: deletedUser,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+      user.deleted = true;
+      user.isActive = false;
+      const deletedUser = await user.save();
+
+      try {
+        const logEntry: CreateLogDto = {
+          userId: deletedUser._id.toString(),
+          action: SystemLogAction.USER_PROFILE_UPDATE,
+          details: { reason: 'User soft deleted' },
+        };
+        await this.systemLogService.createLog(logEntry);
+      } catch (logError) {
+        console.error('Failed to create system log for user delete:', logError);
+      }
+
+      return {
+        success: true,
+        message: 'User marked as deleted successfully',
+        data: deletedUser,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 
@@ -308,21 +314,21 @@ export class UserService {
     userId: string,
     isActive: boolean,
   ): Promise<ApiGetResponse<User>> {
-    try{
-    const user = await this.userModel
-      .findByIdAndUpdate(userId, { isActive }, { new: true })
-      .exec();
-    
-    if (!user) throw new NotFoundException('User not found');
+    try {
+      const user = await this.userModel
+        .findByIdAndUpdate(userId, { isActive }, { new: true })
+        .exec();
 
-    return {
-      success: true,
-      message: `User ${isActive ? 'activated' : 'deactivated'} successfully`,
-      data: user,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+      if (!user) throw new NotFoundException('User not found');
+
+      return {
+        success: true,
+        message: `User ${isActive ? 'activated' : 'deactivated'} successfully`,
+        data: user,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 }

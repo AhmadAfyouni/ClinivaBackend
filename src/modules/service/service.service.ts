@@ -73,8 +73,8 @@ export class ServiceService {
           'A service with this name already exists for the same clinic and doctor.',
         );
       }
-     const publicId = await generateUniquePublicId(this.serviceModel, 'ser');
-      
+      const publicId = await generateUniquePublicId(this.serviceModel, 'ser');
+
       const service = new this.serviceModel({
         ...createServiceDto,
         isActive: true,
@@ -179,24 +179,22 @@ export class ServiceService {
     }
   }
 
+  async deleteService(id: string): Promise<ApiGetResponse<Service>> {
+    try {
+      const service = await this.serviceModel.findById(id).exec();
+      if (!service) throw new NotFoundException('Service not found');
 
-async deleteService(id: string): Promise<ApiGetResponse<Service>> {
-    try{
-    const service = await this.serviceModel.findById(id).exec();
-    if (!service) throw new NotFoundException('Service not found');
+      service.deleted = true;
+      const deletedService = await service.save();
 
-    service.deleted = true;
-    const deletedService = await service.save();
-
-    return {
-      success: true,
-      message: 'Service marked as deleted successfully',
-      data: deletedService,
-    };  
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+      return {
+        success: true,
+        message: 'Service marked as deleted successfully',
+        data: deletedService,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
-
 }

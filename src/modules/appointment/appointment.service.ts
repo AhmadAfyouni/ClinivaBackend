@@ -204,170 +204,169 @@ export class AppointmentService {
     paginationDto: PaginationAndFilterDto,
     filters: any,
   ) {
-    try{
-    let { page, limit, allData, sortBy, order } = paginationDto;
+    try {
+      let { page, limit, allData, sortBy, order } = paginationDto;
 
-    // تحويل الباجينيشين إلى أرقام
-    page = Number(page) || 1;
-    limit = Number(limit) || 10;
+      // تحويل الباجينيشين إلى أرقام
+      page = Number(page) || 1;
+      limit = Number(limit) || 10;
 
-    const sortField: string = sortBy ?? 'id';
-    const sort: Record<string, number> = {
-      [sortField]: order === 'asc' ? 1 : -1,
-    };
+      const sortField: string = sortBy ?? 'id';
+      const sort: Record<string, number> = {
+        [sortField]: order === 'asc' ? 1 : -1,
+      };
 
-    let doctorIds: string[] = [];
-    let patientIds: string[] = [];
-    const searchConditions: any[] = [];
-    const searchTerm = filters.search; // استخراج searchTerm من الفلتر
-    const filterConditions: any[] = [];
-    const allowedStatuses = ['scheduled', 'completed', 'cancelled'];
-    console.log('step1');
-    if (filters.status) {
-      if (filters.status === 'null') {
-      } else if (allowedStatuses.includes(filters.status)) {
-        filterConditions.push({ status: filters.status });
-      } else {
-        throw new Error(
-          `Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`,
-        );
+      let doctorIds: string[] = [];
+      let patientIds: string[] = [];
+      const searchConditions: any[] = [];
+      const searchTerm = filters.search; // استخراج searchTerm من الفلتر
+      const filterConditions: any[] = [];
+      const allowedStatuses = ['scheduled', 'completed', 'cancelled'];
+      console.log('step1');
+      if (filters.status) {
+        if (filters.status === 'null') {
+        } else if (allowedStatuses.includes(filters.status)) {
+          filterConditions.push({ status: filters.status });
+        } else {
+          throw new Error(
+            `Invalid status value. Allowed values: ${allowedStatuses.join(', ')}`,
+          );
+        }
       }
+      console.log('step2');
+
+      if (searchTerm) {
+        console.log('step3');
+
+        const searchRegex = new RegExp(searchTerm, 'i');
+
+        // البحث في الأطباء
+        const doctors = await this.doctorModel
+          .find({ name: searchRegex })
+          .select('_id');
+        doctorIds = doctors.map((doc) => doc._id.toString());
+
+        // البحث في المرضى
+        const patients = await this.patientModel
+          .find({ name: searchRegex })
+          .select('_id');
+        patientIds = patients.map((patient) => patient._id.toString());
+
+        // بناء شروط البحث
+        const searchOrConditions: Record<string, any>[] = [];
+
+        if (doctorIds.length) {
+          searchOrConditions.push({ doctor: { $in: doctorIds } });
+        }
+
+        if (patientIds.length) {
+          searchOrConditions.push({ patient: { $in: patientIds } });
+        }
+
+        if (searchOrConditions.length) {
+          searchConditions.push({ $or: searchOrConditions });
+        } else {
+          return { data: [], total: 0, page, limit, totalPages: 0 };
+        }
+      }
+      const doctorsResult = await applyModelFilter(
+        this.doctorModel,
+        filters,
+        'doctorName',
+        'name',
+        'doctor',
+        filterConditions,
+        page,
+        limit,
+      );
+
+      const patientResult = await applyModelFilter(
+        this.patientModel,
+        filters,
+        'patientName',
+        'name',
+        'patient',
+        filterConditions,
+        page,
+        limit,
+      );
+
+      addDateFilter(filters, 'datetime', searchConditions);
+
+      // تنظيف الفلتر من حقل البحث
+      await this.viewWonerAppointment(filters);
+      const fieldsToDelete = [
+        'search',
+        'status',
+        'doctorName',
+        'patientName',
+        'datetime',
+        'employeeId',
+      ];
+      fieldsToDelete.forEach((field) => delete filters[field]);
+
+      const finalFilter = buildFinalFilter(
+        filters,
+        searchConditions,
+        filterConditions,
+      );
+
+      const result = await paginate(
+        this.appointmentModel,
+        [
+          { path: 'doctor', select: 'name' },
+          { path: 'patient', select: 'name' },
+          { path: 'clinic', select: 'name' },
+        ],
+        page,
+        limit,
+        allData,
+        finalFilter,
+        sort,
+      );
+
+      return result;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
-    console.log('step2');
-
-    if (searchTerm) {
-      console.log('step3');
-
-      const searchRegex = new RegExp(searchTerm, 'i');
-
-      // البحث في الأطباء
-      const doctors = await this.doctorModel
-        .find({ name: searchRegex })
-        .select('_id');
-      doctorIds = doctors.map((doc) => doc._id.toString());
-
-      // البحث في المرضى
-      const patients = await this.patientModel
-        .find({ name: searchRegex })
-        .select('_id');
-      patientIds = patients.map((patient) => patient._id.toString());
-
-      // بناء شروط البحث
-      const searchOrConditions: Record<string, any>[] = [];
-
-      if (doctorIds.length) {
-        searchOrConditions.push({ doctor: { $in: doctorIds } });
-      }
-
-      if (patientIds.length) {
-        searchOrConditions.push({ patient: { $in: patientIds } });
-      }
-
-      if (searchOrConditions.length) {
-        searchConditions.push({ $or: searchOrConditions });
-      } else {
-        return { data: [], total: 0, page, limit, totalPages: 0 };
-      }
-    }
-    const doctorsResult = await applyModelFilter(
-      this.doctorModel,
-      filters,
-      'doctorName',
-      'name',
-      'doctor',
-      filterConditions,
-      page,
-      limit,
-    );
-
-    const patientResult = await applyModelFilter(
-      this.patientModel,
-      filters,
-      'patientName',
-      'name',
-      'patient',
-      filterConditions,
-      page,
-      limit,
-    );
-
-    addDateFilter(filters, 'datetime', searchConditions);
-
-    // تنظيف الفلتر من حقل البحث
-    await this.viewWonerAppointment(filters);
-    const fieldsToDelete = [
-      'search',
-      'status',
-      'doctorName',
-      'patientName',
-      'datetime',
-      'employeeId',
-    ];
-    fieldsToDelete.forEach((field) => delete filters[field]);
-
-    const finalFilter = buildFinalFilter(
-      filters,
-      searchConditions,
-      filterConditions,
-    );
-
-    const result = await paginate(
-      this.appointmentModel,
-      [
-        { path: 'doctor', select: 'name' },
-        { path: 'patient', select: 'name' },
-        { path: 'clinic', select: 'name' },
-      ],
-      page,
-      limit,
-      allData,
-      finalFilter,
-      sort,
-    );
-
-    return result;
-  }catch(error){
-    console.log(error)
-    throw new BadRequestException(error)
-  }
   }
   private async viewWonerAppointment(filters: any) {
-    console.log("@@",filters)
+    console.log('@@', filters);
     // const Ofilter=new ObjectId(filters)
     // console.log("@!!!!@",Ofilter )
-try{
-    if (filters.employeeId) {
-      const employee = await this.doctorModel.findById(
-        filters.employeeId.toString(),
-      );
-      if (employee?.employeeType === 'Doctor') {
-        filters.doctor = filters.employeeId;
-      } else if (employee?.employeeType === 'Other') {
-        const clinicIds = employee.clinics || [];
-        filters.clinic = { $in: clinicIds };
+    try {
+      if (filters.employeeId) {
+        const employee = await this.doctorModel.findById(
+          filters.employeeId.toString(),
+        );
+        if (employee?.employeeType === 'Doctor') {
+          filters.doctor = filters.employeeId;
+        } else if (employee?.employeeType === 'Other') {
+          const clinicIds = employee.clinics || [];
+          filters.clinic = { $in: clinicIds };
+        }
+        delete filters.employeeId;
       }
-      delete filters.employeeId;
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error.message);
     }
-}
-catch(error){
-    console.log(error)
-    throw new BadRequestException(error.message)
-}
   }
   async getAppointmentById(id: string): Promise<ApiGetResponse<Appointment>> {
-    try{
-    const appointment = await this.appointmentModel
-      .findById(id)
-      .populate('patient clinic doctor');
-    if (!appointment) throw new NotFoundException('Appointment not found');
-    return {
-      success: true,
-      message: 'Appointment retrieved successfully',
-      data: appointment,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error.message)
+    try {
+      const appointment = await this.appointmentModel
+        .findById(id)
+        .populate('patient clinic doctor');
+      if (!appointment) throw new NotFoundException('Appointment not found');
+      return {
+        success: true,
+        message: 'Appointment retrieved successfully',
+        data: appointment,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -375,41 +374,39 @@ catch(error){
     id: string,
     updateAppointmentDto: UpdateAppointmentDto,
   ): Promise<ApiGetResponse<Appointment>> {
-    try{
-    const updatedAppointment = await this.appointmentModel
-      .findByIdAndUpdate(id, updateAppointmentDto, { new: true })
-      .exec();
-    if (!updatedAppointment)
-      throw new NotFoundException('Appointment not found');
-    return {
-      success: true,
-      message: 'Appointment update successfully',
-      data: updatedAppointment,
-    };
-    }catch(error){
-      console.log(error)
-      throw new BadRequestException(error.message)
+    try {
+      const updatedAppointment = await this.appointmentModel
+        .findByIdAndUpdate(id, updateAppointmentDto, { new: true })
+        .exec();
+      if (!updatedAppointment)
+        throw new NotFoundException('Appointment not found');
+      return {
+        success: true,
+        message: 'Appointment update successfully',
+        data: updatedAppointment,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error.message);
     }
   }
 
-  
-async deleteAppointment(id: string): Promise<ApiGetResponse<Appointment>> {
-  try{
-  const appointment = await this.appointmentModel.findById(id).exec();
-  if (!appointment) throw new NotFoundException('Appointment not found');
+  async deleteAppointment(id: string): Promise<ApiGetResponse<Appointment>> {
+    try {
+      const appointment = await this.appointmentModel.findById(id).exec();
+      if (!appointment) throw new NotFoundException('Appointment not found');
 
-  appointment.deleted = true;
-  const deletedAppointment = await appointment.save();
+      appointment.deleted = true;
+      const deletedAppointment = await appointment.save();
 
-  return {
-    success: true,
-    message: 'Appointment marked as deleted successfully',
-    data: deletedAppointment,
-  };  
-  }catch(error){
-    console.log(error)
-    throw new BadRequestException(error.message)
+      return {
+        success: true,
+        message: 'Appointment marked as deleted successfully',
+        data: deletedAppointment,
+      };
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error.message);
+    }
   }
-}
-
 }

@@ -41,17 +41,8 @@ export class DepartmentController {
   async getAllDepartments(
     @Query() paginationDto: PaginationAndFilterDto,
     @Query() queryParams: any,
-  
   ) {
- 
-
-    
- 
-   
-  
-
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-
 
     return this.departmentService.getAllDepartments(paginationDto, filters);
   }
@@ -63,7 +54,7 @@ export class DepartmentController {
   }
 
   @Put(':id')
-   @Permissions(PermissionsEnum.ADMIN)
+  @Permissions(PermissionsEnum.ADMIN)
   async updateDepartment(
     @Param('id') id: string,
     @Body() updateDepartmentDto: UpdateDepartmentDto,

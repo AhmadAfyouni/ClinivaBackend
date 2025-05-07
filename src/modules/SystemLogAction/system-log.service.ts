@@ -14,14 +14,18 @@ export interface CreateLogDto {
 @Injectable()
 export class SystemLogService {
   constructor(
-    @InjectModel(SystemLog.name) private systemLogModel: Model<SystemLogDocument>,
+    @InjectModel(SystemLog.name)
+    private systemLogModel: Model<SystemLogDocument>,
   ) {}
 
   async createLog(logData: CreateLogDto): Promise<SystemLogDocument> {
     const newLog = new this.systemLogModel({
       ...logData,
       // Ensure userId is stored as ObjectId if a string is passed
-      userId: typeof logData.userId === 'string' ? new Types.ObjectId(logData.userId) : logData.userId,
+      userId:
+        typeof logData.userId === 'string'
+          ? new Types.ObjectId(logData.userId)
+          : logData.userId,
     });
     return newLog.save();
   }

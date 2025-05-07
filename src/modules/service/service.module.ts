@@ -4,7 +4,10 @@ import { Service, ServiceSchema } from './schemas/service.schema';
 import { ServiceService } from './service.service';
 import { ServiceController } from './service.controller';
 import { Clinic, ClinicSchema } from '../clinic/schemas/clinic.schema';
-import { ClinicCollection, ClinicCollectionSchema } from '../cliniccollection/schemas/cliniccollection.schema';
+import {
+  ClinicCollection,
+  ClinicCollectionSchema,
+} from '../cliniccollection/schemas/cliniccollection.schema';
 import { Employee, EmployeeSchema } from '../employee/schemas/employee.schema';
 
 @Module({
