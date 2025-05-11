@@ -29,6 +29,7 @@ import {
   AppointmentDocument,
 } from '../appointment/schemas/appointment.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { Company } from '../company/schemas/company.schema';
 
 @Injectable()
 export class ClinicCollectionService {
@@ -43,11 +44,38 @@ export class ClinicCollectionService {
     @InjectModel(Appointment.name)
     private appointmentModel: Model<AppointmentDocument>,
   ) {}
+  private async checkUniqueName(name: string, companyId: string) {
+    const existingClinicCollection = await this.clinicCollectionModel.findOne({
+      name,
+      companyId,
+    });
 
+    if (existingClinicCollection) {
+      throw new BadRequestException(
+        'A clinic collection with this name already exists in the specified company.',
+      );
+    }
+  }
   async createClinicCollection(
     createClinicCollectionDto: CreateClinicCollectionDto,
+    plan: string,
+    companyId: Company,
   ): Promise<ApiGetResponse<ClinicCollection>> {
     try {
+      console.log('createClinicCollectionDtpppppppppp', plan);
+      if (plan === 'company' && companyId) {
+        createClinicCollectionDto.companyId = companyId._id;
+      } else {
+        throw new BadRequestException(
+          'Company ID is required for company plan',
+        );
+      }
+      if (createClinicCollectionDto.companyId) {
+        await this.checkUniqueName(
+          createClinicCollectionDto.name,
+          createClinicCollectionDto.companyId.toString(),
+        );
+      }
       console.log('createClinicCollection');
       const publicId = await generateUniquePublicId(
         this.clinicCollectionModel,
@@ -57,6 +85,7 @@ export class ClinicCollectionService {
       const newClinicCollection = new this.clinicCollectionModel({
         ...createClinicCollectionDto,
         publicId,
+        plan,
       });
       console.log('newClinicCollection', newClinicCollection);
       const savedClinicCollection = await newClinicCollection.save();
@@ -81,15 +110,9 @@ export class ClinicCollectionService {
     console.log('getAllClinicCollections');
     let { page, limit, allData, sortBy, order } = paginationDto;
     console.log(paginationDto.order);
-    // Convert page & limit to numbers
     page = Number(page) || 1;
     limit = Number(limit) || 10;
 
-    // Determine valid sort field; ignore invalid fields
-    // const defaultSortField = 'id';
-    // const rawSortField = sortBy ?? defaultSortField;
-    // const sortField = this.clinicCollectionModel.schema.path(rawSortField) ? rawSortField : defaultSortField;
-    // const sort: Record<string, number> = { [sortField]: order === 'desc' ? -1 : 1 };
     order = order || 'asc';
     console.log(order);
     const sortField: string = sortBy ?? 'id';
@@ -116,6 +139,7 @@ export class ClinicCollectionService {
       ...filters,
       ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
     };
+    finalFilter.deleted = { $ne: true };
 
     const result = await paginate(
       this.clinicCollectionModel,
@@ -192,8 +216,10 @@ export class ClinicCollectionService {
         .findById(id)
         .populate(['companyId', 'specializations'])
         .exec();
-      if (!collection)
-        throw new NotFoundException('Clinic Collection not found');
+      if (!collection || collection.deleted)
+        throw new NotFoundException(
+          'Clinic Collection not found or has been deleted',
+        );
 
       const base = await this.addClinicCounts(collection);
 
@@ -249,8 +275,10 @@ export class ClinicCollectionService {
     const updatedClinicCollection = await this.clinicCollectionModel
       .findByIdAndUpdate(id, updateClinicCollectionDto, { new: true })
       .populate(['companyId']);
-    if (!updatedClinicCollection)
-      throw new NotFoundException('Clinic Collection not found');
+    if (!updatedClinicCollection || updatedClinicCollection.deleted)
+      throw new NotFoundException(
+        'Clinic Collection not found or has been deleted',
+      );
 
     return {
       success: true,
@@ -265,10 +293,14 @@ export class ClinicCollectionService {
     const clinicCollection = await this.clinicCollectionModel
       .findById(id)
       .exec();
-    if (!clinicCollection)
-      throw new NotFoundException('Clinic Collection not found');
+    if (!clinicCollection || clinicCollection.deleted)
+      throw new NotFoundException(
+        'Clinic Collection not found or has been deleted',
+      );
 
     clinicCollection.deleted = true;
+    clinicCollection.name =
+      clinicCollection.name + ' (Deleted)' + clinicCollection.publicId;
     const deletedClinicCollection = await clinicCollection.save();
 
     return {

@@ -13,19 +13,12 @@ export enum DayOfWeek {
 export class WorkingHours {
   @Prop({
     required: true,
-    enum: [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-    ],
+    enum: DayOfWeek,
   })
   day: string; // يوم العمل
 
   @Prop({
+    required: true,
     type: { startTime: String, endTime: String },
     default: { startTime: '', endTime: '' },
   })
