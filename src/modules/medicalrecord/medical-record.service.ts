@@ -41,7 +41,7 @@ export class MedicalRecordService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -60,6 +60,8 @@ export class MedicalRecordService {
       const sort: Record<string, number> = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
+      filters.deleted = { $ne: true };
+
       return paginate(
         this.medicalRecordModel,
         ['appointment'],
@@ -71,7 +73,7 @@ export class MedicalRecordService {
       );
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -83,7 +85,10 @@ export class MedicalRecordService {
         .findById(id)
         .populate('appointment')
         .exec();
-      if (!record) throw new NotFoundException('Medical Record not found');
+      if (!record || record.deleted)
+        throw new NotFoundException(
+          'Medical Record not found or has been deleted',
+        );
       return {
         success: true,
         message: 'Medical Record retrieved successfully',
@@ -91,7 +96,7 @@ export class MedicalRecordService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -103,8 +108,10 @@ export class MedicalRecordService {
       const updatedRecord = await this.medicalRecordModel
         .findByIdAndUpdate(id, updateMedicalRecordDto, { new: true })
         .exec();
-      if (!updatedRecord)
-        throw new NotFoundException('Medical Record not found');
+      if (!updatedRecord || updatedRecord.deleted)
+        throw new NotFoundException(
+          'Medical Record not found or has been deleted',
+        );
       return {
         success: true,
         message: 'Medical Record update successfully',
@@ -112,7 +119,7 @@ export class MedicalRecordService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -121,10 +128,13 @@ export class MedicalRecordService {
   ): Promise<ApiGetResponse<MedicalRecord>> {
     try {
       const medicalRecord = await this.medicalRecordModel.findById(id).exec();
-      if (!medicalRecord)
-        throw new NotFoundException('Medical Record not found');
+      if (!medicalRecord || medicalRecord.deleted)
+        throw new NotFoundException(
+          'Medical Record not found or has been deleted',
+        );
 
       medicalRecord.deleted = true;
+      medicalRecord.publicId = medicalRecord.publicId + ' (Deleted)';
       const deletedMedicalRecord = await medicalRecord.save();
 
       return {
@@ -134,7 +144,7 @@ export class MedicalRecordService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 }

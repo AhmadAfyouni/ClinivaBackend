@@ -53,8 +53,8 @@ export class Employee {
   @Prop({})
   professional_experience: string;
 
-  @Prop({ type: [String], default: [] })
-  specialties: string[];
+  // @Prop({ type: [String], default: [] })
+  // specialties: string[];
 
   @Prop({ type: [String], default: [] })
   Languages?: string[];
@@ -124,6 +124,7 @@ export class Employee {
 
   @Prop({ type: [Types.ObjectId], ref: 'Specialization', required: true })
   specializations: Types.ObjectId[]; // قائمة بمعرفات الاختصاصات المرتبطة بالعيادة
+
   @Prop({ unique: true, required: true })
   publicId: string;
 

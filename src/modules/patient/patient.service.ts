@@ -77,10 +77,10 @@ export class PatientService {
       // إعداد شروط البحث
       const searchConditions: any[] = [];
       const filterConditions: any[] = [];
+      filters.deleted = { $ne: true };
       await applyBooleanFilter(filters, 'isActive', filterConditions);
 
       addDateFilter(filters, 'dateOfBirth', searchConditions);
-
       // تحقق إذا كان يوجد نص للبحث
       if (filters.search) {
         const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
@@ -136,14 +136,15 @@ export class PatientService {
       return result;
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
   async getPatientById(id: string): Promise<ApiGetResponse<Patient>> {
     try {
       const patient = await this.patientModel.findById(id).exec();
-      if (!patient) throw new NotFoundException('Patient not found');
+      if (!patient || patient.deleted)
+        throw new NotFoundException('Patient not found or has been deleted');
       return {
         success: true,
         message: 'patient retrieved successfully',
@@ -151,7 +152,7 @@ export class PatientService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -163,7 +164,8 @@ export class PatientService {
       const updatedPatient = await this.patientModel
         .findByIdAndUpdate(id, updatePatientDto, { new: true })
         .exec();
-      if (!updatedPatient) throw new NotFoundException('Patient not found');
+      if (!updatedPatient || updatedPatient.deleted)
+        throw new NotFoundException('Patient not found or has been deleted');
       return {
         success: true,
         message: 'Patient update successfully',
@@ -171,16 +173,18 @@ export class PatientService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
   async deletePatient(id: string): Promise<ApiGetResponse<Patient>> {
     try {
       const patient = await this.patientModel.findById(id).exec();
-      if (!patient) throw new NotFoundException('Patient not found');
+      if (!patient || patient.deleted)
+        throw new NotFoundException('Patient not found or has been deleted');
 
       patient.deleted = true;
+      patient.name = patient.name + ' (Deleted)' + patient.publicId;
       const deletedPatient = await patient.save();
 
       return {
@@ -190,7 +194,7 @@ export class PatientService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 }
