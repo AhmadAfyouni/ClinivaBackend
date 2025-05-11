@@ -43,28 +43,32 @@ export class AppointmentController {
     @Query() queryParams: any,
     @Request() req,
   ) {
+    try {
+      const userId = req.user?.userId;
+      if (!userId) throw new BadRequestException('User ID is missing');
 
-    const userId = req.user?.userId;
-    if (!userId) throw new BadRequestException('User ID is missing');
-    
-    const response = await this.userService.getUserById(userId);
-    
-    const user = response?.data;
-    // if (!user || !user.employeeId) {
-    //   throw new NotFoundException('User or Employee ID not found');
-    // }
-    
- 
-    const employeeId =
-      typeof user.employeeId === 'string'
-        ? user.employeeId
-        : user.employeeId._id?.toString() || user.employeeId.toString();
-    
-    const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-    filters.employeeId = employeeId;
-    
+      const response = await this.userService.getUserById(userId);
 
-    return this.appointmentService.getAllAppointments(paginationDto, filters);
+      const user = response?.data;
+      // if (!user || !user.employeeId) {
+      //   throw new NotFoundException('User or Employee ID not found');
+      // }
+
+      console.log('user.employeeId', user.employeeId);
+      console.log('user', user);
+      const employeeId =
+        typeof user.employeeId === 'string'
+          ? user.employeeId
+          : user.employeeId._id?.toString() || user.employeeId.toString();
+
+      const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+      filters.employeeId = employeeId;
+
+      return this.appointmentService.getAllAppointments(paginationDto, filters);
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error.message);
+    }
   }
 
   @Get(':id')

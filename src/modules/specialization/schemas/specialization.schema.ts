@@ -14,19 +14,19 @@ export class Specialization {
   description: string;
 
   @Prop({ required: true, type: [String] })
-  requiredEquipment: string[]; // المعدات المطلوبة
+  requiredEquipment: string[];
 
   @Prop({ required: true, type: [String] })
-  requiredStaff: string[]; // الموظفين المطلوبين
+  requiredStaff: string[];
 
   @Prop({ required: true, type: [String] })
-  medicalProcedures: string[]; // الإجراءات الطبية
+  medicalProcedures: string[];
 
   @Prop({ required: true })
-  certificationRequirements: string; // متطلبات الشهادات
+  certificationRequirements: string;
 
   @Prop({ required: true, default: true })
-  isActive: boolean; // هل التخصص نشط؟
+  isActive: boolean;
 
   @Prop({ unique: true, required: true })
   publicId: string;

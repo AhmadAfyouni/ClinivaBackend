@@ -104,7 +104,7 @@ export class ServiceService {
       limit = Number(limit) || 10;
       const sortField = sortBy ?? 'id';
       const sort = { [sortField]: order === 'asc' ? 1 : -1 };
-
+      filters.deleted = { $ne: true };
       // Handle doctorId filter: convert to ObjectId and build $in query
       if (filters.doctorId) {
         if (!isValidObjectId(filters.doctorId)) {
@@ -142,8 +142,10 @@ export class ServiceService {
   async findOne(id: string): Promise<any> {
     try {
       const service = await this.serviceModel.findById(id).exec();
-      if (!service) {
-        throw new NotFoundException(`Service with ID ${id} not found`);
+      if (!service || service.deleted) {
+        throw new NotFoundException(
+          `Service with ID ${id} not found or has been deleted`,
+        );
       }
       return {
         success: true,
@@ -163,8 +165,10 @@ export class ServiceService {
       const updatedService = await this.serviceModel
         .findByIdAndUpdate(id, updateServiceDto, { new: true })
         .exec();
-      if (!updatedService) {
-        throw new NotFoundException(`Service with ID ${id} not found`);
+      if (!updatedService || updatedService.deleted) {
+        throw new NotFoundException(
+          `Service with ID ${id} not found or has been deleted`,
+        );
       }
       return {
         success: true,
@@ -182,9 +186,11 @@ export class ServiceService {
   async deleteService(id: string): Promise<ApiGetResponse<Service>> {
     try {
       const service = await this.serviceModel.findById(id).exec();
-      if (!service) throw new NotFoundException('Service not found');
+      if (!service || service.deleted)
+        throw new NotFoundException('Service not found or has been deleted');
 
       service.deleted = true;
+      service.name = service.name + ' (Deleted)' + service.publicId;
       const deletedService = await service.save();
 
       return {
@@ -194,7 +200,7 @@ export class ServiceService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 }

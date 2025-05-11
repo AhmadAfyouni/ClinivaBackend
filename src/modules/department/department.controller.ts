@@ -32,8 +32,17 @@ export class DepartmentController {
 
   @Post()
   @Permissions(PermissionsEnum.ADMIN)
-  async createDepartment(@Body() createDepartmentDto: CreateDepartmentDto) {
-    return this.departmentService.createDepartment(createDepartmentDto);
+  async createDepartment(
+    @Body() createDepartmentDto: CreateDepartmentDto,
+    @Request() req,
+  ) {
+    const userId = req.user.userId;
+    const response = await this.userService.getUserById(userId);
+    const user = response.data;
+    return this.departmentService.createDepartment(
+      createDepartmentDto,
+      user.plan,
+    );
   }
 
   @Get()

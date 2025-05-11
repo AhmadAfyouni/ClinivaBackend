@@ -26,6 +26,9 @@ export class Service extends Document {
 
   @Prop({ type: Boolean, default: false })
   deleted: boolean;
+
+  @Prop({ type: Number, default: 30 }) // default duration of 30 minutes
+  duration: number;
 }
 
 export const ServiceSchema = SchemaFactory.createForClass(Service);
