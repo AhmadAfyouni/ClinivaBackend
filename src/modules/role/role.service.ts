@@ -36,7 +36,7 @@ export class RoleService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -55,7 +55,7 @@ export class RoleService {
       return paginate(this.roleModel, [], page, limit, allData, filters, sort);
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -70,7 +70,7 @@ export class RoleService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -93,7 +93,7 @@ export class RoleService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -107,7 +107,7 @@ export class RoleService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 }

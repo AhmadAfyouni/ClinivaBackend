@@ -26,7 +26,7 @@ export class ClinicCollection {
 
   @Prop({ required: true })
   name: string;
-  //
+
   @Prop()
   overview?: string;
 
@@ -35,21 +35,21 @@ export class ClinicCollection {
 
   @Prop()
   address: string;
-  //
+
   @Prop()
   logo?: string;
-  //
+
   @Prop()
   vision?: string;
-  //
+
   @Prop()
   goals?: string;
 
   @Prop()
-  patientCapacity: number; // قدرة استيعاب المرضى
+  patientCapacity: number;
 
   @Prop({ type: String, required: false })
-  policies: string; //  حقل السياسات العامة
+  policies: string;
 
   @Prop({ type: [ContactInfo], default: [] })
   contactInfos: ContactInfo[];
@@ -59,19 +59,17 @@ export class ClinicCollection {
 
   @Prop({ type: [WorkingHours], default: [] })
   workingDays: WorkingHours[];
-  //
+
   @Prop({ type: [CashBox], default: [] })
   cashBoxes: CashBox[];
-  //
+
   @Prop({ type: [OnlinePaymentMethod], default: [] })
   onlinePaymentMethods: OnlinePaymentMethod[];
-  //
   @Prop({ type: [BankAccount], default: [] })
   bankAccount: BankAccount[];
-  //
   @Prop({ type: [InsuranceCompany], default: [] })
   insuranceCompany: InsuranceCompany[];
-  //
+
   @Prop({ type: CommercialRecord })
   commercialRecord: CommercialRecord;
 
@@ -82,7 +80,7 @@ export class ClinicCollection {
   companyId?: Types.ObjectId;
 
   @Prop({ type: [Types.ObjectId], ref: 'Specialization', required: true })
-  specializations: Types.ObjectId[]; // قائمة بمعرفات الاختصاصات المرتبطة بالمجمع
+  specializations: Types.ObjectId[];
 
   @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
   PIC: Types.ObjectId;

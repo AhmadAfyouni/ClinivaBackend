@@ -11,6 +11,7 @@ import {
   NotFoundException,
   BadRequestException,
   UseGuards,
+  HttpException,
 } from '@nestjs/common';
 import { ClinicCollectionService } from './clinic-collection.service';
 import { CreateClinicCollectionDto } from './dto/create-clinic-collection.dto';
@@ -37,38 +38,31 @@ export class ClinicCollectionController {
     @Body() createClinicCollectionDto: CreateClinicCollectionDto,
     @Request() req,
   ) {
+    try {
+      const userId = req.user.userId;
+      const response = await this.userService.getUserById(userId);
+      const user = response.data;
+      const employeeId = user.employeeId;
+      const employee = await this.employeeService.getEmployeeById(
+        employeeId?._id.toString(),
+      );
 
-    const userId = req.user.userId;
-    console.log('first', userId);
-    const response = await this.userService.getUserById(userId);
+      if (!employee) {
+        throw new NotFoundException('Employee not found');
+      }
 
-    if (!response.data || Array.isArray(response.data)) {
-      throw new NotFoundException('User not found or response is invalid');
+      return this.clinicCollectionService.createClinicCollection(
+        createClinicCollectionDto,
+        user.plan,
+        employee?.companyId,
+      );
+    } catch (error) {
+      if (error instanceof HttpException) throw error;
+      throw new BadRequestException(
+        'Failed to create clinic collection',
+        error.message,
+      );
     }
-
-    const user = response.data;
-    const rawEmployeeId = user.employeeId;
-    const employeeId =
-      typeof rawEmployeeId === 'string'
-        ? rawEmployeeId
-        : rawEmployeeId?._id?.toString() || rawEmployeeId?.toString();
-    
-    if (!employeeId) throw new BadRequestException('Invalid employee ID');
-    
-    const employee = await this.employeeService.getEmployeeById(employeeId);
-    
-    if (!employee) {
-      throw new NotFoundException('Employee not found');
-    }
-    console.log(1);
-    // Get the companyId from the employee record
-    const companyId = employee;
-    console.log('Company ID:', companyId.data.name);
-    console.log(2);
-
-    return this.clinicCollectionService.createClinicCollection(
-      createClinicCollectionDto,
-    );
   }
 
   @Get()

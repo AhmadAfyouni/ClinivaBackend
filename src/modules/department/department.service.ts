@@ -39,10 +39,38 @@ export class DepartmentService {
     private cliniccollectionModel: Model<ClinicCollectionDocument>, // 👈 هنا
   ) {}
 
+  private async checkUniqueName(name: string, clinicCollectionId: string) {
+    const existingDepartment = await this.departmentModel.findOne({
+      name,
+      clinicCollectionId,
+    });
+
+    if (existingDepartment) {
+      throw new BadRequestException(
+        'A department with this name already exists in the specified Medical Complex.',
+      );
+    }
+  }
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
+    plan: string,
   ): Promise<ApiGetResponse<Department>> {
     try {
+      if (
+        (plan === 'collection' || plan === 'company') &&
+        !createDepartmentDto.clinicCollectionId
+      ) {
+        throw new BadRequestException(
+          'clinicCollectionId is required for collection plan',
+        );
+      }
+      if (createDepartmentDto.clinicCollectionId) {
+        await this.checkUniqueName(
+          createDepartmentDto.name,
+          createDepartmentDto.clinicCollectionId.toString(),
+        );
+      }
+
       const publicId = await generateUniquePublicId(
         this.departmentModel,
         'dep',
@@ -60,7 +88,7 @@ export class DepartmentService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
   async getAllDepartments(paginationDto: PaginationAndFilterDto, filters: any) {
@@ -103,7 +131,7 @@ export class DepartmentService {
           ? { $and: [{ $or: searchConditions }] }
           : {}),
       };
-
+      finalFilter.deleted = { $ne: true };
       // استخدام paginate مع populate
       const result = await paginate(
         this.departmentModel,
@@ -133,7 +161,7 @@ export class DepartmentService {
       return result;
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
   async addStatsToDepartment(department: any) {
@@ -192,7 +220,8 @@ export class DepartmentService {
         .populate(['clinicCollectionId', 'specializations'])
         .exec();
 
-      if (!department) throw new NotFoundException('Department not found');
+      if (!department || department.deleted)
+        throw new NotFoundException('Department not found or has been deleted');
 
       // compute clinic and patient stats from main
       const departmentWithStats = await this.addStatsToDepartment(department);
@@ -224,7 +253,7 @@ export class DepartmentService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -236,8 +265,8 @@ export class DepartmentService {
       const updatedDepartment = await this.departmentModel
         .findByIdAndUpdate(id, updateDepartmentDto, { new: true })
         .populate(['clinicCollectionId']);
-      if (!updatedDepartment)
-        throw new NotFoundException('Department not found');
+      if (!updatedDepartment || updatedDepartment.deleted)
+        throw new NotFoundException('Department not found or has been deleted');
       return {
         success: true,
         message: 'Department update successfully',
@@ -245,16 +274,18 @@ export class DepartmentService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
   async deleteDepartment(id: string): Promise<ApiGetResponse<Department>> {
     try {
       const department = await this.departmentModel.findById(id).exec();
-      if (!department) throw new NotFoundException('Department not found');
+      if (!department || department.deleted)
+        throw new NotFoundException('Department not found or has been deleted');
 
       department.deleted = true;
+      department.name = department.name + ' (Deleted)' + department.publicId;
       const deletedDepartment = await department.save();
 
       return {
@@ -264,7 +295,7 @@ export class DepartmentService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -283,7 +314,7 @@ export class DepartmentService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 }

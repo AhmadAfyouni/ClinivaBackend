@@ -48,46 +48,55 @@ export class AppointmentService {
       const appointmentDate = new Date(createAppointmentDto.datetime);
 
       // validate service assignment
-      const service = await this.serviceModel
+      const serviceData = await this.serviceModel
         .findById(createAppointmentDto.service)
         .exec();
-      if (!service) throw new NotFoundException('Service not found');
+      if (!serviceData) throw new NotFoundException('Service not found');
+      const clinic = await this.clinicModel
+        .findById(createAppointmentDto.clinic)
+        .exec();
+      if (!clinic) {
+        throw new NotFoundException('Clinic not found');
+      }
       if (
-        service.clinic.toString() !== createAppointmentDto.clinic.toString()
+        serviceData.clinic.toString() !== createAppointmentDto.clinic.toString()
       ) {
         throw new BadRequestException('Service is not offered by this clinic');
       }
       if (
         createAppointmentDto.doctor &&
-        !service.doctors
+        !serviceData.doctors
           .map((d) => d.toString())
           .includes(createAppointmentDto.doctor.toString())
       ) {
         throw new BadRequestException('Doctor is not assigned to this service');
       }
+      // check if clinic in holiday
+      console.log(appointmentDate);
+      console.log(clinic.holidays);
+      if (!clinic.holidays?.some((h) => h.date === appointmentDate)) {
+        throw new BadRequestException('Clinic is on holiday');
+      }
 
-      // conflict checks
+      // conflict checks with service duration
       await this.checkConflict(
         'doctor',
         createAppointmentDto.doctor,
         appointmentDate,
+        clinic.AverageDurationOfVisit,
       );
       await this.checkConflict(
         'patient',
         createAppointmentDto.patient,
         appointmentDate,
+        clinic.AverageDurationOfVisit,
       );
       await this.checkConflict(
         'clinic',
         createAppointmentDto.clinic,
         appointmentDate,
+        clinic.AverageDurationOfVisit,
       );
-
-      // validate clinic and schedule
-      const clinic = await this.clinicModel
-        .findById(createAppointmentDto.clinic)
-        .exec();
-      if (!clinic) throw new NotFoundException('Clinic not found');
 
       const { description, day, startHour, endHour } = this.getClinicTimeSlot(
         clinic,
@@ -127,20 +136,25 @@ export class AppointmentService {
     field: keyof Appointment,
     id: Types.ObjectId | undefined,
     date: Date,
+    duration: number,
   ): Promise<void> {
     if (!id) return;
-    const windowStart = new Date(date.getTime() - 30 * 60000);
-    const windowEnd = date;
+
+    const windowStart = new Date(date.getTime() - (duration - 1) * 60000);
+    const windowEnd = new Date(date.getTime() + (duration - 1) * 60000);
+
     const existing = await this.appointmentModel
       .findOne({
         [field]: id,
         datetime: { $gte: windowStart, $lte: windowEnd },
+        deleted: false,
       })
       .exec();
+
     if (existing) {
       const label = field.charAt(0).toUpperCase() + field.slice(1);
       throw new BadRequestException(
-        `${label} has another appointment within 30 minutes of requested time`,
+        `${label} has another appointment within ${duration} minutes of requested time`,
       );
     }
   }
@@ -170,13 +184,8 @@ export class AppointmentService {
     if (!schedule) {
       throw new BadRequestException(`Clinic is closed on ${day}`);
     }
-    console.log(schedule);
-    console.log(schedule.endTime);
-    // console.log(schedule.timeSlot);
     const { hours: sh, minutes: sm } = this.parseTime(schedule.startTime);
     const { hours: eh, minutes: em } = this.parseTime(schedule.endTime);
-    console.log('start', sh);
-    console.log('end', eh);
     return {
       start: sh * 60 + sm,
       end: eh * 60 + em,
@@ -207,11 +216,11 @@ export class AppointmentService {
     try {
       let { page, limit, allData, sortBy, order } = paginationDto;
 
-      // تحويل الباجينيشين إلى أرقام
       page = Number(page) || 1;
       limit = Number(limit) || 10;
 
       const sortField: string = sortBy ?? 'id';
+
       const sort: Record<string, number> = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
@@ -222,7 +231,6 @@ export class AppointmentService {
       const searchTerm = filters.search; // استخراج searchTerm من الفلتر
       const filterConditions: any[] = [];
       const allowedStatuses = ['scheduled', 'completed', 'cancelled'];
-      console.log('step1');
       if (filters.status) {
         if (filters.status === 'null') {
         } else if (allowedStatuses.includes(filters.status)) {
@@ -233,26 +241,20 @@ export class AppointmentService {
           );
         }
       }
-      console.log('step2');
-
+      filterConditions.push({ deleted: { $ne: true } });
       if (searchTerm) {
-        console.log('step3');
-
         const searchRegex = new RegExp(searchTerm, 'i');
 
-        // البحث في الأطباء
         const doctors = await this.doctorModel
           .find({ name: searchRegex })
           .select('_id');
         doctorIds = doctors.map((doc) => doc._id.toString());
 
-        // البحث في المرضى
         const patients = await this.patientModel
           .find({ name: searchRegex })
           .select('_id');
         patientIds = patients.map((patient) => patient._id.toString());
 
-        // بناء شروط البحث
         const searchOrConditions: Record<string, any>[] = [];
 
         if (doctorIds.length) {
@@ -293,7 +295,6 @@ export class AppointmentService {
 
       addDateFilter(filters, 'datetime', searchConditions);
 
-      // تنظيف الفلتر من حقل البحث
       await this.viewWonerAppointment(filters);
       const fieldsToDelete = [
         'search',
@@ -328,13 +329,10 @@ export class AppointmentService {
       return result;
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
   private async viewWonerAppointment(filters: any) {
-    console.log('@@', filters);
-    // const Ofilter=new ObjectId(filters)
-    // console.log("@!!!!@",Ofilter )
     try {
       if (filters.employeeId) {
         const employee = await this.doctorModel.findById(
@@ -358,7 +356,10 @@ export class AppointmentService {
       const appointment = await this.appointmentModel
         .findById(id)
         .populate('patient clinic doctor');
-      if (!appointment) throw new NotFoundException('Appointment not found');
+      if (!appointment || appointment.deleted)
+        throw new NotFoundException(
+          'Appointment not found or has been deleted',
+        );
       return {
         success: true,
         message: 'Appointment retrieved successfully',
@@ -378,8 +379,10 @@ export class AppointmentService {
       const updatedAppointment = await this.appointmentModel
         .findByIdAndUpdate(id, updateAppointmentDto, { new: true })
         .exec();
-      if (!updatedAppointment)
-        throw new NotFoundException('Appointment not found');
+      if (!updatedAppointment || updatedAppointment.deleted)
+        throw new NotFoundException(
+          'Appointment not found or has been deleted',
+        );
       return {
         success: true,
         message: 'Appointment update successfully',
@@ -394,9 +397,13 @@ export class AppointmentService {
   async deleteAppointment(id: string): Promise<ApiGetResponse<Appointment>> {
     try {
       const appointment = await this.appointmentModel.findById(id).exec();
-      if (!appointment) throw new NotFoundException('Appointment not found');
+      if (!appointment || appointment.deleted)
+        throw new NotFoundException(
+          'Appointment not found or has been deleted',
+        );
 
       appointment.deleted = true;
+      appointment.publicId = appointment.publicId + ' (Deleted)';
       const deletedAppointment = await appointment.save();
 
       return {

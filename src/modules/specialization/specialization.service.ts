@@ -56,7 +56,7 @@ export class SpecializationService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -74,6 +74,7 @@ export class SpecializationService {
       const sort: Record<string, number> = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
+      filters.deleted = { $ne: true };
 
       const searchConditions: any[] = [];
       const filterConditions: any[] = [];
@@ -162,7 +163,7 @@ export class SpecializationService {
       return result;
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -171,8 +172,10 @@ export class SpecializationService {
   ): Promise<ApiGetResponse<Specialization>> {
     try {
       const specialization = await this.specializationModel.findById(id).exec();
-      if (!specialization)
-        throw new NotFoundException('Specialization not found');
+      if (!specialization || specialization.deleted)
+        throw new NotFoundException(
+          'Specialization not found or has been deleted',
+        );
 
       // Get clinic and doctor counts in parallel
       console.log('Searching for specialization counts with ID:', id);
@@ -205,7 +208,7 @@ export class SpecializationService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -217,8 +220,10 @@ export class SpecializationService {
       const updatedSpecialization = await this.specializationModel
         .findByIdAndUpdate(id, updateSpecializationDto, { new: true })
         .exec();
-      if (!updatedSpecialization)
-        throw new NotFoundException('Specialization not found');
+      if (!updatedSpecialization || updatedSpecialization.deleted)
+        throw new NotFoundException(
+          'Specialization not found or has been deleted',
+        );
 
       return {
         success: true,
@@ -227,7 +232,7 @@ export class SpecializationService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -236,10 +241,14 @@ export class SpecializationService {
   ): Promise<ApiGetResponse<Specialization>> {
     try {
       const specialization = await this.specializationModel.findById(id).exec();
-      if (!specialization)
-        throw new NotFoundException('Specialization not found');
+      if (!specialization || specialization.deleted)
+        throw new NotFoundException(
+          'Specialization not found or has been deleted',
+        );
 
       specialization.deleted = true;
+      specialization.name =
+        specialization.name + ' (Deleted)' + specialization.publicId;
       const deletedSpecialization = await specialization.save();
 
       return {
@@ -249,7 +258,7 @@ export class SpecializationService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 }

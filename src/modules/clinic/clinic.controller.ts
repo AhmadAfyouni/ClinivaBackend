@@ -16,7 +16,6 @@ import { CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { UserService } from '../user/user.service';
-import { extractId } from 'src/common/utlis/paginate';
 import { EmployeeService } from '../employee/employee.service';
 import { PermissionsEnum } from 'src/config/permission.enum';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
@@ -32,8 +31,11 @@ export class ClinicController {
 
   @Post()
   @Permissions(PermissionsEnum.ADMIN)
-  async createClinic(@Body() createClinicDto: CreateClinicDto) {
-    return this.clinicService.createClinic(createClinicDto);
+  async createClinic(@Body() createClinicDto: CreateClinicDto, @Request() req) {
+    const userId = req.user.userId;
+    const response = await this.userService.getUserById(userId);
+    const user = response.data;
+    return this.clinicService.createClinic(createClinicDto, user.plan);
   }
 
   @Get()

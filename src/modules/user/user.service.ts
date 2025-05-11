@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   NotFoundException,
   UnauthorizedException,
@@ -39,6 +40,18 @@ export class UserService {
     createUserDto: CreateUserDto,
   ): Promise<ApiGetResponse<User>> {
     try {
+      // Check if a user with the same employee ID already exists
+      const existingUser = await this.userModel.findOne({
+        employeeId: createUserDto.employeeId,
+        deleted: false,
+      });
+
+      if (existingUser) {
+        throw new ConflictException(
+          'A user with this employee ID already exists',
+        );
+      }
+
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(
         createUserDto.password,
@@ -59,7 +72,7 @@ export class UserService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -70,7 +83,7 @@ export class UserService {
       // Convert page & limit to numbers
       page = Number(page) || 1;
       limit = Number(limit) || 10;
-
+      filters.deleted = { $ne: true };
       // تحديد حقل الفرز الافتراضي
       const sortField: string = sortBy ?? 'id';
       const sort: { [key: string]: 1 | -1 } = {
@@ -143,7 +156,7 @@ export class UserService {
       return result;
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -154,7 +167,7 @@ export class UserService {
         .populate(['roleIds', 'employeeId'])
         .exec();
 
-      if (!user)
+      if (!user || user.deleted)
         throw new NotFoundException('User not found or has been deleted');
 
       return {
@@ -164,7 +177,7 @@ export class UserService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
   //   async getUserById(id: string): Promise<ApiGetResponse<User>> {
@@ -181,9 +194,10 @@ export class UserService {
 
   async getUserByEmail(email: string): Promise<User> {
     const user = await this.userModel.findOne({ email }).exec();
-    if (!user) {
-      throw new NotFoundException(`User with email ${email} not found`);
-    }
+    if (!user || user.deleted)
+      throw new NotFoundException(
+        `User with email ${email} not found or has been deleted`,
+      );
     return user;
   }
 
@@ -203,7 +217,8 @@ export class UserService {
       const updatedUser = await this.userModel
         .findByIdAndUpdate(id, updateUserDto, { new: true })
         .exec();
-      if (!updatedUser) throw new NotFoundException('User not found');
+      if (!updatedUser || updatedUser.deleted)
+        throw new NotFoundException('User not found or has been deleted');
 
       try {
         const logEntry: CreateLogDto = {
@@ -225,17 +240,73 @@ export class UserService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async UpdateProfile(
+    updateUserDto: UpdateUserDto,
+    currentUserId: string,
+  ): Promise<ApiGetResponse<User>> {
+    try {
+      // Validate input
+      if (!updateUserDto) {
+        throw new BadRequestException('Update data is required');
+      }
+
+      // Prepare update object
+      const updateData: Partial<UpdateUserDto> = { ...updateUserDto };
+
+      // Hash password if provided
+      if (updateData.password) {
+        const salt = await bcrypt.genSalt();
+        updateData.password = await bcrypt.hash(updateData.password, salt);
+      }
+
+      // Use the currentUserId instead of the separate id parameter
+      const updatedUser = await this.userModel.findByIdAndUpdate(
+        currentUserId,
+        { $set: updateData },
+        { new: true, runValidators: true },
+      );
+
+      if (!updatedUser || updatedUser.deleted) {
+        throw new NotFoundException('User not found or has been deleted');
+      }
+
+      // Create system log
+      try {
+        const logEntry: CreateLogDto = {
+          userId: updatedUser._id.toString(),
+          action: SystemLogAction.USER_PROFILE_UPDATE,
+          details: { updatedFields: Object.keys(updateUserDto) },
+        };
+        await this.systemLogService.createLog(logEntry);
+      } catch (logError) {
+        console.error('Failed to create system log for user update:', logError);
+      }
+
+      return {
+        success: true,
+        message: 'User updated successfully',
+        data: updatedUser,
+      };
+    } catch (error) {
+      console.log(error.message);
+      throw new BadRequestException(error.message);
     }
   }
 
   async deleteUser(id: string): Promise<ApiGetResponse<User>> {
     try {
       const user = await this.userModel.findById(id).exec();
-      if (!user) throw new NotFoundException('User not found');
+      if (!user || user.deleted)
+        throw new NotFoundException('User not found or has been deleted');
 
       user.deleted = true;
       user.isActive = false;
+      user.name = user.name + ' (Deleted)' + user.publicId;
+      user.email = user.email + ' (Deleted)' + user.publicId;
       const deletedUser = await user.save();
 
       try {
@@ -256,7 +327,7 @@ export class UserService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 
@@ -328,7 +399,7 @@ export class UserService {
       };
     } catch (error) {
       console.log(error);
-      throw new BadRequestException(error);
+      throw new BadRequestException(error.message);
     }
   }
 }

@@ -25,6 +25,7 @@ import { PermissionsGuard } from './common/guards/permissions.guard';
 import { SpecializationModule } from './modules/specialization/specialization.module';
 import { ServiceModule } from './modules/service/service.module';
 import { PermissionModule } from './modules/permission/permission.module';
+import { SystemLogModule } from './modules/SystemLogAction/system-log.module';
 
 // Security & Middleware
 
@@ -52,6 +53,7 @@ import { PermissionModule } from './modules/permission/permission.module';
     SpecializationModule,
     ServiceModule,
     PermissionModule,
+    SystemLogModule,
   ],
   providers: [
     {

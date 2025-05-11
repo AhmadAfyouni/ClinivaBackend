@@ -50,10 +50,35 @@ export class ClinicService {
     @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
     @InjectModel(Service.name) private serviceModel: Model<Service>,
   ) {}
+  private async checkUniqueName(name: string, departmentId: string) {
+    const existingClinic = await this.clinicModel.findOne({
+      name,
+      departmentId,
+    });
+
+    if (existingClinic) {
+      throw new BadRequestException(
+        'A clinic with this name already exists in the specified department.',
+      );
+    }
+  }
   async createClinic(
     createClinicDto: CreateClinicDto,
+    plan: string,
   ): Promise<ApiGetResponse<Clinic>> {
     try {
+      if (plan != 'clinic' && !createClinicDto.departmentId) {
+        throw new BadRequestException(
+          'departmentId is required for collection plan',
+        );
+      }
+      if (createClinicDto.departmentId) {
+        await this.checkUniqueName(
+          createClinicDto.name,
+          createClinicDto.departmentId.toString(),
+        );
+      }
+
       const publicId = await generateUniquePublicId(this.clinicModel, 'cli');
 
       const newClinic = new this.clinicModel({
@@ -117,6 +142,8 @@ export class ClinicService {
 
       const fieldsToDelete = ['search', 'isActive', 'specializationName'];
       fieldsToDelete.forEach((field) => delete filters[field]);
+      filterConditions.push({ deleted: { $ne: true } });
+
       const finalFilter = buildFinalFilter(
         filters,
         searchConditions,
@@ -225,7 +252,10 @@ export class ClinicService {
         this.employeeModel.find({ clinics: id }).select('name'),
       ]);
 
-      if (!clinic) throw new NotFoundException('Clinic not found');
+      if (!clinic || clinic.deleted) {
+        throw new NotFoundException('Clinic not found or has been deleted');
+      }
+      console.log('@@@@@employees', employees);
 
       const clinicObj = clinic.toObject();
       clinicObj['patientCount'] = patientCount;
@@ -262,7 +292,8 @@ export class ClinicService {
       const updatedClinic = await this.clinicModel
         .findByIdAndUpdate(id, updateClinicDto, { new: true })
         .populate(['departmentId']);
-      if (!updatedClinic) throw new NotFoundException('Clinic not found');
+      if (!updatedClinic || updatedClinic.deleted)
+        throw new NotFoundException('Clinic not found or has been deleted');
       return {
         success: true,
         message: 'Clinic update successfully',
@@ -277,9 +308,11 @@ export class ClinicService {
   async deleteClinic(id: string): Promise<ApiGetResponse<Clinic>> {
     try {
       const clinic = await this.clinicModel.findById(id).exec();
-      if (!clinic) throw new NotFoundException('Clinic not found');
+      if (!clinic || clinic.deleted)
+        throw new NotFoundException('Clinic not found or has been deleted');
 
       clinic.deleted = true;
+      clinic.name = clinic.name + ' (Deleted)' + clinic.publicId;
       const deletedClinic = await clinic.save();
 
       return {

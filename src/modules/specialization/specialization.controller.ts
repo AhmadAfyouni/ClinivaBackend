@@ -7,11 +7,8 @@ import {
   Body,
   Put,
   Query,
-  Request,
-  NotFoundException,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { SpecializationService } from './specialization.service';
 import { CreateSpecializationDto } from './dto/create-specialization.dto';
 import { UpdateSpecializationDto } from './dto/update-specialization.dto';
