@@ -51,6 +51,22 @@ export class MedicalRecordController {
     return this.medicalRecordService.getMedicalRecordById(id);
   }
 
+  @Get('patient/:patientId')
+  @Permissions(PermissionsEnum.MEDICAL_RECORD_VIEW)
+  async getMedicalRecordByPatientId(
+    @Param('patientId') patientId: string,
+    @Query() paginationDto: PaginationAndFilterDto,
+    @Query() queryParams: any,
+  ) {
+    const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+
+    return this.medicalRecordService.getMedicalRecordByPatientId(
+      patientId,
+      paginationDto,
+      filters,
+    );
+  }
+
   @Put(':id')
   @Permissions(PermissionsEnum.MEDICAL_RECORD_UPDATE)
   async updateMedicalRecord(
