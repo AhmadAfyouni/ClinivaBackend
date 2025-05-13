@@ -18,6 +18,24 @@ import { MedicationDTO } from 'src/common/utlis/helper.dto';
 
 export class CreateMedicalRecordDto {
   @ApiProperty({
+    description: 'Patient ID linked to the medical record',
+    example: '60f7c7b84f1a2c001c8b4567',
+    required: false,
+  })
+  @IsMongoId()
+  @IsNotEmpty()
+  patient: Types.ObjectId;
+
+  @ApiProperty({
+    description: 'Doctor ID linked to the medical record',
+    example: '60f7c7b84f1a2c001c8b4567',
+    required: false,
+  })
+  @IsMongoId()
+  @IsNotEmpty()
+  doctor: Types.ObjectId;
+
+  @ApiProperty({
     description: 'Appointment ID linked to the medical record',
     example: '60f7c7b84f1a2c001c8b4567',
     required: true,

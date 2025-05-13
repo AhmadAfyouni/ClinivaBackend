@@ -70,21 +70,14 @@ export class SpecializationService {
       // Convert page & limit to numbers
       page = Number(page) || 1;
       limit = Number(limit) || 10;
+      filters.deleted = { $ne: true };
       const sortField: string = sortBy ?? 'id';
       const sort: Record<string, number> = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
-      filters.deleted = { $ne: true };
 
       const searchConditions: any[] = [];
       const filterConditions: any[] = [];
-      // By default, filter out deleted specializations unless explicitly requested
-      if (!filters.hasOwnProperty('deleted')) {
-        filterConditions.push({ deleted: false });
-      } else {
-        await applyBooleanFilter(filters, 'deleted', filterConditions);
-      }
-
       await applyBooleanFilter(filters, 'isActive', filterConditions);
       // تحقق إذا كان يوجد نص للبحث في الحقول النصية (name, email)
       if (filters.search) {
@@ -142,10 +135,6 @@ export class SpecializationService {
           }),
         ]);
 
-        console.log(`Counts for specialization ${specId}:`, {
-          clinics: clinicCount,
-          doctors: doctorCount,
-        });
         clinicCountMap.set(specId.toString(), clinicCount);
         doctorCountMap.set(specId.toString(), doctorCount);
       }
@@ -191,10 +180,6 @@ export class SpecializationService {
         }),
       ]);
 
-      console.log('Found counts:', {
-        clinics: clinicCount,
-        doctors: doctorCount,
-      });
       const specObj = specialization.toObject();
       specObj['statistics'] = {
         clinics: clinicCount,

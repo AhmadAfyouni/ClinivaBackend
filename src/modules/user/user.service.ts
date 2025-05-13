@@ -93,14 +93,6 @@ export class UserService {
       const searchConditions: any[] = [];
       const filterConditions: any[] = [];
       let RoleIds: string[] = [];
-      // By default, filter out deleted users    3.3
-      //  explicitly requested
-      if (!filters.hasOwnProperty('deleted')) {
-        filterConditions.push({ deleted: false });
-        console.log('deleted');
-      } else {
-        await applyBooleanFilter(filters, 'deleted', filterConditions);
-      }
 
       await applyBooleanFilter(filters, 'isActive', filterConditions);
       if (filters.search) {

@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  InternalServerErrorException,
   HttpException,
   BadRequestException,
 } from '@nestjs/common';
@@ -29,7 +28,6 @@ import {
   AppointmentDocument,
 } from '../appointment/schemas/appointment.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
-import { Company } from '../company/schemas/company.schema';
 
 @Injectable()
 export class ClinicCollectionService {
@@ -44,50 +42,55 @@ export class ClinicCollectionService {
     @InjectModel(Appointment.name)
     private appointmentModel: Model<AppointmentDocument>,
   ) {}
-  private async checkUniqueName(name: string, companyId: string) {
-    const existingClinicCollection = await this.clinicCollectionModel.findOne({
-      name,
-      companyId,
-    });
-
+  private async checkUniqueName(name: string, company) {
+    const existingClinicCollection = await this.clinicCollectionModel
+      .findOne({
+        name,
+        companyId: company,
+      })
+      .exec();
+    console.log('existingClinicCollection', existingClinicCollection);
     if (existingClinicCollection) {
       throw new BadRequestException(
-        'A clinic collection with this name already exists in the specified company.',
+        'A clinic collection with this name(' +
+          name +
+          ') already exists in the specified company.',
       );
     }
   }
   async createClinicCollection(
     createClinicCollectionDto: CreateClinicCollectionDto,
     plan: string,
-    companyId: Company,
+    employeeId: string,
   ): Promise<ApiGetResponse<ClinicCollection>> {
     try {
       console.log('createClinicCollectionDtpppppppppp', plan);
-      if (plan === 'company' && companyId) {
-        createClinicCollectionDto.companyId = companyId._id;
-      } else {
-        throw new BadRequestException(
-          'Company ID is required for company plan',
-        );
+      if (plan === 'company') {
+        const employee = await this.employeeModel.findById(employeeId);
+        if (employee && employee.companyId)
+          createClinicCollectionDto.companyId = employee.companyId;
+        else {
+          throw new BadRequestException(
+            'Company ID is required for company plan',
+          );
+        }
       }
+
       if (createClinicCollectionDto.companyId) {
         await this.checkUniqueName(
           createClinicCollectionDto.name,
-          createClinicCollectionDto.companyId.toString(),
+          createClinicCollectionDto.companyId,
         );
       }
-      console.log('createClinicCollection');
       const publicId = await generateUniquePublicId(
         this.clinicCollectionModel,
         'com',
       );
-      console.log('publicId', publicId);
       const newClinicCollection = new this.clinicCollectionModel({
         ...createClinicCollectionDto,
         publicId,
         plan,
       });
-      console.log('newClinicCollection', newClinicCollection);
       const savedClinicCollection = await newClinicCollection.save();
       return {
         success: true,
@@ -95,6 +98,7 @@ export class ClinicCollectionService {
         data: savedClinicCollection,
       };
     } catch (error) {
+      console.log(error.message);
       if (error instanceof HttpException) throw error;
       throw new BadRequestException(
         'Failed to create clinic collection',
@@ -107,61 +111,66 @@ export class ClinicCollectionService {
     paginationDto: PaginationAndFilterDto,
     filters: any,
   ) {
-    console.log('getAllClinicCollections');
-    let { page, limit, allData, sortBy, order } = paginationDto;
-    console.log(paginationDto.order);
-    page = Number(page) || 1;
-    limit = Number(limit) || 10;
+    try {
+      let { page, limit, allData, sortBy, order } = paginationDto;
+      page = Number(page) || 1;
+      limit = Number(limit) || 10;
 
-    order = order || 'asc';
-    console.log(order);
-    const sortField: string = sortBy ?? 'id';
-    const sort: { [key: string]: 1 | -1 } = {
-      [sortField]: order === 'asc' ? 1 : -1,
-    };
-    console.log(sortField);
+      order = order || 'asc';
+      const sortField: string = sortBy ?? 'id';
+      const sort: { [key: string]: 1 | -1 } = {
+        [sortField]: order === 'asc' ? 1 : -1,
+      };
 
-    const searchConditions: any[] = [];
+      const searchConditions: any[] = [];
 
-    if (filters.search) {
-      const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
+      if (filters.search) {
+        const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
 
-      searchConditions.push(
-        { name: regex },
+        searchConditions.push(
+          { name: regex },
 
-        { address: regex },
+          { address: regex },
+        );
+      }
+
+      delete filters.search;
+
+      const finalFilter = {
+        ...filters,
+        ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
+      };
+      finalFilter.deleted = { $ne: true };
+
+      const result = await paginate(
+        this.clinicCollectionModel,
+        ['companyId', 'specializations', 'PIC'],
+        page,
+        limit,
+        allData,
+        finalFilter,
+        sort,
+      );
+
+      if (result.data) {
+        const clinicCollections = result.data;
+        const updatedClinicCollections = await Promise.all(
+          clinicCollections.map((clinicCollection) =>
+            this.addClinicCounts(clinicCollection),
+          ),
+        );
+        result.data = updatedClinicCollections;
+      }
+
+      return result;
+    } catch (error) {
+      console.log(error.message);
+      if (error instanceof HttpException) throw error;
+      throw new BadRequestException(
+        'Failed to retrieve clinic collections',
+        error.message,
       );
     }
-
-    delete filters.search;
-
-    const finalFilter = {
-      ...filters,
-      ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
-    };
-    finalFilter.deleted = { $ne: true };
-
-    const result = await paginate(
-      this.clinicCollectionModel,
-      ['companyId', 'specializations', 'PIC'],
-      page,
-      limit,
-      allData,
-      finalFilter,
-      sort,
-    );
-
-    if (result.data) {
-      const clinicCollections = result.data;
-      const updatedClinicCollections = await Promise.all(
-        clinicCollections.map((clinicCollection) =>
-          this.addClinicCounts(clinicCollection),
-        ),
-      );
-      result.data = updatedClinicCollections;
-    }
-
-    return result;
   }
 
   private async getRelatedCount(
@@ -262,9 +271,7 @@ export class ClinicCollectionService {
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
-      throw new InternalServerErrorException(
-        'Failed to retrieve clinic collection',
-      );
+      throw new BadRequestException('Failed to retrieve clinic collection');
     }
   }
 
@@ -272,41 +279,51 @@ export class ClinicCollectionService {
     id: string,
     updateClinicCollectionDto: UpdateClinicCollectionDto,
   ): Promise<ApiGetResponse<ClinicCollection>> {
-    const updatedClinicCollection = await this.clinicCollectionModel
-      .findByIdAndUpdate(id, updateClinicCollectionDto, { new: true })
-      .populate(['companyId']);
-    if (!updatedClinicCollection || updatedClinicCollection.deleted)
-      throw new NotFoundException(
-        'Clinic Collection not found or has been deleted',
-      );
+    try {
+      const updatedClinicCollection = await this.clinicCollectionModel
+        .findByIdAndUpdate(id, updateClinicCollectionDto, { new: true })
+        .populate(['companyId']);
+      if (!updatedClinicCollection || updatedClinicCollection.deleted)
+        throw new NotFoundException(
+          'Clinic Collection not found or has been deleted',
+        );
 
-    return {
-      success: true,
-      message: 'Clinic Collection update successfully',
-      data: updatedClinicCollection,
-    };
+      return {
+        success: true,
+        message: 'Clinic Collection update successfully',
+        data: updatedClinicCollection,
+      };
+    } catch (error) {
+      console.log(error.message);
+      throw new BadRequestException('Failed to update clinic collection');
+    }
   }
 
   async deleteClinicCollection(
     id: string,
   ): Promise<ApiGetResponse<ClinicCollection>> {
-    const clinicCollection = await this.clinicCollectionModel
-      .findById(id)
-      .exec();
-    if (!clinicCollection || clinicCollection.deleted)
-      throw new NotFoundException(
-        'Clinic Collection not found or has been deleted',
-      );
+    try {
+      const clinicCollection = await this.clinicCollectionModel
+        .findById(id)
+        .exec();
+      if (!clinicCollection || clinicCollection.deleted)
+        throw new NotFoundException(
+          'Clinic Collection not found or has been deleted',
+        );
 
-    clinicCollection.deleted = true;
-    clinicCollection.name =
-      clinicCollection.name + ' (Deleted)' + clinicCollection.publicId;
-    const deletedClinicCollection = await clinicCollection.save();
+      clinicCollection.deleted = true;
+      clinicCollection.name =
+        clinicCollection.name + ' (Deleted)' + clinicCollection.publicId;
+      const deletedClinicCollection = await clinicCollection.save();
 
-    return {
-      success: true,
-      message: 'Clinic Collection marked as deleted successfully',
-      data: deletedClinicCollection,
-    };
+      return {
+        success: true,
+        message: 'Clinic Collection marked as deleted successfully',
+        data: deletedClinicCollection,
+      };
+    } catch (error) {
+      console.log(error.message);
+      throw new BadRequestException('Failed to delete clinic collection');
+    }
   }
 }

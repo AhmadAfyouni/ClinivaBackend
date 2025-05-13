@@ -19,10 +19,11 @@ import { UpdateClinicCollectionDto } from './dto/update-clinic-collection.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { UserService } from '../user/user.service';
 import { EmployeeService } from '../employee/employee.service';
+import { CompanyService } from '../company/company.service';
 import { Permissions } from 'src/config/permissions.decorator';
-
 import { PermissionsEnum } from 'src/config/permission.enum';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+
 @Controller('cliniccollections')
 @UseGuards(PermissionsGuard)
 export class ClinicCollectionController {
@@ -30,6 +31,7 @@ export class ClinicCollectionController {
     private readonly clinicCollectionService: ClinicCollectionService,
     private readonly userService: UserService,
     private readonly employeeService: EmployeeService,
+    private readonly companyService: CompanyService,
   ) {}
 
   @Post()
@@ -43,18 +45,14 @@ export class ClinicCollectionController {
       const response = await this.userService.getUserById(userId);
       const user = response.data;
       const employeeId = user.employeeId;
-      const employee = await this.employeeService.getEmployeeById(
-        employeeId?._id.toString(),
-      );
 
-      if (!employee) {
-        throw new NotFoundException('Employee not found');
-      }
+      console.log('starttttttttttt');
+      console.log('user', employeeId._id);
 
       return this.clinicCollectionService.createClinicCollection(
         createClinicCollectionDto,
         user.plan,
-        employee?.companyId,
+        employeeId._id.toString(),
       );
     } catch (error) {
       if (error instanceof HttpException) throw error;
@@ -72,7 +70,7 @@ export class ClinicCollectionController {
     @Query() queryParams: any,
   ) {
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-
+    console.log('queryParams', queryParams);
     return this.clinicCollectionService.getAllClinicCollections(
       paginationDto,
       filters,

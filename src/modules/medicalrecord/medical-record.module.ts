@@ -6,15 +6,19 @@ import {
   MedicalRecord,
   MedicalRecordSchema,
 } from './schemas/medicalrecord.schema';
-
+import {
+  Appointment,
+  AppointmentSchema,
+} from '../appointment/schemas/appointment.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: MedicalRecord.name, schema: MedicalRecordSchema },
+      { name: Appointment.name, schema: AppointmentSchema },
     ]),
   ],
   controllers: [MedicalRecordController],
   providers: [MedicalRecordService],
-  exports: [MedicalRecordService, MongooseModule], // لتتمكن وحدات أخرى من استخدام هذه الخدمة
+  exports: [MedicalRecordService, MongooseModule, MedicalRecordService],
 })
 export class MedicalRecordModule {}

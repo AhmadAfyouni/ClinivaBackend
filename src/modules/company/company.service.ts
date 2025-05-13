@@ -4,6 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
+import { EmployeeService } from '../employee/employee.service';
 import { Model } from 'mongoose';
 import { Company, CompanyDocument } from './schemas/company.schema';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -17,6 +18,7 @@ export class CompanyService {
   constructor(
     @InjectModel(Company.name) private companyModel: Model<CompanyDocument>,
     private readonly userService: UserService,
+    private readonly employeeService: EmployeeService,
   ) {}
 
   async create(
@@ -26,11 +28,30 @@ export class CompanyService {
     try {
       const createdCompany = new this.companyModel(createCompanyDto);
       const savedCompany = await createdCompany.save();
-      console.log(savedCompany._id);
-      console.log('user_id', user_id);
-      const user = await this.userService.getUserById(user_id);
-      user.company = savedCompany._id;
-      await user.save();
+      const userResponse = await this.userService.getUserById(user_id);
+
+      const employeeId = userResponse.data.employeeId;
+
+      if (employeeId) {
+        try {
+          console.log(
+            `Attempting to assign company ${savedCompany._id} to employee `,
+          );
+          await this.employeeService.updateEmployee(employeeId._id.toString(), {
+            companyId: savedCompany._id,
+          });
+          console.log(
+            `Successfully assigned company ${savedCompany._id} to employee `,
+          );
+        } catch (err) {
+          console.error(`Failed to assign company to employee :`, err.message);
+        }
+      } else {
+        console.warn(
+          `User ${user_id} does not have an employeeId. Cannot assign company to employee.`,
+        );
+      }
+
       return {
         success: true,
         message: 'Company created successfully',

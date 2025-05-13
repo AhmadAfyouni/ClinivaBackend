@@ -8,29 +8,26 @@ export type MedicalRecordDocument = MedicalRecord & Document;
 export class MedicalRecord {
   _id: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Appointment', required: true })
-  appointment: Types.ObjectId; // مرجع إلى الموعد، يحتوي على جميع البيانات المرتبطة
+  @Prop({ type: Types.ObjectId, ref: 'Appointment', default: null })
+  appointment: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Patient', default: null })
+  patient: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
+  doctor: Types.ObjectId;
 
   @Prop({ required: true })
-  diagnosis: string; // التشخيص الطبي
+  diagnosis: string;
 
   @Prop()
-  Symptoms?: string; //  الاعراض
+  Symptoms?: string;
 
   @Prop()
-  treatmentPlan?: string; //  خطة العلاج
+  treatmentPlan?: string;
 
   @Prop({ type: [Medication], default: [] })
-  medications: Medication[]; // قائمة الأدوية مع الجرعة
-
-  //     @Prop({enum: ['draft', 'finalized'], default: 'draft'})
-  //     recordStatus: string;  // حالة السجل (مسودة أو نهائي)
-
-  // @Prop({type: Number, min: 1, max: 5})
-  // patientRating?: number;  // تقييم المريض للطبيب (1-5 نجوم)
-
-  // @Prop({default: ''})
-  // patientFeedback?: string;  // ملاحظات المريض عن الخدمة
+  medications: Medication[];
 
   @Prop({
     type: String,
@@ -61,13 +58,14 @@ export class MedicalRecord {
   })
   visitType: string;
   @Prop({ type: [String], default: [] })
-  labTests: string[]; // التحاليل المطلوبة
+  labTests: string[];
 
   @Prop({ default: '' })
-  notes?: string; // ملاحظات إضافية من الطبيب
+  notes?: string;
 
   @Prop({ enum: ['draft', 'finalized'], default: 'draft' })
-  recordStatus: string; // حالة السجل (مسودة أو نهائي)
+  recordStatus: string;
+
   @Prop({ unique: true, required: true })
   publicId: string;
 

@@ -24,7 +24,7 @@ import { Patient, PatientDocument } from '../patient/schemas/patient.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 import { Clinic, ClinicDocument } from '../clinic/schemas/clinic.schema';
 import { Service } from '../service/schemas/service.schema';
-const { ObjectId } = require('mongodb');
+import { MedicalRecordService } from '../medicalrecord/medical-record.service';
 
 @Injectable()
 export class AppointmentService {
@@ -39,6 +39,7 @@ export class AppointmentService {
     private clinicModel: Model<ClinicDocument>,
     @InjectModel(Service.name)
     private serviceModel: Model<Service>,
+    private medicalRecordService: MedicalRecordService,
   ) {}
 
   async createAppointment(
@@ -55,7 +56,7 @@ export class AppointmentService {
       const clinic = await this.clinicModel
         .findById(createAppointmentDto.clinic)
         .exec();
-      if (!clinic) {
+      if (!clinic || !clinic.holidays || clinic.holidays.length === 0) {
         throw new NotFoundException('Clinic not found');
       }
       if (
@@ -72,9 +73,7 @@ export class AppointmentService {
         throw new BadRequestException('Doctor is not assigned to this service');
       }
       // check if clinic in holiday
-      console.log(appointmentDate);
-      console.log(clinic.holidays);
-      if (!clinic.holidays?.some((h) => h.date === appointmentDate)) {
+      if (clinic.holidays?.some((h) => h.date === appointmentDate)) {
         throw new BadRequestException('Clinic is on holiday');
       }
 
@@ -120,7 +119,15 @@ export class AppointmentService {
         publicId,
       });
       const savedAppointment = await newAppointment.save();
-
+      await this.medicalRecordService.createMedicalRecord({
+        appointment: savedAppointment._id,
+        visitType: 'emergency',
+        severityLevel: 'moderate',
+        diagnosis: 'diagnosis',
+        medications: [],
+        patient: savedAppointment.patient,
+        doctor: savedAppointment.doctor,
+      });
       return {
         success: true,
         message: 'Appointment created successfully',
