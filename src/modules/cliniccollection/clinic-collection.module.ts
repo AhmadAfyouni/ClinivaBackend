@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ClinicCollectionService } from './clinic-collection.service';
 import { ClinicCollectionController } from './clinic-collection.controller';
@@ -9,6 +9,7 @@ import {
 import { UserModule } from '../user/user.module';
 import { EmployeeModule } from '../employee/employee.module';
 import { Employee, EmployeeSchema } from '../employee/schemas/employee.schema';
+import { CompanyModule } from '../company/company.module';
 import {
   Department,
   DepartmentSchema,
@@ -29,7 +30,8 @@ import {
       { name: Appointment.name, schema: AppointmentSchema },
     ]),
     UserModule,
-    EmployeeModule,
+    forwardRef(() => EmployeeModule),
+    forwardRef(() => CompanyModule), // Use forwardRef for EmployeeModule
   ],
   controllers: [ClinicCollectionController],
   providers: [ClinicCollectionService],
