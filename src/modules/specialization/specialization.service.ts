@@ -135,10 +135,6 @@ export class SpecializationService {
           }),
         ]);
 
-        console.log(`Counts for specialization ${specId}:`, {
-          clinics: clinicCount,
-          doctors: doctorCount,
-        });
         clinicCountMap.set(specId.toString(), clinicCount);
         doctorCountMap.set(specId.toString(), doctorCount);
       }
@@ -184,10 +180,6 @@ export class SpecializationService {
         }),
       ]);
 
-      console.log('Found counts:', {
-        clinics: clinicCount,
-        doctors: doctorCount,
-      });
       const specObj = specialization.toObject();
       specObj['statistics'] = {
         clinics: clinicCount,

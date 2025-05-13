@@ -14,6 +14,7 @@ import { forwardRef } from '@nestjs/common';
 import { Clinic, ClinicSchema } from '../clinic/schemas/clinic.schema';
 import { ClinicModule } from '../clinic/clinic.module';
 import { Service, ServiceSchema } from '../service/schemas/service.schema';
+import { MedicalRecordModule } from '../medicalrecord/medical-record.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { Service, ServiceSchema } from '../service/schemas/service.schema';
     forwardRef(() => EmployeeModule),
     forwardRef(() => UserModule),
     forwardRef(() => ClinicModule),
+    forwardRef(() => MedicalRecordModule),
   ],
   controllers: [AppointmentController],
   providers: [AppointmentService],

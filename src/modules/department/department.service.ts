@@ -24,7 +24,6 @@ import {
   ClinicCollection,
 } from '../cliniccollection/schemas/cliniccollection.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
-import { UserService } from '../user/user.service';
 @Injectable()
 export class DepartmentService {
   constructor(
@@ -57,11 +56,11 @@ export class DepartmentService {
   ): Promise<ApiGetResponse<Department>> {
     try {
       if (
-        (plan === 'collection' || plan === 'company') &&
+        (plan === 'complex' || plan === 'company') &&
         !createDepartmentDto.clinicCollectionId
       ) {
         throw new BadRequestException(
-          'clinicCollectionId is required for collection plan',
+          'complex id is required for department plan',
         );
       }
       if (createDepartmentDto.clinicCollectionId) {
