@@ -56,7 +56,7 @@ export class AppointmentService {
       const clinic = await this.clinicModel
         .findById(createAppointmentDto.clinic)
         .exec();
-      if (!clinic || !clinic.holidays || clinic.holidays.length === 0) {
+      if (!clinic || !clinic.holidays) {
         throw new NotFoundException('Clinic not found');
       }
       if (
