@@ -7,7 +7,9 @@ import {
   Post,
   Put,
   Query,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { EmployeeService } from './employee.service';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
@@ -16,6 +18,8 @@ import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto'
 import { PermissionsEnum } from 'src/config/permission.enum';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/config/permissions.decorator';
+import { ApiConsumes } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 @Controller('employees')
 @UseGuards(PermissionsGuard)
 export class EmployeeController {
@@ -23,8 +27,13 @@ export class EmployeeController {
 
   @Post()
   @Permissions(PermissionsEnum.ADMIN)
-  async createEmployee(@Body() createEmployeeDto: CreateEmployeeDto) {
-    return this.employeeService.createEmployee(createEmployeeDto);
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  async createEmployee(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createEmployeeDto: CreateEmployeeDto,
+  ) {
+    return this.employeeService.createEmployee(createEmployeeDto, file);
   }
 
   @Get()

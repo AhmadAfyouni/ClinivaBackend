@@ -13,16 +13,24 @@ import { CreatePatientDto } from './dto/create-patient.dto';
 import { UpdatePatientDto } from './dto/update-patient.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { PermissionsEnum } from 'src/config/permission.enum';
-import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/config/permissions.decorator';
+import { ApiConsumes } from '@nestjs/swagger';
+import { UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadedFile } from '@nestjs/common';
 @Controller('patients')
 export class PatientController {
   constructor(private readonly patientService: PatientService) {}
 
   @Post()
   @Permissions(PermissionsEnum.PATIENT_CREATE)
-  async createPatient(@Body() createPatientDto: CreatePatientDto) {
-    return this.patientService.createPatient(createPatientDto);
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  async createPatient(
+    @Body() createPatientDto: CreatePatientDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.patientService.createPatient(createPatientDto, file);
   }
 
   @Get()

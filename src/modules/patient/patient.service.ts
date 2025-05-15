@@ -29,6 +29,7 @@ import {
   MedicalRecord,
 } from '../medicalrecord/schemas/medicalrecord.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { saveFileLocally } from 'src/common/utlis/upload.util';
 @Injectable()
 export class PatientService {
   constructor(
@@ -42,12 +43,17 @@ export class PatientService {
 
   async createPatient(
     createPatientDto: CreatePatientDto,
+    file: Express.Multer.File,
   ): Promise<ApiGetResponse<Patient>> {
     try {
       const publicId = await generateUniquePublicId(this.patientModel, 'pa');
+      const relativeFilePath = file
+        ? saveFileLocally(file, 'patients/images')
+        : '';
       const newPatient = new this.patientModel({
         ...createPatientDto,
         publicId,
+        image: relativeFilePath || '',
       });
       const savedPatient = await newPatient.save();
       return {

@@ -29,9 +29,9 @@ export class Patient {
 
   @Prop({ required: true })
   nationality?: string;
-  //
-  // @Prop()
-  // image?: string;
+
+  @Prop()
+  image?: string;
 
   @Prop({
     type: String,

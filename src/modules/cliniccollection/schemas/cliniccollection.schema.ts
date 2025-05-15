@@ -90,6 +90,21 @@ export class ClinicCollection {
 
   @Prop({ type: Boolean, default: false })
   deleted: boolean;
+
+  @Prop({ required: true })
+  email: string;
+
+  @Prop()
+  website?: string;
+
+  @Prop()
+  stateProvince: string;
+
+  @Prop()
+  postalZipCode: string;
+
+  @Prop({ required: true })
+  country: string;
 }
 
 export const ClinicCollectionSchema =

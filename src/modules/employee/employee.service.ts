@@ -25,6 +25,7 @@ import {
 } from '../department/schemas/department.schema';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { saveFileLocally } from 'src/common/utlis/upload.util';
 
 @Injectable()
 export class EmployeeService {
@@ -39,6 +40,7 @@ export class EmployeeService {
 
   async createEmployee(
     createEmployeeDto: CreateEmployeeDto,
+    file: Express.Multer.File,
   ): Promise<ApiGetResponse<Employee>> {
     try {
       if (
@@ -53,10 +55,15 @@ export class EmployeeService {
           'The staff has not been assigned to any of these: Company, Clinic Collection, clinics, department',
         );
       }
+
       const publicId = await generateUniquePublicId(this.employeeModel, 'emp');
+      const relativeFilePath = file
+        ? saveFileLocally(file, 'employees/images')
+        : '';
       const newEmployee = new this.employeeModel({
         ...createEmployeeDto,
         publicId,
+        image: relativeFilePath || '',
       });
       const savedEmployee = await newEmployee.save();
       return {
@@ -65,7 +72,7 @@ export class EmployeeService {
         data: savedEmployee,
       };
     } catch (error) {
-      console.log(error);
+      console.log('error', error.message);
       throw new BadRequestException(error.message);
     }
   }
