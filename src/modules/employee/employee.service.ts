@@ -278,12 +278,16 @@ export class EmployeeService {
   async getEmployeesWithoutUser(): Promise<ApiGetResponse<Employee[]>> {
     try {
       // fetch all user-linked employee IDs
-      const users = await this.userModel.find().select('employeeId').exec();
+      const users = await this.userModel
+        .find({ deleted: false })
+        .select('employeeId')
+        .exec();
       const userEmpIds = users.map((u) => u.employeeId.toString());
       // find employees not in user table
       const employees = await this.employeeModel
         .find({
           _id: { $nin: userEmpIds },
+          deleted: false,
         })
         .exec();
       return {
