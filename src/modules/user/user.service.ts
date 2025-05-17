@@ -307,6 +307,7 @@ export class UserService {
           action: SystemLogAction.USER_PROFILE_UPDATE,
           details: { reason: 'User soft deleted' },
         };
+
         await this.systemLogService.createLog(logEntry);
       } catch (logError) {
         console.error('Failed to create system log for user delete:', logError);

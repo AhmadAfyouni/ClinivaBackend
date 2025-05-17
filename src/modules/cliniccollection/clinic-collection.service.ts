@@ -94,14 +94,14 @@ export class ClinicCollectionService {
       const savedClinicCollection = await newClinicCollection.save();
       return {
         success: true,
-        message: 'clinic Collection created successfully',
+        message: 'Medical Complex created successfully',
         data: savedClinicCollection,
       };
     } catch (error) {
       console.log(error.message);
       if (error instanceof HttpException) throw error;
       throw new BadRequestException(
-        'Failed to create clinic collection',
+        'Failed to create Medical Complex',
         error.message,
       );
     }
