@@ -27,9 +27,9 @@ export class ServiceController {
 
   @Get()
   async findAll(@Query() query: any) {
-    const { page, limit, allData, sortBy, order, ...filters } = query;
+    const { page, limit, allData, sortBy, order, search, ...filters } = query;
     return await this.serviceService.findAll(
-      { page, limit, allData, sortBy, order },
+      { page, limit, allData, sortBy, order, search },
       filters,
     );
   }
