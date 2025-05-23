@@ -27,22 +27,29 @@ export class AuthService {
   /**
    * Validates a user by email and password
    */
-  async validateUser(email: string, password: string): Promise<User | null> {
-    const user = await this.userService.getUserByEmail(email);
+  async validateUser(identifier: string, password: string): Promise<User | null> {
+    try {
+      // Try to find user by either email or username
+      const user = await this.userService.getUserByIdentifier(identifier);
 
-    if (!user) throw new UnauthorizedException('Invalid email or password');
+      if (!user.isActive) {
+        throw new UnauthorizedException('User account is inactive.');
+      }
 
-    if (!user.isActive)
-      throw new UnauthorizedException('User account is inactive.');
+      if (user.deleted) {
+        throw new UnauthorizedException('User account has been deleted.');
+      }
 
-    if (user.deleted)
-      throw new UnauthorizedException('User account has been deleted.');
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        throw new UnauthorizedException('Invalid email/username or password');
+      }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid)
-      throw new UnauthorizedException('Invalid email or password');
-
-    return user;
+      return user;
+    } catch (error) {
+      // If user is not found or any other error occurs, throw invalid credentials
+      throw new UnauthorizedException('Invalid email/username or password');
+    }
   }
 
   /**

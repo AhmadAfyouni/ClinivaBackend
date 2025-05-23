@@ -2,10 +2,12 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Inject,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { Appointment, AppointmentDocument } from './schemas/appointment.schema';
+import { User } from '../user/schemas/user.schema';
 import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
@@ -39,6 +41,8 @@ export class AppointmentService {
     private clinicModel: Model<ClinicDocument>,
     @InjectModel(Service.name)
     private serviceModel: Model<Service>,
+    @InjectModel('User')
+    private userModel: Model<User>,
     private medicalRecordService: MedicalRecordService,
   ) {}
 
@@ -343,20 +347,39 @@ export class AppointmentService {
   private async viewWonerAppointment(filters: any) {
     try {
       if (filters.employeeId) {
-        const employee = await this.doctorModel.findById(
-          filters.employeeId.toString(),
-        );
-        if (employee?.employeeType === 'Doctor') {
-          filters.doctor = filters.employeeId;
-        } else if (employee?.employeeType === 'Other') {
-          const clinicIds = employee.clinics || [];
-          filters.clinic = { $in: clinicIds };
+        // First, get the employee to access the userId
+        const employee = await this.doctorModel.findById(filters.employeeId.toString());
+        
+        if (!employee) {
+          throw new NotFoundException('Employee not found');
         }
+
+        // Get the user to access employeeType
+        const user = await this.userModel.findById(employee.userId);
+        if (!user) {
+          throw new NotFoundException('User not found for this employee');
+        }
+
+        // Check employeeType from user to determine the filter
+        if (user.employeeType === 'Doctor') {
+          filters.doctor = filters.employeeId;
+        } else if (user.employeeType === 'Other') {
+          // For other employee types, filter by their assigned clinics
+          const clinicIds = employee.clinic || [];
+          if (clinicIds.length > 0) {
+            filters.clinic = { $in: clinicIds };
+          } else {
+            // If no clinics assigned, return empty result
+            filters._id = null; // This will return no results
+          }
+        }
+        
+        // Remove the employeeId filter as we've processed it
         delete filters.employeeId;
       }
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException(error.message);
+      console.error('Error in viewWonerAppointment:', error);
+      throw new BadRequestException(error.message || 'Failed to process appointment view');
     }
   }
   async getAppointmentById(id: string): Promise<ApiGetResponse<Appointment>> {

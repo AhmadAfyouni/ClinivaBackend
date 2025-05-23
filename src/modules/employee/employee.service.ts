@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Employee, EmployeeDocument } from './schemas/employee.schema';
 import { CreateEmployeeDto } from './dto/create-employee.dto';
 import { UpdateEmployeeDto } from './dto/update-employee.dto';
@@ -16,8 +16,8 @@ import {
 } from '../../common/utlis/paginate';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
 import {
-  ClinicCollectionDocument,
-  ClinicCollection,
+  ComplexDocument,
+  Complex,
 } from '../cliniccollection/schemas/cliniccollection.schema';
 import {
   DepartmentDocument,
@@ -31,8 +31,8 @@ import { saveFileLocally } from 'src/common/utlis/upload.util';
 export class EmployeeService {
   constructor(
     @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
-    @InjectModel(ClinicCollection.name)
-    private clinicCollectionModel: Model<ClinicCollectionDocument>,
+    @InjectModel(Complex.name)
+    private clinicCollectionModel: Model<ComplexDocument>,
     @InjectModel(Department.name)
     private departmentModel: Model<DepartmentDocument>,
     @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -43,13 +43,20 @@ export class EmployeeService {
     file: Express.Multer.File,
   ): Promise<ApiGetResponse<Employee>> {
     try {
+      // Get the user to check employeeType
+      const user = await this.userModel.findById(createEmployeeDto.userId);
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+
+      // Check if the employee needs to be assigned to a company, clinic, etc.
       if (
         !createEmployeeDto.companyId &&
         !createEmployeeDto.clinicCollectionId &&
-        !createEmployeeDto.clinics &&
+        !createEmployeeDto.clinics?.length &&
         !createEmployeeDto.departmentId &&
-        createEmployeeDto.employeeType != 'PIC' &&
-        createEmployeeDto.employeeType != 'Administrative'
+        user.employeeType !== 'PIC' &&
+        user.employeeType !== 'Administrative'
       ) {
         throw new BadRequestException(
           'The staff has not been assigned to any of these: Company, Clinic Collection, clinics, department',
@@ -112,7 +119,15 @@ export class EmployeeService {
       // Validate and apply employee type filter
       if (filters.employeeType) {
         if (ALLOWED_EMPLOYEE_TYPES.includes(filters.employeeType)) {
-          filterConditions.push({ employeeType: filters.employeeType });
+          // Instead of filtering by employeeType in the employee document,
+          // we'll need to find users with this employeeType and then filter employees
+          const users = await this.userModel.find({ 
+            employeeType: filters.employeeType,
+            deleted: false 
+          }).select('_id').lean().exec();
+          
+          const userIds = users.map(user => user._id);
+          filterConditions.push({ userId: { $in: userIds } });
         } else {
           throw new BadRequestException(
             `Invalid employeeType. Allowed values: ${ALLOWED_EMPLOYEE_TYPES.join(', ')}`,
@@ -277,27 +292,49 @@ export class EmployeeService {
 
   async getEmployeesWithoutUser(): Promise<ApiGetResponse<Employee[]>> {
     try {
-      // fetch all user-linked employee IDs
-      const users = await this.userModel
-        .find({ deleted: false })
-        .select('employeeId')
-        .exec();
-      const userEmpIds = users.map((u) => u.employeeId.toString());
-      // find employees not in user table
+      // First, get all user IDs that exist in the users collection
+      const users = await this.userModel.find({ deleted: false }).select('_id').lean().exec();
+      const userIds = users.map(user => user._id.toString());
+      
+      // Build the query to find employees without a valid user
+      const query = {
+        $or: [
+          { userId: { $exists: false } },
+          { userId: null },
+          { userId: '' },
+          { 
+            $and: [
+              { userId: { $exists: true } },
+              { userId: { $ne: null } },
+              { userId: { $ne: '' } },
+              { userId: { $nin: userIds } }
+            ]
+          }
+        ],
+        deleted: false
+      };
+
+      // Execute the query
       const employees = await this.employeeModel
-        .find({
-          _id: { $nin: userEmpIds },
-          deleted: false,
-        })
+        .find(query)
+        .populate('userId', '_id email') // Populate userId for debugging
+        .lean()
         .exec();
+      
       return {
         success: true,
         message: 'Employees without user retrieved successfully',
         data: employees,
       };
     } catch (error) {
-      console.log(error.message);
-      throw new BadRequestException(error.message);
+      console.error('Error in getEmployeesWithoutUser:', error);
+      throw new BadRequestException(error.message || 'Failed to retrieve employees without user');
     }
+  }
+
+  async findByUserId(userId: string): Promise<EmployeeDocument | null> {
+    return this.employeeModel
+      .findOne({ userId: new Types.ObjectId(userId), deleted: false })
+      .exec();
   }
 }
