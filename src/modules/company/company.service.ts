@@ -29,26 +29,32 @@ export class CompanyService {
       const createdCompany = new this.companyModel(createCompanyDto);
       const savedCompany = await createdCompany.save();
       const userResponse = await this.userService.getUserById(user_id);
+      const user = userResponse.data;
 
-      const employeeId = userResponse.data.employeeId;
+      if (!user || !user._id) {
+        throw new NotFoundException('User not found');
+      }
 
-      if (employeeId) {
+      // Find the employee associated with this user
+      const employee = await this.employeeService.findByUserId(user._id.toString());
+      
+      if (employee) {
         try {
           console.log(
-            `Attempting to assign company ${savedCompany._id} to employee `,
+            `Attempting to assign company ${savedCompany._id} to employee ${employee._id}`,
           );
-          await this.employeeService.updateEmployee(employeeId._id.toString(), {
+          await this.employeeService.updateEmployee(employee._id.toString(), {
             companyId: savedCompany._id,
           });
           console.log(
-            `Successfully assigned company ${savedCompany._id} to employee `,
+            `Successfully assigned company ${savedCompany._id} to employee ${employee._id}`,
           );
         } catch (err) {
-          console.error(`Failed to assign company to employee :`, err.message);
+          console.error(`Failed to assign company to employee ${employee._id}:`, err.message);
         }
       } else {
         console.warn(
-          `User ${user_id} does not have an employeeId. Cannot assign company to employee.`,
+          `User ${user_id} does not have an associated employee. Cannot assign company to employee.`,
         );
       }
 

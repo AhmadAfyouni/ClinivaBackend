@@ -1,51 +1,73 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import mongoose, { Document, Types } from 'mongoose';
+import { Document, Types } from 'mongoose';
 import { ActivityLog, LoginHistory } from 'src/common/utlis/helper';
 
 export type UserDocument = User & Document;
 
-@Schema({ timestamps: true }) // سيضيف createdAt و updatedAt تلقائيًا
+@Schema({ timestamps: true })
 export class User {
   _id: Types.ObjectId;
 
-  @Prop({ required: true })
-  name: string; // اسم المستخدم
+  @Prop({ required: true, unique: true })
+  name: string;
 
   @Prop({ required: true, unique: true })
-  email: string; // البريد الإلكتروني (فريد لعدم التكرار)
+  email: string;
 
   @Prop({ required: true })
-  password: string; // كلمة المرور
+  password: string;
 
   @Prop({ default: true })
   isActive: boolean;
 
   @Prop({ type: [Types.ObjectId], ref: 'Role', required: true })
-  roleIds: Types.ObjectId[]; // قائمة بمعرفات الأدوار المرتبطة بالمستخدم
+  roleIds: Types.ObjectId[];
 
-  @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
-  employeeId: Types.ObjectId; // مرجع إلى جدول الموظفين (إن كان المستخدم موظفًا)
+  @Prop({
+    type: String,
+    enum: [
+      'Doctor',
+      'Nurse',
+      'Technician',
+      'Administrative',
+      'Employee',
+      'PIC',
+      'Other',
+    ],
+    required: true,
+  })
+  employeeType: string;
 
   @Prop({ type: Date, default: null })
   lastLoginAt?: Date;
 
   @Prop()
-  lastPasswordUpdate?: Date; // تاريخ آخر تحديث لكلمة المرور
+  lastPasswordUpdate?: Date;
 
   @Prop({ type: [ActivityLog], default: [] })
-  activityLog?: ActivityLog[]; // سجل النشاط
+  activityLog?: ActivityLog[];
 
   @Prop({ type: [LoginHistory], default: [] })
-  loginHistory?: LoginHistory[]; // تاريخ ووقت تسجيل الدخول من الأجهزة والعناوين IP
+  loginHistory?: LoginHistory[];
+
   @Prop({ unique: true, required: true })
   publicId: string;
 
   @Prop({
     required: true,
     default: 'clinic',
-    enum: ['company', 'complex', 'department', 'clinic'],
+    enum: ['company', 'complex', 'clinic'],
   })
   plan: string;
+
+  @Prop({ type: Types.ObjectId, ref: 'Company', required: true })
+  companyId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Complex', required: true })
+  complexId: Types.ObjectId;
+
+  @Prop({ type: Types.ObjectId, ref: 'Clinic', required: true })
+  clinicId: Types.ObjectId;
 
   @Prop({ type: Boolean, default: false })
   deleted: boolean;

@@ -15,29 +15,29 @@ export class WorkingHours {
     required: true,
     enum: DayOfWeek,
   })
-  day: string; // يوم العمل
+  day: string;
 
   @Prop({
     required: true,
     type: { startTime: String, endTime: String },
     default: { startTime: '', endTime: '' },
   })
-  startTime: string; // فترات العمل خلال اليوم
-  endTime: string; // فترات العمل خلال اليوم
+  startTime: string;
+  endTime: string;
 }
 
 export class InsuranceCompany {
   @Prop({ required: true })
-  companyName: string; // اسم الشركة
+  companyName: string;
 
   @Prop({ type: [String], required: true })
-  coveredServices: string[]; // الخدمات المغطاة
+  coveredServices: string[];
 
   @Prop({ required: true })
-  termsAndConditions: string; // الشروط والأحكام
+  termsAndConditions: string;
 
   @Prop({ type: [String], default: [] })
-  coverageDetails: string[]; // تفاصيل التغطية (قائمة ذكية)
+  coverageDetails: string[];
 
   @Prop({ required: true, min: 0, max: 100 })
   coveragePercentage: number; // نسبة التغطية %
@@ -173,20 +173,32 @@ export class Holiday {
 }
 
 export class ContactInfo {
-  @Prop({
-    required: true,
-    enum: ['email', 'phone', 'socialMedia', 'CompanyWebsite'],
-  })
-  type: string;
+  @Prop({ type: String })
+  phone_numbers: string;
 
-  @Prop({ required: true })
-  value: string;
+  @Prop({ type: String })
+  email: string;
 
-  @Prop({ required: true })
-  isPublic: boolean;
+  @Prop({ type: String })
+  website: string;
 
-  @Prop({ required: false })
-  subType: string; //  العمل  او المكتب أو الشخصي
+  @Prop({ type: String })
+  address: string;
+
+  @Prop({ type: { lat: String, lng: String } })
+  google_maps_location: { lat: string; lng: string };
+
+  @Prop({ type: String })
+  linkedin: string;
+
+  @Prop({ type: String })
+  twitter: string;
+
+  @Prop({ type: String })
+  facebook: string;
+
+  @Prop({ type: String })
+  youtube: string;
 }
 
 export class Insurance {
@@ -226,16 +238,16 @@ export class WorkingDays {
 
 export class Vacation {
   @Prop({ required: true, type: Date })
-  leaveStartDate: Date; // تاريخ بدء الإجازة
+  leaveStartDate: Date;
 
   @Prop({ required: true, type: Date })
-  leaveEndDate: Date; // تاريخ انتهاء الإجازة
+  leaveEndDate: Date;
 
   @Prop({ required: true, enum: ['Vacation', 'Sick Leave', 'Emergency'] })
-  leaveType: string; // نوع الإجازة (عطلة/إجازة مرضية/طارئة)
+  leaveType: string;
 
   @Prop({ required: true, enum: ['Approved', 'Pending'], default: 'Pending' })
-  status: string; // الحالة (موافقة/معلقة)
+  status: string;
 }
 
 export class Medication {
@@ -247,36 +259,19 @@ export class Medication {
 }
 
 export class BreakTime {
-  @Prop({ required: true })
-  startTime: string; //
+  @Prop({ required: true, enum: DayOfWeek })
+  day: string;
 
   @Prop({ required: true })
-  endTime: string; //
+  startTime: string;
+
+  @Prop({ required: true })
+  endTime: string;
 }
 
 export class MedicalTestResult {
   @Prop({ required: true, type: String })
-  filePath: string; // مسار الملف المحمل في النظام
-}
-
-export class Certificate {
-  @Prop({ required: true })
-  certificateName: string; // اسم الشهادة
-
-  @Prop({ required: true })
-  institution: string; // الجهة المانحة للشهادة
-
-  @Prop({ required: true })
-  issueDate: Date; // تاريخ إصدار الشهادة
-
-  @Prop()
-  expiryDate?: Date; // تاريخ انتهاء الشهادة (اختياري)
-
-  @Prop({ required: true })
-  certificateImageUrl: string; // رابط الصورة المخزنة للشهادة
-
-  @Prop({ enum: ['pending', 'approved', 'rejected'], default: 'pending' })
-  status: string; // حالة التحقق من الشهادة
+  filePath: string;
 }
 
 export class ActivityLog {

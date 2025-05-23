@@ -137,7 +137,7 @@ export class UserService {
 
       const result = await paginate(
         this.userModel,
-        [{ path: 'roleIds', select: 'name' }, { path: 'employeeId' }],
+        [{ path: 'roleIds', select: 'name' }],
         page,
         limit,
         allData,
@@ -156,7 +156,7 @@ export class UserService {
     try {
       const user = await this.userModel
         .findOne({ _id: id, deleted: false })
-        .populate(['roleIds', 'employeeId'])
+        .populate(['roleIds'])
         .exec();
 
       if (!user || user.deleted)
@@ -190,6 +190,21 @@ export class UserService {
       throw new NotFoundException(
         `User with email ${email} not found or has been deleted`,
       );
+    return user;
+  }
+
+  async getUserByIdentifier(identifier: string): Promise<User> {
+    const user = await this.userModel.findOne({
+      $or: [
+        { email: identifier },
+        { name: identifier }
+      ]
+    }).exec();
+    
+    if (!user || user.deleted) {
+      throw new NotFoundException('Invalid email/username or password');
+    }
+    
     return user;
   }
 

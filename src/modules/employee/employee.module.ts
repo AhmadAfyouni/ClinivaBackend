@@ -6,7 +6,7 @@ import { Employee, EmployeeSchema } from './schemas/employee.schema';
 import { ClinicCollectionModule } from '../cliniccollection/clinic-collection.module';
 import {
   ClinicCollectionSchema,
-  ClinicCollection,
+  Complex,
 } from '../cliniccollection/schemas/cliniccollection.schema';
 import { DepartmentModule } from '../department/department.module';
 import {
@@ -19,7 +19,7 @@ import { User, UserSchema } from '../user/schemas/user.schema';
   imports: [
     MongooseModule.forFeature([
       { name: Employee.name, schema: EmployeeSchema },
-      { name: ClinicCollection.name, schema: ClinicCollectionSchema },
+      { name: Complex.name, schema: ClinicCollectionSchema },
       { name: Department.name, schema: DepartmentSchema },
       { name: User.name, schema: UserSchema },
     ]),
