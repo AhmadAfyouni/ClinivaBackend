@@ -70,14 +70,14 @@ export class Employee {
   @Prop()
   medicalLicenseNumber?: string;
 
-  @Prop({ type: File, required: false })
-  certifications?: File;
+  @Prop({ type: String, required: false })
+  certifications?: string;
 
   @Prop({ type: String, required: false })
   Qualifications?: string;
 
-  @Prop({ type: File, required: false })
-  workPermit?: File;
+  @Prop({ type: String, required: false })
+  workPermit?: string;
 
   @Prop({ default: 0 })
   consultation_fee: number; // رسوم الاستشارة
