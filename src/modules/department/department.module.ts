@@ -17,7 +17,7 @@ import {
 } from '../medicalrecord/schemas/medicalrecord.schema';
 import {
   ClinicCollectionSchema,
-  ClinicCollection,
+  Complex,
 } from '../cliniccollection/schemas/cliniccollection.schema';
 import { ClinicCollectionModule } from '../cliniccollection/clinic-collection.module';
 import { forwardRef } from '@nestjs/common';
@@ -31,7 +31,7 @@ import { RoleModule } from '../role/role.module';
     MongooseModule.forFeature([
       { name: Department.name, schema: DepartmentSchema },
       { name: Clinic.name, schema: ClinicSchema },
-      { name: ClinicCollection.name, schema: ClinicCollectionSchema },
+      { name: Complex.name, schema: ClinicCollectionSchema },
       { name: Appointment.name, schema: AppointmentSchema },
       { name: MedicalRecord.name, schema: MedicalRecordSchema },
       { name: User.name, schema: UserSchema },

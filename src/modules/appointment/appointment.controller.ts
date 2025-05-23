@@ -18,16 +18,19 @@ import { CreateAppointmentDto } from './dto/create-appointment.dto';
 import { UpdateAppointmentDto } from './dto/update-appointment.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { UserService } from '../user/user.service';
+import { EmployeeService } from '../employee/employee.service';
 import { AppointmentModule } from './appointment.module';
 import { PermissionsEnum } from 'src/config/permission.enum';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/config/permissions.decorator';
+
 @Controller('appointments')
 @UseGuards(PermissionsGuard)
 export class AppointmentController {
   constructor(
     private readonly appointmentService: AppointmentService,
     private readonly userService: UserService,
+    private readonly employeeService: EmployeeService,
   ) {}
 
   @Post()
@@ -50,19 +53,18 @@ export class AppointmentController {
       const response = await this.userService.getUserById(userId);
 
       const user = response?.data;
-      // if (!user || !user.employeeId) {
-      //   throw new NotFoundException('User or Employee ID not found');
-      // }
+      if (!user || !user._id) {
+        throw new NotFoundException('User not found');
+      }
 
-      console.log('user.employeeId', user.employeeId);
-      console.log('user', user);
-      const employeeId =
-        typeof user.employeeId === 'string'
-          ? user.employeeId
-          : user.employeeId._id?.toString() || user.employeeId.toString();
+      // Find the employee associated with this user
+      const employee = await this.employeeService.findByUserId(user._id.toString());
+      if (!employee) {
+        throw new NotFoundException('Employee not found for this user');
+      }
 
       const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-      filters.employeeId = employeeId;
+      filters.employeeId = employee._id.toString();
 
       return this.appointmentService.getAllAppointments(paginationDto, filters);
     } catch (error) {

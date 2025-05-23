@@ -2,7 +2,6 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import {
   ContactInfo,
-  Certificate,
   WorkingHours,
   Vacation,
   BreakTime,
@@ -16,8 +15,8 @@ export class Employee {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ type: [ContactInfo], default: [] })
-  contactInfos: ContactInfo[];
+  @Prop({ type: ContactInfo, default: {} })
+  contactInfos: ContactInfo;
 
   @Prop({ required: true })
   dateOfBirth: Date;
@@ -25,11 +24,11 @@ export class Employee {
   @Prop({ required: true, enum: ['male', 'female'] })
   gender: string;
 
-  @Prop({ required: true })
-  identity?: string; // National ID or Passport
+  @Prop({ required: true, unique: true })
+  identity: string;
 
   @Prop({ required: true })
-  nationality?: string;
+  nationality: string;
 
   @Prop()
   image?: string;
@@ -42,7 +41,7 @@ export class Employee {
   marital_status?: string;
 
   @Prop({ required: true })
-  number_children?: number;
+  number_children: number;
 
   @Prop()
   notes?: string;
@@ -53,8 +52,8 @@ export class Employee {
   @Prop({})
   professional_experience: string;
 
-  // @Prop({ type: [String], default: [] })
-  // specialties: string[];
+  @Prop({ default: 0 })
+  evaluation: number;
 
   @Prop({ type: [String], default: [] })
   Languages?: string[];
@@ -62,74 +61,57 @@ export class Employee {
   @Prop({ type: [WorkingHours], default: [] })
   workingHours: WorkingHours[];
 
-  // @Prop()
-  // evaluation?: number;
-
-  @Prop({
-    type: String,
-    enum: [
-      'Doctor',
-      'Nurse',
-      'Technician',
-      'Administrative',
-      'Employee',
-      'PIC',
-      'Other',
-    ],
-    required: true,
-  })
-  employeeType: string;
-
   @Prop({ type: [Vacation], default: [] })
-  vacationRecords: Vacation[]; // سجل الإجازات
+  vacationRecords: Vacation[];
 
   @Prop({ required: true })
-  hireDate: Date; // تاريخ التوظيف
+  hireDate: Date;
 
   @Prop()
-  medicalLicenseNumber?: string; ///رقم الرخصة الطبية
+  medicalLicenseNumber?: string;
 
-  @Prop({ type: [Certificate], default: [] })
-  certifications?: Certificate[]; //الشهادات
+  @Prop({ type: File, required: false })
+  certifications?: File;
 
-  @Prop({ required: true, default: 'Qualifications' })
-  Qualifications: string; // المؤهلات
+  @Prop({ type: String, required: false })
+  Qualifications?: string;
 
-  @Prop({ required: true, default: 0 })
+  @Prop({ type: File, required: false })
+  workPermit?: File;
+
+  @Prop({ default: 0 })
   consultation_fee: number; // رسوم الاستشارة
 
   @Prop({ default: true })
-  on_call: boolean; // الإتاحة
+  on_call: boolean;
 
-  @Prop({ required: true, enum: ['FULL_TIME', 'PART_TIME'] })
-  jobType: string; //  نوع التوظيف (دوام كامل/جزئي)
+  @Prop({
+    required: true,
+    enum: ['FULL_TIME', 'PART_TIME'],
+    default: 'FULL_TIME',
+  })
+  jobType: string;
 
   @Prop({ type: [BreakTime], default: [] })
-  breakTimes: BreakTime[]; //  قائمة بأوقات الراحة// "للطبيب"
+  breakTimes: BreakTime[];
 
-  @Prop({ default: true })
+  @Prop({ type: Boolean, default: true })
   isActive: boolean;
 
-  @Prop({ type: Types.ObjectId, ref: 'Company', default: null })
-  companyId?: Types.ObjectId; // الشركة التي يعمل بها الموظف (إن وجد)
-
-  @Prop({ type: Types.ObjectId, ref: 'ClinicCollection', default: null })
-  clinicCollectionId?: Types.ObjectId; // مجموعة العيادات التي يعمل بها الموظف (إن وجد)
-
-  @Prop({ type: Types.ObjectId, ref: 'Department', default: null })
-  departmentId?: Types.ObjectId; // القسم الذي يعمل به الطبيب أو الموظف (إن وجد)
-
-  @Prop({ type: [Types.ObjectId], ref: 'Clinic', default: [] })
-  clinics: Types.ObjectId[]; // العيادات التي يعمل بها الطبيب أو الموظف (يمكن أن يعمل في أكثر من عيادة)
-
   @Prop({ type: [Types.ObjectId], ref: 'Specialization', required: true })
-  specializations: Types.ObjectId[]; // قائمة بمعرفات الاختصاصات المرتبطة بالعيادة
+  specializations: Types.ObjectId[];
+
+  @Prop({ type: [Types.ObjectId], ref: 'Clinic', required: false })
+  clinic: Types.ObjectId[];
 
   @Prop({ unique: true, required: true })
   publicId: string;
 
   @Prop({ type: Boolean, default: false })
   deleted: boolean;
+
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
+  userId: Types.ObjectId;
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);

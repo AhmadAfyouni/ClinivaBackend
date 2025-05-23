@@ -44,15 +44,21 @@ export class ClinicCollectionController {
       const userId = req.user.userId;
       const response = await this.userService.getUserById(userId);
       const user = response.data;
-      const employeeId = user.employeeId;
+      
+      if (!user || !user._id) {
+        throw new NotFoundException('User not found');
+      }
 
-      console.log('starttttttttttt');
-      console.log('user', employeeId._id);
+      // Find the employee associated with this user
+      const employee = await this.employeeService.findByUserId(user._id.toString());
+      if (!employee) {
+        throw new NotFoundException('Employee not found for this user');
+      }
 
       return this.clinicCollectionService.createClinicCollection(
         createClinicCollectionDto,
         user.plan,
-        employeeId._id.toString(),
+        employee._id.toString(),
       );
     } catch (error) {
       if (error instanceof HttpException) throw error;

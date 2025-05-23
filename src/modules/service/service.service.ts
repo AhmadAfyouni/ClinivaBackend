@@ -95,9 +95,19 @@ export class ServiceService {
     }
   }
 
-  async findAll(paginationDto: PaginationAndFilterDto, filters: any) {
+  async findAll(
+    paginationDto: {
+      page?: number;
+      limit?: number;
+      allData?: boolean;
+      sortBy?: string;
+      order?: 'asc' | 'desc';
+      search?: string;
+    },
+    filters: any
+  ) {
     try {
-      let { page, limit, allData, sortBy, order } = paginationDto;
+      let { page, limit, allData, sortBy, order, search } = paginationDto;
 
       // Default pagination values
       page = Number(page) || 1;
@@ -105,6 +115,19 @@ export class ServiceService {
       const sortField = sortBy ?? 'id';
       const sort = { [sortField]: order === 'asc' ? 1 : -1 };
       filters.deleted = { $ne: true };
+
+      // Handle search query
+      if (search) {
+        const searchRegex = new RegExp(search, 'i'); // Case-insensitive search
+        filters.$or = [
+          { name: searchRegex },
+          { description: searchRegex },
+          { 'clinic.name': searchRegex },
+          { 'doctors.name': searchRegex },
+          { 'doctors.specializations': searchRegex }
+        ];
+      }
+
       // Handle doctorId filter: convert to ObjectId and build $in query
       if (filters.doctorId) {
         if (!isValidObjectId(filters.doctorId)) {

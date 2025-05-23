@@ -20,8 +20,8 @@ import {
   MedicalRecordDocument,
 } from '../medicalrecord/schemas/medicalrecord.schema';
 import {
-  ClinicCollectionDocument,
-  ClinicCollection,
+  ComplexDocument,
+  Complex,
 } from '../cliniccollection/schemas/cliniccollection.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
@@ -34,8 +34,8 @@ export class DepartmentService {
     private appointmentModel: Model<AppointmentDocument>, // 👈 هنا
     @InjectModel(MedicalRecord.name)
     private medicalRecordModel: Model<MedicalRecordDocument>, // 👈 هنا
-    @InjectModel(ClinicCollection.name)
-    private cliniccollectionModel: Model<ClinicCollectionDocument>, // 👈 هنا
+    @InjectModel(Complex.name)
+    private cliniccollectionModel: Model<ComplexDocument>, // 👈 هنا
   ) {}
 
   private async checkUniqueName(name: string, clinicCollectionId: string) {

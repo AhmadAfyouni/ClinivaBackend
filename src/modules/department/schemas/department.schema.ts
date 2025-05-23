@@ -61,7 +61,7 @@ export class Department {
   })
   @Prop({
     type: Types.ObjectId,
-    ref: 'ClinicCollection',
+    ref: 'Complex',
     default: null,
   })
   clinicCollectionId: Types.ObjectId;
