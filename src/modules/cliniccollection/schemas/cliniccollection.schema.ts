@@ -11,14 +11,14 @@ import {
   WorkingHours,
 } from '../../../common/utlis/helper';
 
-export type ClinicCollectionDocument = ClinicCollection & Document;
+export type ComplexDocument = Complex & Document;
 
 @Schema({
   timestamps: true,
   toJSON: { virtuals: true },
   toObject: { virtuals: true },
 })
-export class ClinicCollection {
+export class Complex {
   _id: Types.ObjectId;
 
   @Prop({ default: true })
@@ -107,5 +107,4 @@ export class ClinicCollection {
   country: string;
 }
 
-export const ClinicCollectionSchema =
-  SchemaFactory.createForClass(ClinicCollection);
+export const ClinicCollectionSchema = SchemaFactory.createForClass(Complex);

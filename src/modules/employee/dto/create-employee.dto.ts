@@ -33,6 +33,15 @@ export class CreateEmployeeDto {
   name: string;
 
   @ApiProperty({
+    description: 'User ID',
+    example: '60f7c7b84f1a2c001c8b4568',
+    required: true,
+  })
+  @IsMongoId()
+  @IsNotEmpty()
+  userId: string;
+
+  @ApiProperty({
     type: [ContactInfoDTO],
     description: 'List of contact information',
     required: false,

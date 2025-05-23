@@ -6,10 +6,7 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import {
-  ClinicCollection,
-  ClinicCollectionDocument,
-} from './schemas/cliniccollection.schema';
+import { Complex, ComplexDocument } from './schemas/cliniccollection.schema';
 import { UpdateClinicCollectionDto } from './dto/update-clinic-collection.dto';
 import { CreateClinicCollectionDto } from './dto/create-clinic-collection.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
@@ -28,12 +25,13 @@ import {
   AppointmentDocument,
 } from '../appointment/schemas/appointment.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { User, UserDocument } from '../user/schemas/user.schema';
 
 @Injectable()
 export class ClinicCollectionService {
   constructor(
-    @InjectModel(ClinicCollection.name)
-    private clinicCollectionModel: Model<ClinicCollectionDocument>,
+    @InjectModel(Complex.name)
+    private clinicCollectionModel: Model<ComplexDocument>,
     @InjectModel(Employee.name)
     private employeeModel: Model<EmployeeDocument>,
     @InjectModel(Department.name)
@@ -41,6 +39,8 @@ export class ClinicCollectionService {
     @InjectModel(Clinic.name) private clinicModel: Model<ClinicDocument>,
     @InjectModel(Appointment.name)
     private appointmentModel: Model<AppointmentDocument>,
+    @InjectModel(User.name)
+    private userModel: Model<UserDocument>,
   ) {}
   private async checkUniqueName(name: string, company) {
     const existingClinicCollection = await this.clinicCollectionModel
@@ -62,13 +62,14 @@ export class ClinicCollectionService {
     createClinicCollectionDto: CreateClinicCollectionDto,
     plan: string,
     employeeId: string,
-  ): Promise<ApiGetResponse<ClinicCollection>> {
+  ): Promise<ApiGetResponse<Complex>> {
     try {
       console.log('createClinicCollectionDtpppppppppp', plan);
       if (plan === 'company') {
         const employee = await this.employeeModel.findById(employeeId);
-        if (employee && employee.companyId)
-          createClinicCollectionDto.companyId = employee.companyId;
+        const user = await this.userModel.findById(employee?.userId);
+        if (employee && user?.companyId)
+          createClinicCollectionDto.companyId = user.companyId;
         else {
           throw new BadRequestException(
             'Company ID is required for company plan',
@@ -183,7 +184,7 @@ export class ClinicCollectionService {
     });
   }
 
-  private async addClinicCounts(clinicCollection: ClinicCollectionDocument) {
+  private async addClinicCounts(clinicCollection: ComplexDocument) {
     const countConfigs = [
       {
         model: this.employeeModel,
@@ -217,9 +218,7 @@ export class ClinicCollectionService {
     };
   }
 
-  async getClinicCollectionById(
-    id: string,
-  ): Promise<ApiGetResponse<ClinicCollection>> {
+  async getClinicCollectionById(id: string): Promise<ApiGetResponse<Complex>> {
     try {
       const collection = await this.clinicCollectionModel
         .findById(id)
@@ -278,7 +277,7 @@ export class ClinicCollectionService {
   async updateClinicCollection(
     id: string,
     updateClinicCollectionDto: UpdateClinicCollectionDto,
-  ): Promise<ApiGetResponse<ClinicCollection>> {
+  ): Promise<ApiGetResponse<Complex>> {
     try {
       const updatedClinicCollection = await this.clinicCollectionModel
         .findByIdAndUpdate(id, updateClinicCollectionDto, { new: true })
@@ -299,9 +298,7 @@ export class ClinicCollectionService {
     }
   }
 
-  async deleteClinicCollection(
-    id: string,
-  ): Promise<ApiGetResponse<ClinicCollection>> {
+  async deleteClinicCollection(id: string): Promise<ApiGetResponse<Complex>> {
     try {
       const clinicCollection = await this.clinicCollectionModel
         .findById(id)

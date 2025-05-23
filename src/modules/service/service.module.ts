@@ -4,10 +4,7 @@ import { Service, ServiceSchema } from './schemas/service.schema';
 import { ServiceService } from './service.service';
 import { ServiceController } from './service.controller';
 import { Clinic, ClinicSchema } from '../clinic/schemas/clinic.schema';
-import {
-  ClinicCollection,
-  ClinicCollectionSchema,
-} from '../cliniccollection/schemas/cliniccollection.schema';
+import { ClinicCollectionSchema } from '../cliniccollection/schemas/cliniccollection.schema';
 import { Employee, EmployeeSchema } from '../employee/schemas/employee.schema';
 
 @Module({
@@ -15,7 +12,7 @@ import { Employee, EmployeeSchema } from '../employee/schemas/employee.schema';
     MongooseModule.forFeature([
       { name: 'Service', schema: ServiceSchema },
       { name: 'Clinic', schema: ClinicSchema },
-      { name: 'ClinicCollection', schema: ClinicCollectionSchema },
+      { name: 'Complex', schema: ClinicCollectionSchema },
       { name: 'Employee', schema: EmployeeSchema },
     ]),
   ],

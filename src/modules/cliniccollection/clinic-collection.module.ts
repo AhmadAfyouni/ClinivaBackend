@@ -3,10 +3,11 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ClinicCollectionService } from './clinic-collection.service';
 import { ClinicCollectionController } from './clinic-collection.controller';
 import {
-  ClinicCollection,
+  Complex,
   ClinicCollectionSchema,
 } from './schemas/cliniccollection.schema';
 import { UserModule } from '../user/user.module';
+import { User, UserSchema } from '../user/schemas/user.schema';
 import { EmployeeModule } from '../employee/employee.module';
 import { Employee, EmployeeSchema } from '../employee/schemas/employee.schema';
 import { CompanyModule } from '../company/company.module';
@@ -23,11 +24,12 @@ import {
 @Module({
   imports: [
     MongooseModule.forFeature([
-      { name: ClinicCollection.name, schema: ClinicCollectionSchema },
+      { name: Complex.name, schema: ClinicCollectionSchema },
       { name: Employee.name, schema: EmployeeSchema },
       { name: Department.name, schema: DepartmentSchema },
       { name: Clinic.name, schema: ClinicSchema },
       { name: Appointment.name, schema: AppointmentSchema },
+      { name: User.name, schema: UserSchema },
     ]),
     UserModule,
     forwardRef(() => EmployeeModule),
