@@ -1,4 +1,9 @@
-import { Injectable, UnauthorizedException, Req } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  Req,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/user.service';
@@ -27,28 +32,31 @@ export class AuthService {
   /**
    * Validates a user by email and password
    */
-  async validateUser(identifier: string, password: string): Promise<User | null> {
+  async validateUser(
+    identifier: string,
+    password: string,
+  ): Promise<User | null> {
     try {
       // Try to find user by either email or username
       const user = await this.userService.getUserByIdentifier(identifier);
 
       if (!user.isActive) {
-        throw new UnauthorizedException('User account is inactive.');
+        throw new BadRequestException('User account is inactive.');
       }
 
       if (user.deleted) {
-        throw new UnauthorizedException('User account has been deleted.');
+        throw new BadRequestException('User account has been deleted.');
       }
 
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
-        throw new UnauthorizedException('Invalid email/username or password');
+        throw new BadRequestException('Invalid email/username or password');
       }
 
       return user;
     } catch (error) {
       // If user is not found or any other error occurs, throw invalid credentials
-      throw new UnauthorizedException('Invalid email/username or password');
+      throw new BadRequestException('Invalid email/username or password');
     }
   }
 
@@ -71,7 +79,7 @@ export class AuthService {
     const user = await this.validateUser(email, password);
 
     if (!user || !user._id) {
-      throw new UnauthorizedException('Invalid user');
+      throw new BadRequestException('Invalid user');
     }
 
     // Get all permissions from user's roles
