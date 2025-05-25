@@ -56,6 +56,8 @@ export class AuthService {
       return user;
     } catch (error) {
       // If user is not found or any other error occurs, throw invalid credentials
+      console.log('Error', error.message);
+
       throw new BadRequestException('Invalid email/username or password');
     }
   }
@@ -76,6 +78,7 @@ export class AuthService {
       user: any;
     };
   }> {
+    console.log('start login', email, password);
     const user = await this.validateUser(email, password);
 
     if (!user || !user._id) {

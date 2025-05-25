@@ -22,7 +22,6 @@ import {
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { RoleDocument, Role } from '../role/schemas/role.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
-import { Employee } from '../employee/schemas/employee.schema';
 import {
   SystemLogService,
   CreateLogDto,
@@ -40,15 +39,13 @@ export class UserService {
     createUserDto: CreateUserDto,
   ): Promise<ApiGetResponse<User>> {
     try {
-      // Check if a user with the same employee ID already exists
+      // Check if email already exists
       const existingUser = await this.userModel.findOne({
-        employeeId: createUserDto.employeeId,
-        deleted: false,
+        email: createUserDto.email,
       });
-
       if (existingUser) {
         throw new ConflictException(
-          'A user with this employee ID already exists',
+          'This email is already registered. Please use a different email address.',
         );
       }
 
@@ -56,7 +53,7 @@ export class UserService {
       const hashedPassword = await bcrypt.hash(
         createUserDto.password,
         saltRounds,
-      ); // ✅ تشفير كلمة المرور
+      );
       const publicId = await generateUniquePublicId(this.userModel, 'us');
       const newUser = new this.userModel({
         ...createUserDto,
@@ -67,12 +64,17 @@ export class UserService {
 
       return {
         success: true,
-        message: 'user created successfully',
+        message: 'User created successfully',
         data: savedUser,
       };
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException(error.message);
+      console.error('Error creating user:', error);
+      if (error instanceof ConflictException) {
+        throw error; // Re-throw the conflict exception we created
+      }
+      throw new BadRequestException(
+        'An error occurred while creating the user. Please try again.',
+      );
     }
   }
 
@@ -194,25 +196,54 @@ export class UserService {
   }
 
   async getUserByIdentifier(identifier: string): Promise<User> {
-    const user = await this.userModel.findOne({
-      $or: [
-        { email: identifier },
-        { name: identifier }
-      ]
-    }).exec();
-    
+    const user = await this.userModel
+      .findOne({
+        $or: [{ email: identifier }, { name: identifier }],
+      })
+      .exec();
+
     if (!user || user.deleted) {
       throw new NotFoundException('Invalid email/username or password');
     }
-    
+
     return user;
   }
 
   async updateUser(
     id: string,
     updateUserDto: UpdateUserDto,
+    currentUserId: string,
   ): Promise<ApiGetResponse<User>> {
     try {
+      if ('isActive' in updateUserDto && currentUserId == id) {
+        throw new BadRequestException(
+          'You cannot activate or deactivate your own account.',
+        );
+      }
+      if (updateUserDto.email) {
+        const existingEmailUser = await this.userModel.findOne({
+          _id: { $ne: id },
+          email: updateUserDto.email,
+        });
+        if (existingEmailUser) {
+          throw new ConflictException(
+            'This email is already in use. Please use a different email address.',
+          );
+        }
+      }
+
+      if (updateUserDto.name) {
+        const existingNameUser = await this.userModel.findOne({
+          _id: { $ne: id },
+          name: updateUserDto.name,
+        });
+        if (existingNameUser) {
+          throw new ConflictException(
+            'This name is already taken. Please choose a different name.',
+          );
+        }
+      }
+
       if (updateUserDto.password) {
         const salt = await bcrypt.genSalt();
         updateUserDto.password = await bcrypt.hash(
@@ -224,8 +255,10 @@ export class UserService {
       const updatedUser = await this.userModel
         .findByIdAndUpdate(id, updateUserDto, { new: true })
         .exec();
-      if (!updatedUser || updatedUser.deleted)
+
+      if (!updatedUser || updatedUser.deleted) {
         throw new NotFoundException('User not found or has been deleted');
+      }
 
       try {
         const logEntry: CreateLogDto = {
@@ -233,8 +266,6 @@ export class UserService {
           action: SystemLogAction.USER_PROFILE_UPDATE,
           details: { updatedFields: Object.keys(updateUserDto) },
         };
-        // logEntry.ipAddress = request?.ip;
-        // logEntry.userAgent = request?.headers?.['user-agent'];
         await this.systemLogService.createLog(logEntry);
       } catch (logError) {
         console.error('Failed to create system log for user update:', logError);
@@ -242,12 +273,21 @@ export class UserService {
 
       return {
         success: true,
-        message: 'User update successfully',
+        message: 'User updated successfully',
         data: updatedUser,
       };
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException(error.message);
+      console.error('Error updating user:', error);
+      if (
+        error instanceof ConflictException ||
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new BadRequestException(
+        'An error occurred while updating the user. Please try again.',
+      );
     }
   }
 
@@ -260,7 +300,11 @@ export class UserService {
       if (!updateUserDto) {
         throw new BadRequestException('Update data is required');
       }
-
+      if ('isActive' in updateUserDto) {
+        throw new BadRequestException(
+          'You cannot activate or deactivate your own account.',
+        );
+      }
       // Prepare update object
       const updateData: Partial<UpdateUserDto> = { ...updateUserDto };
 
@@ -304,23 +348,45 @@ export class UserService {
     }
   }
 
-  async deleteUser(id: string): Promise<ApiGetResponse<User>> {
+  async deleteUser(
+    id: string,
+    currentUserId: string,
+  ): Promise<ApiGetResponse<User>> {
     try {
+      console.log('currentUserId', currentUserId);
+      console.log('id', id);
+      // Prevent user from deleting their own account
+      if (currentUserId && currentUserId === id) {
+        throw new BadRequestException('You cannot delete your own account');
+      }
+
       const user = await this.userModel.findById(id).exec();
-      if (!user || user.deleted)
+      if (!user || user.deleted) {
         throw new NotFoundException('User not found or has been deleted');
+      }
+
+      // Check if user is deactivated before allowing deletion
+      if (user.isActive) {
+        throw new BadRequestException(
+          'User must be deactivated before deletion',
+        );
+      }
 
       user.deleted = true;
       user.isActive = false;
-      user.name = user.name + ' (Deleted)' + user.publicId;
-      user.email = user.email + ' (Deleted)' + user.publicId;
+      user.name = `${user.name} (Deleted)${user.publicId}`;
+      user.email = `(Deleted)${user.publicId}${user.email}`;
+
       const deletedUser = await user.save();
 
       try {
         const logEntry: CreateLogDto = {
           userId: deletedUser._id.toString(),
-          action: SystemLogAction.USER_PROFILE_UPDATE,
-          details: { reason: 'User soft deleted' },
+          action: SystemLogAction.USER_DELETED,
+          details: {
+            actionBy: currentUserId || 'system',
+            reason: 'User account deleted',
+          },
         };
 
         await this.systemLogService.createLog(logEntry);
@@ -330,12 +396,20 @@ export class UserService {
 
       return {
         success: true,
-        message: 'User marked as deleted successfully',
+        message: 'User account has been successfully deleted',
         data: deletedUser,
       };
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException(error.message);
+      console.error('Error deleting user:', error);
+      if (
+        error instanceof BadRequestException ||
+        error instanceof NotFoundException
+      ) {
+        throw error;
+      }
+      throw new BadRequestException(
+        'An error occurred while deleting the user',
+      );
     }
   }
 
