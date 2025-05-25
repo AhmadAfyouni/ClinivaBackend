@@ -27,7 +27,10 @@ export class AuthService {
   /**
    * Validates a user by email and password
    */
-  async validateUser(identifier: string, password: string): Promise<User | null> {
+  async validateUser(
+    identifier: string,
+    password: string,
+  ): Promise<User | null> {
     try {
       // Try to find user by either email or username
       const user = await this.userService.getUserByIdentifier(identifier);
@@ -68,6 +71,8 @@ export class AuthService {
       user: any;
     };
   }> {
+    const jwtExpiration = process.env.JWT_EXPIRATION;
+    const jwtRefreshExpiration = process.env.JWT_REFRESH_EXPIRATION;
     const user = await this.validateUser(email, password);
 
     if (!user || !user._id) {
@@ -93,8 +98,12 @@ export class AuthService {
       plan: user.plan,
     };
 
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '45m' });
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: jwtExpiration,
+    });
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: jwtRefreshExpiration,
+    });
 
     // Log the login action
     try {
@@ -156,7 +165,9 @@ export class AuthService {
         success: true,
         message: 'user retrieved successfully',
         data: {
-          accessToken: this.jwtService.sign(newPayload, { expiresIn: '45m' }),
+          accessToken: this.jwtService.sign(newPayload, {
+            expiresIn: process.env.JWT_EXPIRATION,
+          }),
         },
       };
     } catch (error) {
