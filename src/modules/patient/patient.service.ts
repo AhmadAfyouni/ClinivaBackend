@@ -15,6 +15,7 @@ import {
   applyBooleanFilter,
   buildFinalFilter,
   paginate,
+  SortType,
 } from 'src/common/utlis/paginate';
 import {
   AppointmentDocument,
@@ -76,7 +77,7 @@ export class PatientService {
       limit = Number(limit) || 10;
 
       const sortField: string = sortBy ?? 'id';
-      const sort: Record<string, number> = {
+      const sort: SortType = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
 
@@ -107,15 +108,20 @@ export class PatientService {
       );
 
       // استخدام paginate مع الشروط النهائية
-      const result = await paginate(
-        this.patientModel,
-        [],
+      const result = await paginate({
+        model: this.patientModel,
+        populate: [],
         page,
         limit,
         allData,
-        finalFilter,
-        sort,
-      );
+        filter: finalFilter,
+        sort: sort,
+      });
+
+      // إضافة آخر زيارة للمريض مع اسم الطبيب
+      if (result.data) {
+        const patients = result.data;
+      }
 
       // إضافة آخر زيارة للمريض مع اسم الطبيب
       if (result.data) {

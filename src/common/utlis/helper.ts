@@ -10,6 +10,14 @@ export enum DayOfWeek {
   Sunday = 'Sunday',
 }
 
+export class Shift {
+  @Prop({ required: true })
+  startTime: string;
+
+  @Prop({ required: true })
+  endTime: string;
+}
+
 export class WorkingHours {
   @Prop({
     required: true,
@@ -19,11 +27,17 @@ export class WorkingHours {
 
   @Prop({
     required: true,
-    type: { startTime: String, endTime: String },
-    default: { startTime: '', endTime: '' },
+    type: Shift,
+    default: { startTime: '08:00', endTime: '13:00' },
   })
-  startTime: string;
-  endTime: string;
+  shift1: Shift;
+
+  @Prop({
+    required: true,
+    type: Shift,
+    default: { startTime: '14:00', endTime: '19:00' },
+  })
+  shift2: Shift;
 }
 
 export class InsuranceCompany {

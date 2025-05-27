@@ -16,6 +16,7 @@ import {
   applyModelFilter,
   buildFinalFilter,
   paginate,
+  SortType,
 } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import {
@@ -72,12 +73,13 @@ export class ClinicService {
           'departmentId is required for collection plan',
         );
       }
-      if (createClinicDto.departmentId) {
-        await this.checkUniqueName(
-          createClinicDto.name,
-          createClinicDto.departmentId.toString(),
-        );
-      }
+      console.log('createClinicDto', createClinicDto);
+      // if (createClinicDto.departmentId) {
+      //   await this.checkUniqueName(
+      //     createClinicDto.name,
+      //     createClinicDto.departmentId.toString(),
+      //   );
+      // }
 
       const publicId = await generateUniquePublicId(this.clinicModel, 'cli');
 
@@ -104,7 +106,7 @@ export class ClinicService {
       limit = Number(limit) || 10;
 
       const sortField: string = sortBy ?? 'id';
-      const sort: Record<string, number> = {
+      const sort: SortType = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
 
@@ -156,15 +158,15 @@ export class ClinicService {
         { path: 'insuranceCompany' },
       ];
 
-      const result = await paginate(
-        this.clinicModel,
-        populateFields,
+      const result = await paginate({
+        model: this.clinicModel,
+        populate: populateFields,
         page,
         limit,
         allData,
-        finalFilter,
-        sort,
-      );
+        filter: finalFilter,
+        sort: sort,
+      });
 
       // إحصائيات لكل عيادة
       if (result.data) {

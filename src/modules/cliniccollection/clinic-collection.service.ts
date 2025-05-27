@@ -10,7 +10,7 @@ import { Complex, ComplexDocument } from './schemas/cliniccollection.schema';
 import { UpdateClinicCollectionDto } from './dto/update-clinic-collection.dto';
 import { CreateClinicCollectionDto } from './dto/create-clinic-collection.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, paginate, SortType } from 'src/common/utlis/paginate';
 import {
   Employee,
   EmployeeDocument,
@@ -119,7 +119,7 @@ export class ClinicCollectionService {
 
       order = order || 'asc';
       const sortField: string = sortBy ?? 'id';
-      const sort: { [key: string]: 1 | -1 } = {
+      const sort: SortType = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
 
@@ -143,15 +143,15 @@ export class ClinicCollectionService {
       };
       finalFilter.deleted = { $ne: true };
 
-      const result = await paginate(
-        this.clinicCollectionModel,
-        ['companyId', 'specializations', 'PIC'],
+      const result = await paginate({
+        model: this.clinicCollectionModel,
+        populate: ['companyId', 'specializations', 'PIC'],
         page,
         limit,
         allData,
-        finalFilter,
-        sort,
-      );
+        filter: finalFilter,
+        sort: sort,
+      });
 
       if (result.data) {
         const clinicCollections = result.data;

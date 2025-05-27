@@ -48,14 +48,19 @@ export class UserController {
 
   @Put(':id')
   @Permissions(PermissionsEnum.ADMIN)
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.updateUser(id, updateUserDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+    @Req() req: any,
+  ) {
+    return this.userService.updateUser(id, updateUserDto, req.user.userId);
   }
 
   @Delete(':id')
   @Permissions(PermissionsEnum.ADMIN)
-  remove(@Param('id') id: string) {
-    return this.userService.deleteUser(id);
+  remove(@Param('id') id: string, @Req() req: any) {
+    console.log(req.user);
+    return this.userService.deleteUser(id, req.user.userId);
   }
 
   @Put(':id/reset-password')
@@ -69,6 +74,7 @@ export class UserController {
   async changePassword(
     @Param('id') id: string,
     @Body() dto: ChangePasswordDto,
+    @Req() req: any,
   ) {
     return {
       message: await this.userService.changePassword(

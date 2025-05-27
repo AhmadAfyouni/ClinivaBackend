@@ -5,8 +5,9 @@ export type SystemLogDocument = SystemLog & Document;
 
 export enum SystemLogAction {
   USER_LOGIN = 'USER_LOGIN',
-  USER_LOGOUT = 'USER_LOGOUT', // Example for future use
+  USER_LOGOUT = 'USER_LOGOUT',
   USER_PROFILE_UPDATE = 'USER_PROFILE_UPDATE',
+  USER_DELETED = 'USER_DELETED',
   // Add other relevant actions as your application evolves
   // e.g., ITEM_CREATED, ITEM_DELETED, PAYMENT_SUCCESS, etc.
 }
