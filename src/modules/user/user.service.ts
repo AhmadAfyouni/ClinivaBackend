@@ -6,27 +6,21 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import {
-  addDateFilter,
-  ApiGetResponse,
-  applyBooleanFilter,
-  applyModelFilter,
-  buildFinalFilter,
-  paginate,
-} from 'src/common/utlis/paginate';
+import { ApiGetResponse } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { RoleDocument, Role } from '../role/schemas/role.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 import {
   SystemLogService,
   CreateLogDto,
-} from '../SystemLogAction/system-log.service'; // Adjust path if necessary
-import { SystemLogAction } from '../SystemLogAction/log_schema'; // Corrected import for SystemLogAction
+} from '../SystemLogAction/system-log.service';
+import { SystemLogAction } from '../SystemLogAction/log_schema';
+import { FilterSort, PaginationOptions } from 'src/common/utils'; // Import the new FilterSort utility
 @Injectable()
 export class UserService {
   constructor(
@@ -45,7 +39,7 @@ export class UserService {
       });
       if (existingUser) {
         throw new ConflictException(
-          'This email is already registered. Please use a different email address.',
+          'The email is already in use. Please enter a unique value for this field',
         );
       }
 
@@ -78,76 +72,110 @@ export class UserService {
     }
   }
 
-  async getAllUsers(paginationDto: PaginationAndFilterDto, filters: any) {
+  /**
+   * Get all users with pagination, filtering, and sorting
+   * @param paginationDto Pagination and filtering options
+   * @param filters Additional filters
+   * @returns Paginated list of users
+   */
+  async getAllUsers(
+    paginationDto: PaginationAndFilterDto,
+    filters: Record<string, any> = {}
+  ) {
     try {
-      let { page, limit, allData, sortBy, order } = paginationDto;
-
-      // Convert page & limit to numbers
-      page = Number(page) || 1;
-      limit = Number(limit) || 10;
-      filters.deleted = { $ne: true };
-      // تحديد حقل الفرز الافتراضي
-      const sortField: string = sortBy ?? 'id';
-      const sort: { [key: string]: 1 | -1 } = {
-        [sortField]: order === 'asc' ? 1 : -1,
-      }; // تحديد الاتجاه بناءً على 'asc' أو 'desc'
-      console.log(sortField);
-      const searchConditions: any[] = [];
-      const filterConditions: any[] = [];
-      let RoleIds: string[] = [];
-
-      await applyBooleanFilter(filters, 'isActive', filterConditions);
-      if (filters.search) {
-        const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الأحرف
-
-        const searchOrConditions: Record<string, any>[] = [
-          { name: regex },
-          { email: regex },
-        ];
-
-        const Roles = await this.roleModel.find({ name: regex }).select('_id');
-        RoleIds = Roles.map((role) => role._id.toString());
-
-        if (RoleIds.length > 0) {
-          searchOrConditions.push({ roleIds: { $in: RoleIds } });
-        }
-
-        searchConditions.push({ $or: searchOrConditions });
+      const { 
+        page = 1, 
+        limit = 10, 
+        sortBy = 'createdAt', 
+        order = 'desc', 
+        search,
+        status,
+        startDate,
+        endDate,
+        includeDeleted = false,
+        fields
+      } = paginationDto;
+      
+      // Initialize FilterSort with user model
+      const filterSort = new FilterSort<UserDocument>(this.userModel as Model<UserDocument>);
+      
+      // Build the base query
+      const query: Record<string, any> = {};
+      
+      // Handle soft-deleted records
+      if (!includeDeleted) {
+        query.deleted = { $ne: true };
       }
-
-      // تحقق إذا كان يوجد تاريخ لإنشاء المستخدم
-      addDateFilter(filters, 'createdAt', searchConditions);
-      const roleResult = await applyModelFilter(
-        this.roleModel,
-        filters,
-        'roleName',
-        'name',
-        'roleIds',
-        filterConditions,
-        page,
-        limit,
-      );
-      if (roleResult) return roleResult;
-
-      const fieldsToDelete = ['search', 'isActive', 'roleName', 'createdAt'];
-      fieldsToDelete.forEach((field) => delete filters[field]);
-      const finalFilter = buildFinalFilter(
-        filters,
-        searchConditions,
-        filterConditions,
-      );
-
-      const result = await paginate(
-        this.userModel,
-        [{ path: 'roleIds', select: 'name' }],
-        page,
-        limit,
-        allData,
-        finalFilter,
-        sort,
-      );
-
-      return result;
+      
+      // Define searchable fields
+      const searchFields: (keyof User)[] = ['name', 'email'];
+      
+      // Handle role filter if roleName is provided
+      if (filters.roleName) {
+        const role = await this.roleModel.findOne({ name: filters.roleName });
+        if (role) {
+          query.roleIds = role._id;
+        }
+      }
+      
+      // Handle status filter if provided
+      if (status) {
+        query.status = status;
+      }
+      
+      // Handle date range filter
+      if (startDate || endDate) {
+        query.createdAt = {};
+        if (startDate) {
+          query.createdAt.$gte = new Date(startDate);
+        }
+        if (endDate) {
+          const endOfDay = new Date(endDate);
+          endOfDay.setHours(23, 59, 59, 999);
+          query.createdAt.$lte = endOfDay;
+        }
+      }
+      
+      // Add text search filter if search term is provided
+      if (search && searchFields.length > 0) {
+        const searchConditions = searchFields.map(field => ({
+          [field]: { $regex: search, $options: 'i' }
+        }));
+        
+        query.$or = searchConditions;
+      }
+      
+      // Configure pagination and population options
+      const options: PaginationOptions<UserDocument> = {
+        page: Math.max(1, Number(page)),
+        limit: Math.min(100, Math.max(1, Number(limit))), // Limit max items per page to 100
+        sortBy,
+        order: order as 'asc' | 'desc',
+        populate: {
+          path: 'roleIds',
+          select: 'name',
+          options: { strictPopulate: false }
+        },
+        select: fields ? fields.split(',').map(f => f.trim()) : undefined
+      };
+      
+      // Execute the query with pagination, filtering, and sorting
+      const result = await filterSort.paginate(options, query);
+      
+      // Format the response
+      return {
+        success: true,
+        message: 'Users retrieved successfully',
+        data: result.data,
+        pagination: {
+          total: result.total,
+          page: result.page,
+          limit: result.limit,
+          totalPages: result.totalPages,
+          hasNextPage: result.hasNextPage,
+          hasPreviousPage: result.hasPreviousPage,
+        },
+      };
     } catch (error) {
       console.log(error);
       throw new BadRequestException(error.message);
@@ -227,7 +255,7 @@ export class UserService {
         });
         if (existingEmailUser) {
           throw new ConflictException(
-            'This email is already in use. Please use a different email address.',
+            'The email is already in use. Please enter a unique value for this field',
           );
         }
       }
@@ -239,7 +267,7 @@ export class UserService {
         });
         if (existingNameUser) {
           throw new ConflictException(
-            'This name is already taken. Please choose a different name.',
+            'The name is already in use. Please enter a unique value for this field',
           );
         }
       }
@@ -368,7 +396,7 @@ export class UserService {
       // Check if user is deactivated before allowing deletion
       if (user.isActive) {
         throw new BadRequestException(
-          'User must be deactivated before deletion',
+          'This user cannot be deleted because they are currently active',
         );
       }
 
@@ -396,7 +424,7 @@ export class UserService {
 
       return {
         success: true,
-        message: 'User account has been successfully deleted',
+        message: 'User has been deleted successfully',
         data: deletedUser,
       };
     } catch (error) {
@@ -476,7 +504,11 @@ export class UserService {
 
       return {
         success: true,
-        message: `User ${isActive ? 'activated' : 'deactivated'} successfully`,
+        message: `${
+          isActive
+            ? 'The account has been activated and is now usable in the system'
+            : 'The account has been deactivated and can no longer be used in the system'
+        }`,
         data: user,
       };
     } catch (error) {

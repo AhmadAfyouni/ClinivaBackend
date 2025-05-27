@@ -1,8 +1,9 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { ActivityLog, LoginHistory } from 'src/common/utlis/helper';
+import { MongooseDocument } from 'src/common/utils/filter-sort.util';
 
-export type UserDocument = User & Document;
+export type UserDocument = User & MongooseDocument;
 
 @Schema({ timestamps: true })
 export class User {
@@ -43,7 +44,7 @@ export class User {
 
   @Prop({
     type: String,
-    enum: ['Doctor', 'Medical Staff', 'Staff'],
+    enum: ['Admin', 'Doctor', 'Medical Staff', 'Staff'],
     required: true,
   })
   employeeType: string;
@@ -90,7 +91,7 @@ UserSchema.post('save', function (error: any, doc: any, next: any) {
   if (error.name === 'MongoServerError' && error.code === 11000) {
     const field = Object.keys(error.keyPattern)[0];
     const value = error.keyValue[field];
-    const message = `${field.charAt(0).toUpperCase() + field.slice(1)} '${value}' is already in use. Please choose a different ${field}.`;
+    const message = `${field.charAt(0).toUpperCase() + field.slice(1)} '${value}' is already in use. Please enter a unique value for this field.`;
     next(new Error(message));
   } else {
     next(error);

@@ -4,59 +4,34 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { EmployeeService } from '../employee/employee.service';
+// import { EmployeeService } from '../employee/employee.service';
 import { Model } from 'mongoose';
 import { Company, CompanyDocument } from './schemas/company.schema';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, paginate, SortType } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { UserService } from 'src/modules/user/user.service';
 
 @Injectable()
 export class CompanyService {
   constructor(
     @InjectModel(Company.name) private companyModel: Model<CompanyDocument>,
-    private readonly userService: UserService,
-    private readonly employeeService: EmployeeService,
+    // private readonly employeeService: EmployeeService,
   ) {}
 
   async create(
     createCompanyDto: CreateCompanyDto,
-    user_id: string,
+    employeeId: string,
   ): Promise<ApiGetResponse<Company>> {
     try {
+      // Create the company
       const createdCompany = new this.companyModel(createCompanyDto);
       const savedCompany = await createdCompany.save();
-      const userResponse = await this.userService.getUserById(user_id);
-      const user = userResponse.data;
 
-      if (!user || !user._id) {
-        throw new NotFoundException('User not found');
-      }
-
-      // Find the employee associated with this user
-      const employee = await this.employeeService.findByUserId(user._id.toString());
-      
-      if (employee) {
-        try {
-          console.log(
-            `Attempting to assign company ${savedCompany._id} to employee ${employee._id}`,
-          );
-          await this.employeeService.updateEmployee(employee._id.toString(), {
-            companyId: savedCompany._id,
-          });
-          console.log(
-            `Successfully assigned company ${savedCompany._id} to employee ${employee._id}`,
-          );
-        } catch (err) {
-          console.error(`Failed to assign company to employee ${employee._id}:`, err.message);
-        }
-      } else {
-        console.warn(
-          `User ${user_id} does not have an associated employee. Cannot assign company to employee.`,
-        );
-      }
+      // Update the employee with the company ID
+      // await this.employeeService.updateEmployee(employeeId, {
+      //   companyId: savedCompany._id,
+      // });
 
       return {
         success: true,
@@ -64,8 +39,10 @@ export class CompanyService {
         data: savedCompany,
       };
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException(error);
+      console.error('Error creating company:', error);
+      throw new BadRequestException(
+        error.message || 'Failed to create company',
+      );
     }
   }
 
@@ -77,22 +54,25 @@ export class CompanyService {
       page = Number(page) || 1;
       limit = Number(limit) || 10;
 
-      const sortField: string = sortBy ?? 'id';
-      const sort: Record<string, number> = {
+      const sortField: string = sortBy ?? 'createdAt';
+      const sort: SortType = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
-      return paginate(
-        this.companyModel,
-        [],
+
+      return paginate({
+        model: this.companyModel,
+        populate: [],
         page,
         limit,
         allData,
-        filters,
-        sort,
-      );
+        filter: filters,
+        sort: sort,
+      });
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException(error);
+      console.error('Error finding companies:', error);
+      throw new BadRequestException(
+        error.message || 'Failed to retrieve companies',
+      );
     }
   }
 
@@ -108,8 +88,10 @@ export class CompanyService {
         data: company,
       };
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException(error);
+      console.error(`Error finding company with ID ${id}:`, error);
+      throw new BadRequestException(
+        error.message || 'Failed to retrieve company',
+      );
     }
   }
 
@@ -126,29 +108,46 @@ export class CompanyService {
       }
       return {
         success: true,
-        message: 'Company update successfully',
+        message: 'Company updated successfully',
         data: updatedCompany,
       };
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException(error);
+      console.error(`Error updating company with ID ${id}:`, error);
+      throw new BadRequestException(
+        error.message || 'Failed to update company',
+      );
     }
   }
 
-  async remove(id: string): Promise<ApiGetResponse<Company>> {
+  async remove(id: string): Promise<ApiGetResponse<Company | null>> {
     try {
-      const result = await this.companyModel.findByIdAndDelete(id).exec();
-      if (!result) {
+      // First, find the company to get its ID
+      const company = await this.companyModel.findById(id).exec();
+      if (!company) {
         throw new NotFoundException(`Company with ID ${id} not found`);
       }
+
+      // Remove company reference from all employees
+      // await this.employeeService['employeeModel']
+      //   .updateMany(
+      //     { companyId: id },
+      //     { $unset: { companyId: '' } }
+      //   )
+      //   .exec();
+
+      // Delete the company
+      await this.companyModel.findByIdAndDelete(id).exec();
+
       return {
         success: true,
-        message: 'Company remove successfully',
-        data: {} as Company,
+        message: 'Company removed successfully',
+        data: null,
       };
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException(error);
+      console.error(`Error removing company with ID ${id}:`, error);
+      throw new BadRequestException(
+        error.message || 'Failed to remove company',
+      );
     }
   }
 }

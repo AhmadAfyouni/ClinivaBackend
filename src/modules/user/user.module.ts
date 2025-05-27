@@ -16,7 +16,7 @@ import { SystemLogModule } from '../SystemLogAction/system-log.module'; // Adjus
     forwardRef(() => RoleModule),
     SystemLogModule, // Add SystemLogModule here
   ],
-  controllers: [UserController, ProfileController],
+  controllers: [UserController],
   providers: [UserService],
   exports: [UserService], // في حال احتجنا لاستخدام الخدمة في أماكن أخرى
 })
