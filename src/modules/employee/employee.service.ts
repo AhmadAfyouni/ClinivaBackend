@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
@@ -24,16 +25,19 @@ import {
   DepartmentDocument,
   Department,
 } from '../department/schemas/department.schema';
-import { User, UserDocument } from '../user/schemas/user.schema';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 import { saveFileLocally } from 'src/common/utlis/upload.util';
 import * as bcrypt from 'bcrypt';
+import { Role, RoleDocument } from '../role/schemas/role.schema';
+
 @Injectable()
 export class EmployeeService {
   constructor(
     @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
     @InjectModel(Complex.name)
     private clinicCollectionModel: Model<ComplexDocument>,
+    @InjectModel(Role.name)
+    private roleModel: Model<RoleDocument>,
     @InjectModel(Department.name)
     private departmentModel: Model<DepartmentDocument>,
     // @InjectModel(User.name) private userModel: Model<UserDocument>,
@@ -105,7 +109,63 @@ export class EmployeeService {
       const savedEmployee = await newEmployee.save();
       return {
         success: true,
-        message: 'Employee created successfully',
+        message: 'The addition has been completed successfully',
+        data: savedEmployee,
+      };
+    } catch (error) {
+      console.log('error', error);
+      throw new BadRequestException(error.message);
+    }
+  }
+
+  async createUser(
+    file: Express.Multer.File,
+    createEmployeeDto: CreateEmployeeDto,
+  ): Promise<ApiGetResponse<Employee>> {
+    try {
+      const requiredFields = ['name', 'password', 'email'];
+      const missingFields = requiredFields.filter(
+        (field) => !createEmployeeDto[field],
+      );
+
+      if (missingFields.length > 0) {
+        throw new BadRequestException(
+          `Missing required fields: ${missingFields.join(', ')}`,
+        );
+      }
+      const publicId = await generateUniquePublicId(this.employeeModel, 'emp');
+      const saltRounds = 10;
+      const hashedPassword = await bcrypt.hash(
+        createEmployeeDto.password,
+        saltRounds,
+      );
+      const relativeFilePath = file
+        ? saveFileLocally(file, 'employees/images')
+        : '';
+      const employeeType =
+        'employeeType' in createEmployeeDto
+          ? createEmployeeDto.employeeType
+          : 'Staff';
+      let role;
+      if (employeeType === 'Admin') {
+        role = await this.roleModel.findOne({ name: 'Admin' });
+        if (!role) throw new InternalServerErrorException('No Roles Found');
+        createEmployeeDto.identity = '(Admin)-' + publicId;
+        createEmployeeDto.Owner = true;
+      }
+
+      const newEmployee = new this.employeeModel({
+        ...createEmployeeDto,
+        employeeType,
+        image: relativeFilePath || '',
+        publicId,
+        password: hashedPassword,
+        roleIds: role ? [role._id] : [],
+      });
+      const savedEmployee = await newEmployee.save();
+      return {
+        success: true,
+        message: 'The addition has been completed successfully',
         data: savedEmployee,
       };
     } catch (error) {
@@ -384,7 +444,7 @@ export class EmployeeService {
       await updatedEmployee.save();
       return {
         success: true,
-        message: 'Employee update successfully',
+        message: 'The changes have been saved successfully',
         data: updatedEmployee,
       };
     } catch (error) {
@@ -405,7 +465,7 @@ export class EmployeeService {
         throw new BadRequestException('You cannot delete your own account');
       }
 
-      if (!employee.isActive)
+      if (employee.isActive)
         throw new BadRequestException(
           'This user cannot be deleted because they are currently active',
         );

@@ -65,6 +65,8 @@ import { SystemLogModule } from './modules/SystemLogAction/system-log.module';
             // Allow /api/v1/docs to be accessed without authentication
             if (request.url.startsWith('/api/v1/docs')) return true;
             if (request.url.startsWith('/api/v1/auth')) return true;
+            if (request.url.startsWith('/api/v1/employees/CreateUser'))
+              return true;
             return super.canActivate(context); // Use the default JwtAuthGuard behavior
           }
         })();

@@ -53,6 +53,16 @@ export class EmployeeController {
     );
   }
 
+  @Post('CreateUser')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('image'))
+  async createUser(
+    @UploadedFile() file: Express.Multer.File,
+    @Body() createEmployeeDto: CreateEmployeeDto,
+  ) {
+    return this.employeeService.createUser(file, createEmployeeDto);
+  }
+
   // @Get()
   // @Permissions(PermissionsEnum.ADMIN)
   // async getAllEmployees(

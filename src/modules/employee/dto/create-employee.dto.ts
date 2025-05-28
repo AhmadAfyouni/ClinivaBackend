@@ -345,4 +345,13 @@ export class CreateEmployeeDto {
   @IsBoolean()
   @IsOptional()
   on_call?: boolean;
+
+  @ApiProperty({
+    description: 'Owner',
+    example: false,
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  Owner?: boolean;
 }

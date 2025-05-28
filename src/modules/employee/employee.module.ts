@@ -14,6 +14,7 @@ import {
   Department,
   DepartmentSchema,
 } from '../department/schemas/department.schema';
+import { Role, RoleSchema } from '../role/schemas/role.schema';
 import { forwardRef } from '@nestjs/common';
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { forwardRef } from '@nestjs/common';
       { name: Employee.name, schema: EmployeeSchema },
       { name: Complex.name, schema: ClinicCollectionSchema },
       { name: Department.name, schema: DepartmentSchema },
+      { name: Role.name, schema: RoleSchema },
     ]),
     forwardRef(() => ClinicCollectionModule),
     forwardRef(() => DepartmentModule),
