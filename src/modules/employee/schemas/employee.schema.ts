@@ -73,7 +73,6 @@ export class Employee {
 
   @Prop({
     required: [true, 'Identity is required'],
-    default: 'Admin',
     unique: [true, 'Identity must be unique'],
     trim: true,
   })
@@ -200,6 +199,9 @@ export class Employee {
 
   @Prop({ type: Boolean, default: true })
   first_login: boolean;
+
+  @Prop({ type: Boolean, default: false })
+  Owner: boolean;
 }
 
 export const EmployeeSchema = SchemaFactory.createForClass(Employee);

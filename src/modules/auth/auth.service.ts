@@ -111,6 +111,8 @@ export class AuthService {
       email: user.email,
       permissions: uniquePermissions,
       plan: user.plan,
+      Owner: user.Owner,
+      firstLogin: user.first_login,
     };
 
     const accessToken = this.jwtService.sign(payload, { expiresIn: '45m' });
@@ -143,6 +145,8 @@ export class AuthService {
           roles: roles.map((r) => r.name),
           permissions: uniquePermissions,
           plan: user.plan,
+          Owner: user.Owner,
+          firstLogin: user.first_login,
         },
       },
     };

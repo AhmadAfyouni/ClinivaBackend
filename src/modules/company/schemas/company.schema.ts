@@ -18,7 +18,13 @@ export class Company {
   _id: Types.ObjectId;
 
   @Prop({ required: true })
-  name: string;
+  nameTrade: string;
+
+  @Prop({ required: true })
+  nameLegal: string;
+
+  @Prop({ required: true })
+  ceo: string;
 
   @Prop()
   overview: string;
@@ -64,14 +70,12 @@ export class Company {
   locationGoogl: { x: number; y: number };
   @Prop({ required: true, default: 'Key_member' })
   Key_member: string; // العضو الرئيسي
-  
+
   @Prop({ required: true, default: ' Founder' })
   Founder: string; // المؤسس
-  
+
   @Prop({ required: true, default: 'Executives' })
   Executives: string; // التنفيذيون
-  
-  
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);
