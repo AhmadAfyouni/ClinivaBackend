@@ -11,7 +11,12 @@ export class Role {
   @Prop({ required: true, unique: true })
   name: string; // Role name (Admin, Doctor, Receptionist)
 
-  @Prop({ type: [String], enum: Object.values(PermissionsEnum), default: [] })
+  @Prop({
+    type: [String],
+    enum: Object.values(PermissionsEnum),
+    default: [],
+    unique: true,
+  })
   permissions: string[]; // قائمة الصلاحيات المرتبطة بالدور
 
   @Prop()
