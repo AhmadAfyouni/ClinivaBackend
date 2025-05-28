@@ -49,7 +49,7 @@ export async function paginate<T>({
 }): Promise<ApiListResponse<T>> {
   try {
     let query = {};
-
+    filter = { ...filter, deleted: false };
     // Ensure numbers are valid
     const limitNumber = Math.max(Number(limit) || 10, 1);
     const pageNumber = Math.max(Number(page) || 1, 1);
