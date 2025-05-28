@@ -23,6 +23,7 @@ import {
   applyBooleanFilter,
   buildFinalFilter,
   paginate,
+  SortType,
 } from 'src/common/utlis/paginate';
 import { generateUniquePublicId } from 'src/common/utlis/id-generator';
 @Injectable()
@@ -72,7 +73,7 @@ export class SpecializationService {
       limit = Number(limit) || 10;
       filters.deleted = { $ne: true };
       const sortField: string = sortBy ?? 'id';
-      const sort: Record<string, number> = {
+      const sort: SortType = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
 
@@ -102,15 +103,15 @@ export class SpecializationService {
       );
 
       // Get paginated specializations
-      const result = await paginate(
-        this.specializationModel,
-        [],
+      const result = await paginate({
+        model: this.specializationModel,
+        populate: [],
         page,
         limit,
         allData,
-        finalFilter,
-        sort,
-      );
+        filter: finalFilter,
+        sort: sort,
+      });
 
       // Get all specialization IDs
       const specializationIds = result.data.map(

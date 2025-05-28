@@ -20,6 +20,7 @@ import { EmployeeService } from '../employee/employee.service';
 import { PermissionsEnum } from 'src/config/permission.enum';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/config/permissions.decorator';
+import { ApiConsumes } from '@nestjs/swagger';
 @Controller('clinics')
 @UseGuards(PermissionsGuard)
 export class ClinicController {
@@ -32,9 +33,11 @@ export class ClinicController {
   @Post()
   @Permissions(PermissionsEnum.ADMIN)
   async createClinic(@Body() createClinicDto: CreateClinicDto, @Request() req) {
+    console.log(createClinicDto, 'createClinicDto');
     const userId = req.user.userId;
     const response = await this.userService.getUserById(userId);
     const user = response.data;
+    console.log('user*******');
     return this.clinicService.createClinic(createClinicDto, user.plan);
   }
 
