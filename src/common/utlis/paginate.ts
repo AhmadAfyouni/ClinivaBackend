@@ -1,6 +1,8 @@
 import { BadRequestException } from '@nestjs/common';
 import { Model } from 'mongoose';
 
+export type SortType = Record<string, 1 | -1>;
+
 export interface ApiListResponse<T> {
   [x: string]: any;
   message: string;
@@ -22,18 +24,31 @@ export interface ApiGetResponse<T> {
   success: boolean;
   data: T;
 }
-export async function paginate<T>(
-  model: Model<T>,
-  populate: any = [],
-  page: number = 1,
-  limit: number = 10,
-  allData: boolean = false,
-  filter: any = {},
-  sort: any = {},
-  message: string = 'Request successful',
-): Promise<ApiListResponse<T>> {
+export async function paginate<T>({
+  model,
+  populate = [],
+  page = 1,
+  limit = 10,
+  allData = false,
+  filter = {},
+  sort = { id: -1 } as SortType,
+  search = '',
+  searchFields = [],
+  message = 'Request successful',
+}: {
+  model: Model<T>;
+  populate?: any[];
+  page?: number;
+  limit?: number;
+  allData?: boolean;
+  filter?: {};
+  sort?: SortType;
+  search?: string;
+  searchFields?: string[];
+  message?: string;
+}): Promise<ApiListResponse<T>> {
   try {
-    const totalItems = await model.countDocuments(filter);
+    let query = {};
 
     // Ensure numbers are valid
     const limitNumber = Math.max(Number(limit) || 10, 1);
@@ -41,26 +56,29 @@ export async function paginate<T>(
     const skip = (pageNumber - 1) * limitNumber;
 
     console.log(
-      `MongoDB Query Params: skip=${skip}, limit=${limitNumber}, allData=${allData}`,
+      `MongoDB Query Params: skip=${skip}, limit=${limitNumber}, allData=${allData} , query=${query} ,sort=${sort},search=${search}`,
     );
+
+    if (search) {
+      console.log('search', search);
+      query['$or'] = searchFields.map((field) => ({
+        [field]: { $regex: search, $options: 'i' },
+      }));
+    }
+    const totalItems = await model.countDocuments({ ...filter, ...query });
 
     //allData === true
     if (allData) {
-      const data = await model
-        .find(filter)
-        .populate(populate)
-        .sort(sort)
-        .exec();
+      const data = await model.find(query).populate(populate).sort(sort).exec();
       return {
         success: true,
         message,
         data,
-        // pagination: , // Correctly set to null when fetching all data
       };
     }
 
     const data = await model
-      .find(filter)
+      .find({ ...filter, ...query })
       .populate(populate)
       .sort(sort)
       .skip(skip)

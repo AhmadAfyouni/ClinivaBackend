@@ -1,20 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
-
+import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+export enum DayOfWeek {
+  Sunday = 'Sunday',
+  Monday = 'Monday',
+  Tuesday = 'Tuesday',
+  Wednesday = 'Wednesday',
+  Thursday = 'Thursday',
+  Friday = 'Friday',
+  Saturday = 'Saturday',
+}
 export class WorkingHoursDTO {
   @ApiProperty({
-    enum: [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-    ],
-    description: 'Day of the week',
+    type: String,
+    enum: DayOfWeek,
+    description: 'Work day (e.g., "Monday")',
     required: true,
     example: 'Monday',
   })
+  @IsString()
+  @IsEnum(DayOfWeek)
+  @IsNotEmpty()
   day: string;
 
   @ApiProperty({
@@ -23,6 +28,8 @@ export class WorkingHoursDTO {
     required: true,
     example: '08:00 AM',
   })
+  @IsString()
+  @IsNotEmpty()
   startTime: string;
 
   @ApiProperty({
@@ -31,6 +38,8 @@ export class WorkingHoursDTO {
     required: true,
     example: '05:00 PM',
   })
+  @IsString()
+  @IsNotEmpty()
   endTime: string;
 }
 
@@ -476,16 +485,6 @@ export class InsuranceDTO {
     example: 'private',
   })
   insuranceType: string;
-}
-
-export enum DayOfWeek {
-  Sunday = 'Sunday',
-  Monday = 'Monday',
-  Tuesday = 'Tuesday',
-  Wednesday = 'Wednesday',
-  Thursday = 'Thursday',
-  Friday = 'Friday',
-  Saturday = 'Saturday',
 }
 
 export class WorkingDaysDTO {

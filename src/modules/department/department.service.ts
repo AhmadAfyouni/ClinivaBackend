@@ -100,7 +100,7 @@ export class DepartmentService {
 
       // تحديد حقل الفرز الافتراضي
       const sortField: string = sortBy ?? 'id';
-      const sort: Record<string, number> = {
+      const sort: Record<string, 1 | -1> = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
 
@@ -132,9 +132,9 @@ export class DepartmentService {
       };
       finalFilter.deleted = { $ne: true };
       // استخدام paginate مع populate
-      const result = await paginate(
-        this.departmentModel,
-        [
+      const result = await paginate({
+        model: this.departmentModel,
+        populate: [
           { path: 'clinicCollectionId', select: 'name' },
           'specializations',
           'PIC',
@@ -142,9 +142,9 @@ export class DepartmentService {
         page,
         limit,
         allData,
-        finalFilter,
-        sort,
-      );
+        filter: finalFilter,
+        sort: sort,
+      });
 
       // إضافة عدد المرضى المرتبطين بكل قسم
       if (result.data) {

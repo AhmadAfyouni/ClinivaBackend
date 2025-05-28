@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { MongooseModule } from '@nestjs/mongoose';
 import { EmployeeService } from './employee.service';
 import { EmployeeController } from './employee.controller';
+import { ProfileController } from './profile.controller';
 import { Employee, EmployeeSchema } from './schemas/employee.schema';
 import { ClinicCollectionModule } from '../cliniccollection/clinic-collection.module';
 import {
@@ -14,19 +15,17 @@ import {
   DepartmentSchema,
 } from '../department/schemas/department.schema';
 import { forwardRef } from '@nestjs/common';
-import { User, UserSchema } from '../user/schemas/user.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Employee.name, schema: EmployeeSchema },
       { name: Complex.name, schema: ClinicCollectionSchema },
       { name: Department.name, schema: DepartmentSchema },
-      { name: User.name, schema: UserSchema },
     ]),
     forwardRef(() => ClinicCollectionModule),
     forwardRef(() => DepartmentModule),
   ],
-  controllers: [EmployeeController],
+  controllers: [EmployeeController, ProfileController],
   providers: [EmployeeService],
   exports: [EmployeeService],
 })

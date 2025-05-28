@@ -8,7 +8,7 @@ import { Model } from 'mongoose';
 import { Role, RoleDocument } from './schemas/role.schema';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, paginate, SortType } from 'src/common/utlis/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Injectable()
@@ -48,11 +48,19 @@ export class RoleService {
       limit = Number(limit) || 10;
 
       const sortField = sortBy ?? 'id';
-      const sort: Record<string, number> = {
+      const sort: SortType = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
 
-      return paginate(this.roleModel, [], page, limit, allData, filters, sort);
+      return paginate({
+        model: this.roleModel,
+        populate: [],
+        page,
+        limit,
+        allData,
+        filter: filters,
+        sort: sort,
+      });
     } catch (error) {
       console.log(error);
       throw new BadRequestException(error.message);
