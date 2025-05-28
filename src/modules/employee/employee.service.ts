@@ -67,7 +67,16 @@ export class EmployeeService {
       //     'The staff has not been assigned to any of these: Company, Clinic Collection, clinics, department',
       //   );
       // }
+      const requiredFields = ['name', 'password', 'email', 'employeeType'];
+      const missingFields = requiredFields.filter(
+        (field) => !createEmployeeDto[field],
+      );
 
+      if (missingFields.length > 0) {
+        throw new BadRequestException(
+          `Missing required fields: ${missingFields.join(', ')}`,
+        );
+      }
       const publicId = await generateUniquePublicId(this.employeeModel, 'emp');
       const relativeFilePath = file
         ? saveFileLocally(file, 'employees/images')
@@ -100,7 +109,7 @@ export class EmployeeService {
         data: savedEmployee,
       };
     } catch (error) {
-      console.log('error', error.message);
+      console.log('error', error);
       throw new BadRequestException(error.message);
     }
   }

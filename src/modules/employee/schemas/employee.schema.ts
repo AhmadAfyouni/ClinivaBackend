@@ -24,7 +24,7 @@ export class Employee {
   })
   name: string;
 
-  @Prop({ required: [true, 'Full name is required'], trim: true })
+  @Prop({ required: false, trim: true })
   fullName: string;
 
   // @Prop({
@@ -61,21 +61,26 @@ export class Employee {
   @Prop({ type: ContactInfo, default: {} })
   contactInfos: ContactInfo;
 
-  @Prop({ required: [true, 'Date of birth is required'] })
+  @Prop({ required: false })
   dateOfBirth: Date;
 
-  @Prop({ required: [true, 'Gender is required'], enum: ['male', 'female'] })
+  @Prop({
+    required: [true, 'Gender is required'],
+    enum: ['male', 'female'],
+    default: 'male',
+  })
   gender: string;
 
   @Prop({
     required: [true, 'Identity is required'],
+    default: 'Admin',
     unique: [true, 'Identity must be unique'],
     trim: true,
   })
   identity: string;
 
-  @Prop({ required: [true, 'Nationality is required'], trim: true })
-  nationality: string;
+  @Prop({ required: false, trim: true })
+  nationality?: string;
 
   @Prop()
   image?: string;
@@ -87,13 +92,13 @@ export class Employee {
   })
   marital_status?: string;
 
-  @Prop({ required: true, min: [0, 'Number of children must be at least 0'] })
+  @Prop({ min: [0, 'Number of children must be at least 0'] })
   number_children: number;
 
   @Prop()
   notes?: string;
 
-  @Prop({ required: true, trim: true })
+  @Prop({ trim: true })
   address?: string;
 
   @Prop({})
@@ -111,7 +116,7 @@ export class Employee {
   @Prop({ type: [Vacation], default: [] })
   vacationRecords: Vacation[];
 
-  @Prop({ required: true })
+  @Prop({ required: true, default: new Date() })
   hireDate: Date;
 
   @Prop()
@@ -151,10 +156,10 @@ export class Employee {
   @Prop({ type: Boolean, default: true })
   isActive: boolean;
 
-  @Prop({ type: [Types.ObjectId], ref: 'Specialization', required: true })
+  @Prop({ type: [Types.ObjectId], ref: 'Specialization' })
   specializations: Types.ObjectId[];
 
-  @Prop({ type: [Types.ObjectId], ref: 'Clinic', required: false })
+  @Prop({ type: [Types.ObjectId], ref: 'Clinic' })
   clinic: Types.ObjectId[];
 
   @Prop({ unique: true, required: true })
