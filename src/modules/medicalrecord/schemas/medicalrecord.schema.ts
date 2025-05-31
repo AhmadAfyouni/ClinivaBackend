@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { Medication } from '../../../common/utlis/helper';
+import { Medication } from '../../../common/utils/helper';
 
 export type MedicalRecordDocument = MedicalRecord & Document;
 

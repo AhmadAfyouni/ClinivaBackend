@@ -1,10 +1,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import {
-  ContactInfo,
-  Insurance,
-  MedicalTestResult,
-} from '../../../common/utlis/helper';
+import { ContactInfo } from '../../../common/utils/helper';
+import { InsuranceDTO, MedicalTestResultDTO } from 'src/common/utils';
 
 export type PatientDocument = Patient & Document;
 
@@ -84,11 +81,11 @@ export class Patient {
   @Prop({ type: [{ disease_name: String }], default: [] })
   ChronicDiseases?: { disease_name: string }[];
 
-  @Prop({ type: [Insurance], default: [] })
-  insurances?: Insurance[];
+  @Prop({ type: [InsuranceDTO], default: [] })
+  insurances?: InsuranceDTO[];
 
-  @Prop({ type: [MedicalTestResult], default: [] })
-  medicalTestResults?: MedicalTestResult[]; // نتائج الاختبارات الطبية
+  @Prop({ type: [MedicalTestResultDTO], default: [] })
+  medicalTestResults?: MedicalTestResultDTO[]; // نتائج الاختبارات الطبية
 
   @Prop({
     type: [String],

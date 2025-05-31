@@ -16,7 +16,7 @@ import {
   ContactInfoDTO,
   InsuranceDTO,
   MedicalTestResultDTO,
-} from 'src/common/utlis/helper.dto';
+} from 'src/common/utils/helper.dto';
 
 export class CreatePatientDto {
   @ApiProperty({

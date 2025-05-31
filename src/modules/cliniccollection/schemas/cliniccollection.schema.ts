@@ -1,15 +1,13 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { ContactInfo, WorkingHours } from '../../../common/utils/helper';
 import {
-  BankAccount,
-  CashBox,
-  CommercialRecord,
-  ContactInfo,
-  Holiday,
-  InsuranceCompany,
-  OnlinePaymentMethod,
-  WorkingHours,
-} from '../../../common/utlis/helper';
+  BankAccountDTO,
+  CommercialRecordDTO,
+  HolidayDTO,
+  InsuranceDTO,
+  OnlinePaymentMethodDTO,
+} from 'src/common/utils';
 
 export type ComplexDocument = Complex & Document;
 
@@ -54,24 +52,23 @@ export class Complex {
   @Prop({ type: [ContactInfo], default: [] })
   contactInfos: ContactInfo[];
 
-  @Prop({ type: [Holiday], default: [] })
-  holidays: Holiday[];
+  @Prop({ type: [HolidayDTO], default: [] })
+  holidays: HolidayDTO[];
 
   @Prop({ type: [WorkingHours], default: [] })
   workingDays: WorkingHours[];
 
-  @Prop({ type: [CashBox], default: [] })
-  cashBoxes: CashBox[];
+  @Prop({ type: [OnlinePaymentMethodDTO], default: [] })
+  onlinePaymentMethods: OnlinePaymentMethodDTO[];
 
-  @Prop({ type: [OnlinePaymentMethod], default: [] })
-  onlinePaymentMethods: OnlinePaymentMethod[];
-  @Prop({ type: [BankAccount], default: [] })
-  bankAccount: BankAccount[];
-  @Prop({ type: [InsuranceCompany], default: [] })
-  insuranceCompany: InsuranceCompany[];
+  @Prop({ type: [BankAccountDTO], default: [] })
+  bankAccount: BankAccountDTO[];
 
-  @Prop({ type: CommercialRecord })
-  commercialRecord: CommercialRecord;
+  @Prop({ type: [InsuranceDTO], default: [] })
+  insuranceCompany: InsuranceDTO[];
+
+  @Prop({ type: CommercialRecordDTO })
+  commercialRecord: CommercialRecordDTO;
 
   @Prop({ type: { x: Number, y: Number } })
   locationGoogl: { x: number; y: number };

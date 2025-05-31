@@ -15,7 +15,7 @@ import {
   applyModelFilter,
   applyBooleanFilter,
   SortType,
-} from '../../common/utlis/paginate';
+} from '../../common/utils/paginate';
 import { PaginationAndFilterDto } from '../../common/dtos/pagination-filter.dto';
 import {
   ComplexDocument,
@@ -25,8 +25,8 @@ import {
   DepartmentDocument,
   Department,
 } from '../department/schemas/department.schema';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
-import { saveFileLocally } from 'src/common/utlis/upload.util';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
+import { saveFileLocally } from 'src/common/utils/upload.util';
 import * as bcrypt from 'bcrypt';
 import { Role, RoleDocument } from '../role/schemas/role.schema';
 

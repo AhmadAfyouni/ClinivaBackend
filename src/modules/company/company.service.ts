@@ -9,7 +9,7 @@ import { Model } from 'mongoose';
 import { Company, CompanyDocument } from './schemas/company.schema';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
-import { ApiGetResponse, paginate, SortType } from 'src/common/utlis/paginate';
+import { ApiGetResponse, paginate, SortType } from 'src/common/utils/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Injectable()

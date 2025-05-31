@@ -17,13 +17,13 @@ import {
   applyModelFilter,
   buildFinalFilter,
   paginate,
-} from 'src/common/utlis/paginate';
+} from 'src/common/utils/paginate';
 import {
   Employee,
   EmployeeDocument,
 } from '../employee/schemas/employee.schema';
 import { Patient, PatientDocument } from '../patient/schemas/patient.schema';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
 import { Clinic, ClinicDocument } from '../clinic/schemas/clinic.schema';
 import { Service } from '../service/schemas/service.schema';
 import { MedicalRecordService } from '../medicalrecord/medical-record.service';

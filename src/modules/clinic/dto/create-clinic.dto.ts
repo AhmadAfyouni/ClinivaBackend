@@ -21,8 +21,8 @@ import {
   HolidayDTO,
   InsuranceCompanyDTO,
   OnlinePaymentMethodDTO,
-  WorkingHoursDTO,
-} from 'src/common/utlis/helper.dto';
+} from 'src/common/utils/helper.dto';
+import { WorkingHours } from 'src/common/utils/helper';
 
 export class CreateClinicDto {
   @ApiProperty({ description: 'Clinic name', example: 'Al Noor Clinic' })
@@ -71,7 +71,11 @@ export class CreateClinicDto {
   @IsNotEmpty()
   address: string;
 
-  @ApiPropertyOptional({ description: 'Clinic logo image file (upload)', type: 'string', format: 'binary' })
+  @ApiPropertyOptional({
+    description: 'Clinic logo image file (upload)',
+    type: 'string',
+    format: 'binary',
+  })
   @IsOptional() // Still optional if the logo itself is optional for a clinic
   @IsString() // This decorator might seem odd for a file, but it's for the field name from swagger. The actual validation of file type/size happens elsewhere.
   logo?: string; // This field is mainly for Swagger, the actual file is handled by @UploadedFile
@@ -111,14 +115,14 @@ export class CreateClinicDto {
   holidays?: HolidayDTO[];
 
   @ApiPropertyOptional({
-    type: [WorkingHoursDTO],
+    type: [WorkingHours],
     description: 'Working hours of the clinic  (اذا مافي مجمع)',
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => WorkingHoursDTO)
+  @Type(() => WorkingHours)
   @IsOptional()
-  WorkingHours?: WorkingHoursDTO[];
+  WorkingHours?: WorkingHours[];
 
   @ApiPropertyOptional({
     type: [BankAccountDTO],

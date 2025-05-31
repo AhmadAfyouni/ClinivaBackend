@@ -11,9 +11,9 @@ import { Service } from './schemas/service.schema';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { Clinic } from '../clinic/schemas/clinic.schema';
 import { Employee } from '../employee/schemas/employee.schema';
-import { ApiGetResponse, paginate, SortType } from 'src/common/utlis/paginate';
+import { ApiGetResponse, paginate, SortType } from 'src/common/utils/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
 
 @Injectable()
 export class ServiceService {
