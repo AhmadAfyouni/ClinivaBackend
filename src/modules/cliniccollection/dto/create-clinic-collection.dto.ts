@@ -14,16 +14,7 @@ import {
 import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
 
-import {
-  BankAccount,
-  CashBox,
-  CommercialRecord,
-  ContactInfo,
-  Holiday,
-  InsuranceCompany,
-  OnlinePaymentMethod,
-  WorkingHours,
-} from '../../../common/utlis/helper';
+import { WorkingHours } from '../../../common/utils/helper';
 import {
   BankAccountDTO,
   CashBoxDTO,
@@ -32,8 +23,7 @@ import {
   HolidayDTO,
   InsuranceCompanyDTO,
   OnlinePaymentMethodDTO,
-  WorkingHoursDTO,
-} from 'src/common/utlis/helper.dto';
+} from 'src/common/utils/helper.dto';
 
 export class CreateClinicCollectionDto {
   @ApiProperty({
@@ -146,15 +136,15 @@ export class CreateClinicCollectionDto {
   holidays?: HolidayDTO[];
 
   @ApiProperty({
-    type: [WorkingHoursDTO],
+    type: [WorkingHours],
     description: 'Working hours of the clinic collection',
     required: false,
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => WorkingHoursDTO)
+  @Type(() => WorkingHours)
   @IsOptional()
-  workingDays?: WorkingHoursDTO[];
+  workingDays?: WorkingHours[];
 
   @ApiProperty({
     type: [BankAccountDTO],

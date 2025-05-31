@@ -1,15 +1,17 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { ContactInfoDTO, DayOfWeek } from 'src/common/utils/helper.dto';
 
 import { MongooseDocument } from 'src/common/utils/filter-sort.util';
 import {
   ContactInfo,
   ActivityLog,
-  BreakTime,
   LoginHistory,
   Vacation,
   WorkingHours,
-} from 'src/common/utlis/helper';
+  Shift,
+} from 'src/common/utils/helper';
+import { ShiftBase } from 'src/common/utils';
 
 export type EmployeeDocument = Employee & MongooseDocument;
 
@@ -58,8 +60,23 @@ export class Employee {
   })
   employeeType: string;
 
-  @Prop({ type: ContactInfo, default: {} })
-  contactInfos: ContactInfo;
+  @Prop({
+    type: {
+      phoneNumber1: { type: String, required: true },
+      phoneNumber2: { type: String, required: true },
+      email: { type: String, required: true },
+      buildingNumber: { type: String, required: true },
+      streetName: { type: String, required: true },
+      region: { type: String, required: true },
+      country: { type: String, required: true },
+      nation: { type: String, required: true },
+      emergencyContactName: { type: String, required: true },
+      emergencyContactPhone: { type: String, required: true },
+    },
+    required: true,
+    _id: false,
+  })
+  contactInfos: ContactInfoDTO;
 
   @Prop({ required: false })
   dateOfBirth: Date;
@@ -109,7 +126,16 @@ export class Employee {
   @Prop({ type: [String], default: [] })
   Languages?: string[];
 
-  @Prop({ type: [WorkingHours], default: [] })
+  @Prop({
+    type: [
+      {
+        day: { type: String, enum: DayOfWeek },
+        shift1: { type: { start: { type: String }, end: { type: String } } },
+        shift2: { type: { start: { type: String }, end: { type: String } } },
+      },
+    ],
+    default: [],
+  })
   workingHours: WorkingHours[];
 
   @Prop({ type: [Vacation], default: [] })
@@ -121,20 +147,32 @@ export class Employee {
   @Prop()
   medicalLicenseNumber?: string;
 
+  @Prop({ required: false })
+  certificationsEffectiveDate: Date;
+
   @Prop({ type: String, required: false })
   certifications?: string;
+
+  @Prop({ required: false })
+  employmentContractEffectiveDate: Date;
 
   @Prop({ type: String, required: false })
   employmentContract?: string;
 
+  @Prop({ require: false })
+  CVEffectiveDate: Date;
+
   @Prop({ type: String, required: false })
   CV?: string;
 
-  @Prop({ type: String, required: false })
-  Qualifications?: string;
+  @Prop({ required: false })
+  workPermitEffectiveDate: Date;
 
   @Prop({ type: String, required: false })
   workPermit?: string;
+
+  @Prop({ type: String, required: false })
+  Qualifications?: string;
 
   @Prop({ default: 0 })
   consultation_fee: number; // رسوم الاستشارة
@@ -148,9 +186,6 @@ export class Employee {
     default: 'FULL_TIME',
   })
   jobType: string;
-
-  @Prop({ type: [BreakTime], default: [] })
-  breakTimes: BreakTime[];
 
   @Prop({ type: Boolean, default: true })
   isActive: boolean;
@@ -175,6 +210,7 @@ export class Employee {
 
   @Prop()
   lastPasswordUpdate?: Date;
+
   @Prop({ type: [ActivityLog], default: [] })
   activityLog?: ActivityLog[];
 

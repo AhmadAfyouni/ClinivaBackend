@@ -16,7 +16,7 @@ import {
   buildFinalFilter,
   paginate,
   SortType,
-} from 'src/common/utlis/paginate';
+} from 'src/common/utils/paginate';
 import {
   AppointmentDocument,
   Appointment,
@@ -29,8 +29,8 @@ import {
   MedicalRecordDocument,
   MedicalRecord,
 } from '../medicalrecord/schemas/medicalrecord.schema';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
-import { saveFileLocally } from 'src/common/utlis/upload.util';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
+import { saveFileLocally } from 'src/common/utils/upload.util';
 @Injectable()
 export class PatientService {
   constructor(

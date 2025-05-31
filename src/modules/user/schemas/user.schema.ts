@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import { ActivityLog, LoginHistory } from 'src/common/utlis/helper';
+import { ActivityLog, LoginHistory } from 'src/common/utils/helper';
 import { MongooseDocument } from 'src/common/utils/filter-sort.util';
 
 export type UserDocument = User & MongooseDocument;

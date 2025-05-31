@@ -24,8 +24,8 @@ import {
   buildFinalFilter,
   paginate,
   SortType,
-} from 'src/common/utlis/paginate';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+} from 'src/common/utils/paginate';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
 @Injectable()
 export class SpecializationService {
   constructor(

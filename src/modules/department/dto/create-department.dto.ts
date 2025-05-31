@@ -1,28 +1,33 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
-    IsArray,
-    IsBoolean,
-    IsDate,
-    IsMongoId,
-    IsNotEmpty,
-    IsNumber,
-    IsOptional,
-    IsString,
-    ValidateNested,
+  IsArray,
+  IsBoolean,
+  IsDate,
+  IsMongoId,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
-import { ContactInfoDTO } from 'src/common/utlis/helper.dto';
+import { ContactInfoDTO } from 'src/common/utils/helper.dto';
 
 export class CreateDepartmentDto {
-  @ApiProperty({ description: 'Department name', example: 'Cardiology Department', required: true })
+  @ApiProperty({
+    description: 'Department name',
+    example: 'Cardiology Department',
+    required: true,
+  })
   @IsString()
   @IsNotEmpty()
   name: string;
 
   @ApiProperty({
     description: 'Department description',
-    example: 'This department focuses on cardiology and heart-related treatments.',
+    example:
+      'This department focuses on cardiology and heart-related treatments.',
     required: false,
   })
   @IsOptional()
@@ -65,7 +70,7 @@ export class CreateDepartmentDto {
   @IsString()
   @IsNotEmpty()
   address: string;
-/*
+  /*
   @ApiProperty({
     description: 'Department logo URL',
     example: 'https://hospital.com/dept-logo.png',
@@ -94,15 +99,15 @@ export class CreateDepartmentDto {
   goals?: string;
 */
 
-    @ApiProperty({
-        description: 'Patient capacity of the department',
-        example: 50,
-        required: false
-    })
-    @IsOptional()
-    @IsNumber()
-    patientCapacity?: number;
-/*
+  @ApiProperty({
+    description: 'Patient capacity of the department',
+    example: 50,
+    required: false,
+  })
+  @IsOptional()
+  @IsNumber()
+  patientCapacity?: number;
+  /*
   @ApiProperty({
       description: 'List of contact information for the department',
       type: [ContactInfoDTO],
@@ -142,11 +147,11 @@ export class CreateDepartmentDto {
   @IsMongoId({ each: true })
   @IsNotEmpty()
   specializations: Types.ObjectId[];
-    @ApiProperty({
-      description: 'ID of the employee assigned as the Person in Charge (PIC)',
-      example: '6634dce923f91b8f7761d8f2',
-      required: true,
-    })
-    @IsMongoId()
-    PIC: string;
+  @ApiProperty({
+    description: 'ID of the employee assigned as the Person in Charge (PIC)',
+    example: '6634dce923f91b8f7761d8f2',
+    required: true,
+  })
+  @IsMongoId()
+  PIC: string;
 }

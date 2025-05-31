@@ -17,7 +17,7 @@ import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { UserService } from '../user/user.service';
 import { EmployeeService } from '../employee/employee.service';
-import { extractId } from 'src/common/utlis/paginate';
+import { extractId } from 'src/common/utils/paginate';
 import { PermissionsEnum } from 'src/config/permission.enum';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/config/permissions.decorator';

@@ -1,16 +1,15 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import {
-  BankAccount,
-  CashBox,
-  CommercialRecord,
-  ContactInfo,
-  Holiday,
-  InsuranceCompany,
-  OnlinePaymentMethod,
-  WorkingHours,
-} from '../../../common/utlis/helper';
+import { ContactInfo, WorkingHours } from '../../../common/utils/helper';
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  BankAccountDTO,
+  CashBoxDTO,
+  CommercialRecordDTO,
+  HolidayDTO,
+  InsuranceCompanyDTO,
+  OnlinePaymentMethodDTO,
+} from 'src/common/utils';
 
 export type ClinicDocument = Clinic & Document & { _patientCount?: number };
 
@@ -45,8 +44,8 @@ export class Clinic {
   @Prop({ type: [ContactInfo], default: [] })
   contactInfos: ContactInfo[];
 
-  @Prop({ type: [Holiday], default: [] })
-  holidays?: Holiday[];
+  @Prop({ type: [HolidayDTO], default: [] })
+  holidays?: HolidayDTO[];
 
   @Prop({ required: true })
   name: string;
@@ -54,20 +53,20 @@ export class Clinic {
   @Prop({ type: [WorkingHours], default: [] })
   WorkingHours?: WorkingHours[];
 
-  @Prop({ type: [BankAccount], default: [] })
-  bankAccount: BankAccount[];
+  @Prop({ type: [BankAccountDTO], default: [] })
+  bankAccount: BankAccountDTO[];
 
-  @Prop({ type: [InsuranceCompany], default: [] })
-  insuranceCompany: InsuranceCompany[];
+  @Prop({ type: [InsuranceCompanyDTO], default: [] })
+  insuranceCompany: InsuranceCompanyDTO[];
 
-  @Prop({ type: [CashBox], default: [] })
-  cashBoxes: CashBox[];
+  @Prop({ type: [CashBoxDTO], default: [] })
+  cashBoxes: CashBoxDTO[];
 
-  @Prop({ type: [OnlinePaymentMethod], default: [] })
-  onlinePaymentMethods: OnlinePaymentMethod[];
+  @Prop({ type: [OnlinePaymentMethodDTO], default: [] })
+  onlinePaymentMethods: OnlinePaymentMethodDTO[];
 
-  @Prop({ type: CommercialRecord })
-  commercialRecord: CommercialRecord;
+  @Prop({ type: CommercialRecordDTO })
+  commercialRecord: CommercialRecordDTO;
   @Prop({ type: Object })
   locationGoogl: { x: number; y: number };
 

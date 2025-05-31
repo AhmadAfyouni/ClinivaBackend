@@ -17,7 +17,7 @@ import {
   buildFinalFilter,
   paginate,
   SortType,
-} from 'src/common/utlis/paginate';
+} from 'src/common/utils/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import {
   Appointment,
@@ -31,7 +31,7 @@ import {
   SpecializationDocument,
   Specialization,
 } from '../specialization/schemas/specialization.schema';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
 import {
   Employee,
   EmployeeDocument,

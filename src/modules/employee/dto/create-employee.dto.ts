@@ -15,12 +15,8 @@ import {
 import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
 import { Certificate } from 'crypto';
-import {
-  BreakTimeDTO,
-  ContactInfoDTO,
-  VacationDTO,
-  WorkingHoursDTO,
-} from 'src/common/utlis/helper.dto';
+import { ContactInfoDTO, VacationDTO } from 'src/common/utils/helper.dto';
+import { WorkingHours } from 'src/common/utils/helper';
 
 export class CreateEmployeeDto {
   @ApiProperty({
@@ -179,14 +175,14 @@ export class CreateEmployeeDto {
   Languages?: string[];
 
   @ApiProperty({
-    type: [WorkingHoursDTO],
+    type: [WorkingHours],
     description: 'Working hours',
     required: true,
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => WorkingHoursDTO)
-  workingHours: WorkingHoursDTO[];
+  @Type(() => WorkingHours)
+  workingHours: WorkingHours[];
 
   @ApiProperty({
     type: [VacationDTO],
@@ -255,16 +251,16 @@ export class CreateEmployeeDto {
   @IsNotEmpty()
   jobType: string;
 
-  @ApiProperty({
-    type: [BreakTimeDTO],
-    description: 'Break Times',
-    required: false,
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => BreakTimeDTO)
-  @IsOptional()
-  breakTimes?: BreakTimeDTO[];
+  // @ApiProperty({
+  //   type: [BreakTimeDTO],
+  //   description: 'Break Times',
+  //   required: false,
+  // })
+  // @IsArray()
+  // @ValidateNested({ each: true })
+  // @Type(() => BreakTimeDTO)
+  // @IsOptional()
+  // breakTimes?: BreakTimeDTO[];
 
   @ApiProperty({
     description: 'Employee activation status',

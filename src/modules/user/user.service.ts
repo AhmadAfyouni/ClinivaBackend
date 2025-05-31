@@ -11,10 +11,10 @@ import * as bcrypt from 'bcrypt';
 import { User, UserDocument } from './schemas/user.schema';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { ApiGetResponse } from 'src/common/utlis/paginate';
+import { ApiGetResponse } from 'src/common/utils/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { RoleDocument, Role } from '../role/schemas/role.schema';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
 import {
   SystemLogService,
   CreateLogDto,
@@ -80,36 +80,38 @@ export class UserService {
    */
   async getAllUsers(
     paginationDto: PaginationAndFilterDto,
-    filters: Record<string, any> = {}
+    filters: Record<string, any> = {},
   ) {
     try {
-      const { 
-        page = 1, 
-        limit = 10, 
-        sortBy = 'createdAt', 
-        order = 'desc', 
+      const {
+        page = 1,
+        limit = 10,
+        sortBy = 'createdAt',
+        order = 'desc',
         search,
         status,
         startDate,
         endDate,
         includeDeleted = false,
-        fields
+        fields,
       } = paginationDto;
-      
+
       // Initialize FilterSort with user model
-      const filterSort = new FilterSort<UserDocument>(this.userModel as Model<UserDocument>);
-      
+      const filterSort = new FilterSort<UserDocument>(
+        this.userModel as Model<UserDocument>,
+      );
+
       // Build the base query
       const query: Record<string, any> = {};
-      
+
       // Handle soft-deleted records
       if (!includeDeleted) {
         query.deleted = { $ne: true };
       }
-      
+
       // Define searchable fields
       const searchFields: (keyof User)[] = ['name', 'email'];
-      
+
       // Handle role filter if roleName is provided
       if (filters.roleName) {
         const role = await this.roleModel.findOne({ name: filters.roleName });
@@ -117,12 +119,12 @@ export class UserService {
           query.roleIds = role._id;
         }
       }
-      
+
       // Handle status filter if provided
       if (status) {
         query.status = status;
       }
-      
+
       // Handle date range filter
       if (startDate || endDate) {
         query.createdAt = {};
@@ -135,16 +137,16 @@ export class UserService {
           query.createdAt.$lte = endOfDay;
         }
       }
-      
+
       // Add text search filter if search term is provided
       if (search && searchFields.length > 0) {
-        const searchConditions = searchFields.map(field => ({
-          [field]: { $regex: search, $options: 'i' }
+        const searchConditions = searchFields.map((field) => ({
+          [field]: { $regex: search, $options: 'i' },
         }));
-        
+
         query.$or = searchConditions;
       }
-      
+
       // Configure pagination and population options
       const options: PaginationOptions<UserDocument> = {
         page: Math.max(1, Number(page)),
@@ -154,14 +156,14 @@ export class UserService {
         populate: {
           path: 'roleIds',
           select: 'name',
-          options: { strictPopulate: false }
+          options: { strictPopulate: false },
         },
-        select: fields ? fields.split(',').map(f => f.trim()) : undefined
+        select: fields ? fields.split(',').map((f) => f.trim()) : undefined,
       };
-      
+
       // Execute the query with pagination, filtering, and sorting
       const result = await filterSort.paginate(options, query);
-      
+
       // Format the response
       return {
         success: true,

@@ -8,7 +8,7 @@ import { Model } from 'mongoose';
 import { Department, DepartmentDocument } from './schemas/department.schema';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, paginate } from 'src/common/utils/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ClinicDocument, Clinic } from '../clinic/schemas/clinic.schema';
 import {
@@ -23,7 +23,7 @@ import {
   ComplexDocument,
   Complex,
 } from '../cliniccollection/schemas/cliniccollection.schema';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
 @Injectable()
 export class DepartmentService {
   constructor(

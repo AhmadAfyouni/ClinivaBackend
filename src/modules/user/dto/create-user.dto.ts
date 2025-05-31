@@ -13,7 +13,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Types } from 'mongoose';
-import { ActivityLogDTO, LoginHistoryDTO } from 'src/common/utlis/helper.dto';
+import { ActivityLogDTO, LoginHistoryDTO } from 'src/common/utils/helper.dto';
 
 export class CreateUserDto {
   @ApiProperty({

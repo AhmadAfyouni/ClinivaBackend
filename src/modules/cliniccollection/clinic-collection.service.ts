@@ -10,7 +10,7 @@ import { Complex, ComplexDocument } from './schemas/cliniccollection.schema';
 import { UpdateClinicCollectionDto } from './dto/update-clinic-collection.dto';
 import { CreateClinicCollectionDto } from './dto/create-clinic-collection.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { ApiGetResponse, paginate, SortType } from 'src/common/utlis/paginate';
+import { ApiGetResponse, paginate, SortType } from 'src/common/utils/paginate';
 import {
   Employee,
   EmployeeDocument,
@@ -24,7 +24,7 @@ import {
   Appointment,
   AppointmentDocument,
 } from '../appointment/schemas/appointment.schema';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
 import { User, UserDocument } from '../user/schemas/user.schema';
 
 @Injectable()
