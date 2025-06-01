@@ -76,67 +76,67 @@ export class WorkingHoursBase extends BaseModel {
 // Base ContactInfo class
 export class ContactInfoBase extends BaseModel {
   @Prop({ type: String })
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: String, required: false })
   @IsString()
   @IsOptional()
   phone_numbers?: string;
 
   @Prop({ type: String })
-  @ApiProperty({ type: String, format: 'email', required: true })
+  @ApiProperty({ type: String, format: 'email', required: false })
   @IsString()
   @IsOptional()
   email?: string;
 
   @Prop({ type: String })
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: String, required: false })
   @IsString()
   @IsNotEmpty()
   phoneNumber1: string;
 
   @Prop({ type: String })
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: String, required: false })
   @IsString()
   @IsNotEmpty()
   phoneNumber2: string;
 
   @Prop({ type: String })
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: String, required: false })
   @IsString()
   @IsNotEmpty()
   buildingNumber: string;
 
   @Prop({ type: String })
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: String, required: false })
   @IsString()
   @IsNotEmpty()
   streetName: string;
 
   @Prop({ type: String })
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: String, required: false })
   @IsString()
   @IsNotEmpty()
   region: string;
 
   @Prop({ type: String })
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: String, required: false })
   @IsString()
   @IsNotEmpty()
   country: string;
 
   @Prop({ type: String })
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: String, required: false })
   @IsString()
   @IsNotEmpty()
   nation: string;
 
   @Prop({ type: String })
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: String, required: false })
   @IsString()
   @IsNotEmpty()
   emergencyContactName: string;
 
   @Prop({ type: String })
-  @ApiProperty({ type: String, required: true })
+  @ApiProperty({ type: String, required: false })
   @IsString()
   @IsNotEmpty()
   emergencyContactPhone: string;
