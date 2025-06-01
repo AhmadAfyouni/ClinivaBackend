@@ -21,8 +21,8 @@ export class Patient {
   @Prop({ required: true, enum: ['male', 'female'] })
   gender: string;
 
-  @Prop({ required: true })
-  identity: string; // National ID or Passport
+  // @Prop({ required: true })
+  // identity: string; // National ID or Passport
 
   @Prop({ required: true })
   nationality?: string;
