@@ -73,7 +73,7 @@ export class Employee {
       emergencyContactName: { type: String, required: false },
       emergencyContactPhone: { type: String, required: false },
     },
-    required: true,
+    required: false,
     _id: false,
   })
   contactInfos: ContactInfoDTO;
@@ -88,12 +88,11 @@ export class Employee {
   })
   gender: string;
 
-  // @Prop({
-  //   required: [true, 'Identity is required'],
-  //   unique: [true, 'Identity must be unique'],
-  //   trim: true,
-  // })
-  // identity: string;
+  @Prop({
+    required: false,
+    unique: false,
+  })
+  identity: string;
 
   @Prop({ required: false, trim: true })
   nationality?: string;
