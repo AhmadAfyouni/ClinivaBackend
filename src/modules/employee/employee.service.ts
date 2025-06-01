@@ -150,7 +150,7 @@ export class EmployeeService {
       if (employeeType === 'Admin') {
         role = await this.roleModel.findOne({ name: 'Admin' });
         if (!role) throw new InternalServerErrorException('No Roles Found');
-        createEmployeeDto.identity = '(Admin)-' + publicId;
+        // createEmployeeDto.identity = '(Admin)-' + publicId;
         createEmployeeDto.Owner = true;
       }
 
@@ -330,7 +330,6 @@ export class EmployeeService {
       if (search) {
         query['$or'] = [
           'name',
-          'identity',
           'nationality',
           'address',
           'specialties',
@@ -362,7 +361,6 @@ export class EmployeeService {
         search: search,
         searchFields: [
           'name',
-          'identity',
           'nationality',
           'address',
           'Languages',
@@ -425,12 +423,7 @@ export class EmployeeService {
           'You are not allowed to active/deactivate your own account',
         );
       }
-      const restrictedFields = [
-        'employeeType',
-        'identity',
-        'email',
-        'password',
-      ];
+      const restrictedFields = ['employeeType', 'email', 'password'];
       const isRestrictedFieldUpdated = restrictedFields.some(
         (field) => field in updateEmployeeDto,
       );
@@ -472,7 +465,7 @@ export class EmployeeService {
       employee.deleted = true;
       employee.isActive = false;
       employee.name = employee.name + ' (Deleted)' + employee.publicId;
-      employee.identity = employee.identity + '(Deleted)' + employee.publicId;
+      // employee.identity = employee.identity + '(Deleted)' + employee.publicId;
       employee.email = `(Deleted)${employee.publicId}${employee.email}`;
 
       const deletedEmployee = await employee.save();
