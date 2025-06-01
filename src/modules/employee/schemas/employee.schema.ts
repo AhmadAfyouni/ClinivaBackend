@@ -62,16 +62,16 @@ export class Employee {
 
   @Prop({
     type: {
-      phoneNumber1: { type: String, required: true },
-      phoneNumber2: { type: String, required: true },
-      email: { type: String, required: true },
-      buildingNumber: { type: String, required: true },
-      streetName: { type: String, required: true },
-      region: { type: String, required: true },
-      country: { type: String, required: true },
-      nation: { type: String, required: true },
-      emergencyContactName: { type: String, required: true },
-      emergencyContactPhone: { type: String, required: true },
+      phoneNumber1: { type: String, required: false },
+      phoneNumber2: { type: String, required: false },
+      email: { type: String, required: false },
+      buildingNumber: { type: String, required: false },
+      streetName: { type: String, required: false },
+      region: { type: String, required: false },
+      country: { type: String, required: false },
+      nation: { type: String, required: false },
+      emergencyContactName: { type: String, required: false },
+      emergencyContactPhone: { type: String, required: false },
     },
     required: true,
     _id: false,
@@ -88,12 +88,12 @@ export class Employee {
   })
   gender: string;
 
-  @Prop({
-    required: [true, 'Identity is required'],
-    unique: [true, 'Identity must be unique'],
-    trim: true,
-  })
-  identity: string;
+  // @Prop({
+  //   required: [true, 'Identity is required'],
+  //   unique: [true, 'Identity must be unique'],
+  //   trim: true,
+  // })
+  // identity: string;
 
   @Prop({ required: false, trim: true })
   nationality?: string;
