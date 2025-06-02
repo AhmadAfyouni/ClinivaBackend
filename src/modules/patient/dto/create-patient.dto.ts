@@ -56,8 +56,7 @@ export class CreatePatientDto {
   })
   @IsEnum(['male', 'female'])
   @IsNotEmpty()
-  gender: string;
-
+  // gender: string;
   @ApiProperty({
     description: 'National ID or Passport',
     example: '9876543210',

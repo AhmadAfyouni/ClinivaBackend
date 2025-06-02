@@ -1,208 +1,192 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
-  IsArray,
-  IsDate,
-  IsMongoId,
-  IsNotEmpty,
-  IsObject,
-  IsOptional,
   IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsBoolean,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-
-import {
-  BankAccountDTO,
-  CashBoxDTO,
-  CommercialRecordDTO,
-  ContactInfoDTO,
-  InsuranceCompanyDTO,
-  OnlinePaymentMethodDTO,
-} from 'src/common/utils/helper.dto';
+import { GeneralInfo } from 'src/common/utils/helper.dto';
 
 export class CreateCompanyDto {
   @ApiProperty({
-    description: 'Company name',
-    example: 'Saudi Health Group',
+    description: 'Trading name of the company',
+    example: 'Al-Noor Medical Center',
     required: true,
   })
   @IsString()
   @IsNotEmpty()
-  name: string;
+  nameTrade: string;
+
+  @ApiProperty({ description: '', required: false })
+  logo: string;
 
   @ApiProperty({
-    description: 'Company address',
-    example: '789 Corporate Ave, Riyadh, Saudi Arabia',
+    description: 'Legal name of the company',
+    example: 'Al-Noor Medical Services Co. Ltd.',
     required: true,
   })
   @IsString()
   @IsNotEmpty()
-  address: string;
+  nameLegal: string;
 
   @ApiPropertyOptional({
-    description: 'Brief overview of the company',
-    example: 'A leading healthcare provider in Saudi Arabia.',
+    description: 'General information about the company',
     required: false,
-  })
-  @IsOptional()
-  @IsString()
-  overview?: string;
-
-  @ApiPropertyOptional({
-    description: 'Year of establishment',
-    example: '2000-08-15',
-    required: false,
-  })
-  @IsOptional()
-  @IsDate()
-  yearOfEstablishment?: Date;
-
-  @ApiPropertyOptional({
-    description: 'Company logo URL',
-    example: 'https://company.com/logo.png',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  logo?: string;
-
-  @ApiPropertyOptional({
-    description: 'Company vision statement',
-    example: 'Delivering innovative healthcare solutions to the Middle East.',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  vision?: string;
-
-  @ApiPropertyOptional({
-    description: 'Additional company goals',
-    example: 'We operate in multiple cities across Saudi Arabia.',
-    required: false,
-  })
-  @IsOptional()
-  @IsString()
-  goals?: string;
-
-  @ApiPropertyOptional({
-    type: [ContactInfoDTO],
-    description: 'Contact information of the company',
-    required: true,
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ContactInfoDTO)
-  @IsOptional()
-  contactInfos?: ContactInfoDTO[];
-  /*
-    @ApiPropertyOptional({
-        type: [Holiday],
-        description: 'Company holidays',
-        required: false,
-        example: [
-            { name: 'National Day', date: '2025-09-23', reason: 'Public Holiday' },
-            { name: 'Eid Al-Fitr', date: '2025-04-20', reason: 'Religious Holiday' }
-        ]
-    })
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => Holiday)
-    @IsOptional()
-    holidays?: Holiday[];
-
-
-    @ApiPropertyOptional({
-        type: [WorkingHours],
-        description: 'Working hours of the company',
-        required: false,
-        example: [
-            { day: 'Monday',  startTime: '08:00 AM', endTime: '05:00 PM'  },
-            { day: 'Tuesday',startTime: '08:00 AM', endTime: '05:00 PM'  }
-        ]
-    })
-    @IsArray()
-    @ValidateNested({ each: true })
-    @Type(() => WorkingHours)
-    @IsOptional()
-    workingDays?: WorkingHours[];
-*/
-  @ApiPropertyOptional({
-    type: [BankAccountDTO],
-    description: 'Bank accounts associated with the company ',
-    required: true,
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => BankAccountDTO)
-  @IsOptional()
-  bankAccount?: BankAccountDTO[];
-
-  @ApiPropertyOptional({
-    type: [CashBoxDTO],
-    description: 'Company cash boxes',
-    required: true,
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CashBoxDTO)
-  @IsOptional()
-  cashBoxes?: CashBoxDTO[];
-
-  @ApiPropertyOptional({
-    type: [OnlinePaymentMethodDTO],
-    description: 'Accepted online payment methods',
-    required: true,
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OnlinePaymentMethodDTO)
-  @IsOptional()
-  onlinePaymentMethods?: OnlinePaymentMethodDTO[];
-
-  @ApiPropertyOptional({
-    type: [InsuranceCompanyDTO],
-    description: 'Accepted insurance companies',
-    required: true,
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => InsuranceCompanyDTO)
-  @IsOptional()
-  insuranceCompany?: InsuranceCompanyDTO[];
-
-  @ApiPropertyOptional({
-    type: CommercialRecordDTO,
-    description: 'Commercial record of the company',
-    required: true,
   })
   @IsOptional()
   @ValidateNested()
-  @Type(() => CommercialRecordDTO)
-  commercialRecord?: CommercialRecordDTO;
+  @Type(() => GeneralInfo)
+  generalInfo?: GeneralInfo;
 
   @ApiPropertyOptional({
-    description: 'Google Maps location coordinates',
+    description: 'Whether the company is marked as deleted',
     required: false,
-    example: { x: 24.7136, y: 46.6753 },
+    default: false,
   })
   @IsOptional()
-  @IsObject()
-  locationGoogl?: { x: number; y: number };
-  @ApiProperty({
-    description: 'Key member of the organization',
-    example: 'John Doe',
-    required: true,
-  })
-  @IsString()
-  @IsNotEmpty()
-  Key_member: string;
-
-  @ApiProperty({
-    description: 'Founder of the organization',
-    example: 'Jane Smith',
-    required: true,
-  })
-  @IsString()
-  @IsNotEmpty()
-  Founder_Executives: string;
+  @IsBoolean()
+  deleted?: boolean = false;
 }
+
+// export class GeneralInfoDto {
+//   @ApiPropertyOptional({
+//     description: 'URL to the company logo',
+//     example: 'https://example.com/logo.png',
+//   })
+//   @IsOptional()
+//   @IsString()
+//   logo?: string;
+
+//   @ApiPropertyOptional({
+//     description: 'Year the company was established',
+//     example: 2010,
+//   })
+//   @IsOptional()
+//   @IsNumber()
+//   yearOfEstablishment?: number;
+
+//   @ApiPropertyOptional({
+//     description: 'Company vision statement',
+//     example: 'To be the leading healthcare provider in the region',
+//   })
+//   @IsOptional()
+//   @IsString()
+//   vision?: string;
+
+//   @ApiPropertyOptional({
+//     description: 'Company goals and objectives',
+//     example:
+//       'Provide exceptional healthcare services with compassion and excellence',
+//   })
+//   @IsOptional()
+//   @IsString()
+//   goals?: string;
+
+//   @ApiPropertyOptional({
+//     description: 'Company overview',
+//     example:
+//       'A state-of-the-art medical center providing comprehensive healthcare services',
+//   })
+//   @IsOptional()
+//   @IsString()
+//   overview?: string;
+
+//   @ApiPropertyOptional({
+//     description: 'Name of the CEO',
+//     example: 'Dr. Ahmed Al-Ghamdi',
+//   })
+//   @IsOptional()
+//   @IsString()
+//   ceo?: string;
+
+//   @ApiPropertyOptional({
+//     description: 'Contact information',
+//     type: ContactInfoBase,
+//   })
+//   @IsOptional()
+//   @ValidateNested()
+//   @Type(() => ContactInfoBase)
+//   contactInformation?: ContactInfoBase;
+
+//   @ApiPropertyOptional({
+//     description: 'LinkedIn profile URL',
+//     example: 'https://linkedin.com/company/example',
+//   })
+//   @IsOptional()
+//   @IsString()
+//   LinkedIn?: string;
+
+//   @ApiPropertyOptional({
+//     description: 'Twitter profile URL',
+//     example: 'https://twitter.com/example',
+//   })
+//   @IsOptional()
+//   @IsString()
+//   Twitter?: string;
+
+//   @ApiPropertyOptional({
+//     description: 'Facebook page URL',
+//     example: 'https://facebook.com/example',
+//   })
+//   @IsOptional()
+//   @IsString()
+//   Facebook?: string;
+
+//   @ApiPropertyOptional({
+//     description: 'Instagram profile URL',
+//     example: 'https://instagram.com/example',
+//   })
+//   @IsOptional()
+//   @IsString()
+//   Instagram?: string;
+
+//   @ApiPropertyOptional({
+//     description: 'Financial information',
+//     example: { VAT: '1234567890', CR: '1234567890' },
+//   })
+//   @IsOptional()
+//   @IsObject()
+//   FinanceInfo?: { VAT: string; CR: string };
+
+//   @ApiPropertyOptional({
+//     description: 'Privacy policy',
+//     example: {
+//       title: 'Privacy Policy',
+//       content: 'Our privacy policy content...',
+//     },
+//   })
+//   @IsOptional()
+//   @IsObject()
+//   PrivacyPolicy?: { title: string; content: string };
+
+//   @ApiPropertyOptional({
+//     description: 'Terms and conditions',
+//     example: { title: 'Terms', content: 'Our terms and conditions...' },
+//   })
+//   @IsOptional()
+//   @IsObject()
+//   TermsConditions?: { title: string; content: string };
+
+//   @ApiPropertyOptional({
+//     description: 'Key member information',
+//     example: 'Key member details',
+//     default: 'Key_member',
+//   })
+//   @IsOptional()
+//   @IsString()
+//   Key_member?: string = 'Key_member';
+
+//   @ApiPropertyOptional({
+//     description: 'Founder and executives information',
+//     example: 'Founder details',
+//     default: 'Founder/Executives',
+//   })
+//   @IsOptional()
+//   @IsString()
+//   Founder_Executives?: string = 'Founder/Executives';
+//   @IsOptional()
+//   @IsObject()
+//   locationGoogl?: { x: number; y: number };
+// }

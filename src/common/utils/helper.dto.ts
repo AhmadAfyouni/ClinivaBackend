@@ -18,14 +18,6 @@ import {
   WorkingHoursBase,
 } from './base.helper';
 
-// Re-export the enums for backward compatibility
-// Re-export the enums for backward compatibility
-// Re-export the enums for backward compatibility
-// Re-export the enums for backward compatibility
-// Re-export the enums for backward compatibility
-// Re-export the enums for backward compatibility
-// Re-export the enums for backward compatibility
-// Re-export the enums for backward compatibility
 export { DayOfWeek, VacationBase, WorkingHoursBase, ContactInfoBase };
 
 export class GeneralInfo extends BaseModel {
@@ -47,14 +39,29 @@ export class GeneralInfo extends BaseModel {
   @ApiProperty()
   ceo: string;
 
-  @ApiProperty()
-  contactInformation: string;
+  @ApiProperty({ required: false })
+  contactInformation: ContactInfoBase;
 
-  @ApiProperty()
-  financeInformation: {};
+  @ApiProperty({ required: false })
+  LinkedIn: string;
 
-  @ApiProperty()
-  privacyPolicy: {};
+  @ApiProperty({ required: false })
+  Twitter: string;
+
+  @ApiProperty({ required: false })
+  Facebook: string;
+
+  @ApiProperty({ required: false })
+  Instagram: string;
+
+  @ApiProperty({ required: false })
+  FinanceInfo: { VAT: string; CR: string };
+
+  @ApiProperty({ required: false })
+  PrivacyPolicy: { title: string; content: string };
+
+  @ApiProperty({ required: false })
+  TermsConditions: { title: string; content: string };
 
   @ApiProperty({ required: true, default: 'Key_member' })
   Key_member: string;

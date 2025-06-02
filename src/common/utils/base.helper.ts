@@ -11,6 +11,7 @@ import {
   IsArray,
   ValidateNested,
   IsObject,
+  isString,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -88,16 +89,10 @@ export class ContactInfoBase extends BaseModel {
   email?: string;
 
   @Prop({ type: String })
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, format: 'url', required: false })
   @IsString()
-  @IsNotEmpty()
-  phoneNumber1: string;
-
-  @Prop({ type: String })
-  @ApiProperty({ type: String, required: false })
-  @IsString()
-  @IsNotEmpty()
-  phoneNumber2: string;
+  @IsOptional()
+  webSite: string;
 
   @Prop({ type: String })
   @ApiProperty({ type: String, required: false })
@@ -128,6 +123,12 @@ export class ContactInfoBase extends BaseModel {
   @IsString()
   @IsNotEmpty()
   nation: string;
+
+  @Prop({ type: Object })
+  @ApiProperty({ type: Object, required: false })
+  @IsObject()
+  @IsOptional()
+  locationGoogl?: { x: number; y: number };
 
   @Prop({ type: String })
   @ApiProperty({ type: String, required: false })
