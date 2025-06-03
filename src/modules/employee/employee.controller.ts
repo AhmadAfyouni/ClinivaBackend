@@ -4,12 +4,14 @@ import {
   Controller,
   Delete,
   Get,
+  InternalServerErrorException,
   Param,
   Post,
   Put,
   Query,
   Req,
   UploadedFile,
+  UploadedFiles,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
@@ -21,7 +23,10 @@ import { PermissionsEnum } from 'src/config/permission.enum';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/config/permissions.decorator';
 import { ApiConsumes } from '@nestjs/swagger';
-import { FileInterceptor } from '@nestjs/platform-express';
+import {
+  FileFieldsInterceptor,
+  FileInterceptor,
+} from '@nestjs/platform-express';
 @Controller('employees')
 @UseGuards(PermissionsGuard)
 export class EmployeeController {
@@ -30,37 +35,50 @@ export class EmployeeController {
   @Post()
   @Permissions(PermissionsEnum.ADMIN)
   @ApiConsumes('multipart/form-data')
-  @UseInterceptors(FileInterceptor('image'))
-  @UseInterceptors(FileInterceptor('workPermit'))
-  @UseInterceptors(FileInterceptor('CV'))
-  @UseInterceptors(FileInterceptor('certifications'))
-  @UseInterceptors(FileInterceptor('employmentContract'))
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'image', maxCount: 1 },
+      { name: 'workPermit', maxCount: 1 },
+      { name: 'CV', maxCount: 1 },
+      { name: 'certifications', maxCount: 1 },
+      { name: 'employmentContract', maxCount: 1 },
+    ]),
+  )
   async createEmployee(
-    @UploadedFile() file: Express.Multer.File,
-    @UploadedFile() workPermit: Express.Multer.File,
-    @UploadedFile() CV: Express.Multer.File,
-    @UploadedFile() certifications: Express.Multer.File,
-    @UploadedFile() employmentContract: Express.Multer.File,
+    @UploadedFiles()
+    files: {
+      image?: Express.Multer.File[];
+      workPermit?: Express.Multer.File[];
+      CV?: Express.Multer.File[];
+      certifications?: Express.Multer.File[];
+      employmentContract?: Express.Multer.File[];
+    },
     @Body() createEmployeeDto: CreateEmployeeDto,
   ) {
-    return this.employeeService.createEmployee(
-      createEmployeeDto,
-      file,
-      workPermit,
-      CV,
-      certifications,
-      employmentContract,
-    );
+    try {
+      console.log(files);
+      return this.employeeService.createEmployee(
+        createEmployeeDto,
+        files?.image?.[0] || undefined,
+        files?.workPermit?.[0] || undefined,
+        files?.CV?.[0] || undefined,
+        files?.certifications?.[0] || undefined,
+        files?.employmentContract?.[0] || undefined,
+      );
+    } catch (error) {
+      console.log(error);
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   @Post('CreateUser')
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('image'))
   async createUser(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() image: Express.Multer.File,
     @Body() createEmployeeDto: CreateEmployeeDto,
   ) {
-    return this.employeeService.createUser(file, createEmployeeDto);
+    return this.employeeService.createUser(image, createEmployeeDto);
   }
 
   // @Get()

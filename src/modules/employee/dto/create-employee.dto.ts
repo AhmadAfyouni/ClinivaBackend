@@ -76,14 +76,14 @@ export class CreateEmployeeDto {
   @IsNotEmpty()
   gender: string;
 
-  // @ApiProperty({
-  //   description: 'National ID or Passport',
-  //   example: '1234567890',
-  //   required: true,
-  // })
-  // @IsString()
-  // @IsNotEmpty()
-  // identity: string;
+  @ApiProperty({
+    description: 'National ID or Passport',
+    example: '1234567890',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  identity: string;
 
   @ApiProperty({ description: 'Nationality', example: 'Saudi', required: true })
   @IsString()

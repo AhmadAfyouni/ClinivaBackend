@@ -129,13 +129,29 @@ export class Employee {
     type: [
       {
         day: { type: String, enum: DayOfWeek },
-        shift1: { type: { start: { type: String }, end: { type: String } } },
-        shift2: { type: { start: { type: String }, end: { type: String } } },
+        shift1: {
+          type: Object,
+          default: { startTime: '08:00', endTime: '13:00' },
+        },
+        shift2: {
+          type: Object,
+          default: { startTime: '08:00', endTime: '13:00' },
+        },
       },
     ],
     default: [],
   })
-  workingHours: WorkingHours[];
+  workingHours: Array<{
+    day: string;
+    shift1: {
+      startTime: string;
+      endTime: string;
+    };
+    shift2: {
+      startTime: string;
+      endTime: string;
+    };
+  }>;
 
   @Prop({ type: [Vacation], default: [] })
   vacationRecords: Vacation[];

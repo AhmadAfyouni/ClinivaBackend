@@ -45,11 +45,11 @@ export class EmployeeService {
 
   async createEmployee(
     createEmployeeDto: CreateEmployeeDto,
-    file: Express.Multer.File,
-    workPermit: Express.Multer.File,
-    CV: Express.Multer.File,
-    certifications: Express.Multer.File,
-    employmentContract: Express.Multer.File,
+    file?: Express.Multer.File,
+    workPermit?: Express.Multer.File,
+    CV?: Express.Multer.File,
+    certifications?: Express.Multer.File,
+    employmentContract?: Express.Multer.File,
   ): Promise<ApiGetResponse<Employee>> {
     try {
       // Get the user to check employeeType
@@ -150,7 +150,7 @@ export class EmployeeService {
       if (employeeType === 'Admin') {
         role = await this.roleModel.findOne({ name: 'Admin' });
         if (!role) throw new InternalServerErrorException('No Roles Found');
-        // createEmployeeDto.identity = '(Admin)-' + publicId;
+        createEmployeeDto.identity = '(Admin)-' + publicId;
         createEmployeeDto.Owner = true;
       }
 
@@ -345,24 +345,31 @@ export class EmployeeService {
       return paginate({
         model: this.employeeModel,
         populate: [
-          // 'companyId',
-          // { path: 'clinicCollectionId', select: 'name' },
-          // { path: 'userId' },
-          // 'clinics',
-          // 'specializations',
           'roleIds',
+          {
+            path: 'workingHours',
+            populate: [
+              {
+                path: 'shift1',
+                // model: 'shift',
+              },
+              {
+                path: 'shift2',
+                // model: 'shift',
+              },
+            ],
+          },
         ],
         page: page,
         limit: limit,
         allData: allData,
         filter: filter_fields ? JSON.parse(filter_fields) : {},
-        // sort: '',
-        // sort: { [sortBy]: order === 'asc' ? 1 : -1 },
         search: search,
         searchFields: [
           'name',
           'nationality',
           'address',
+          'identity',
           'Languages',
           'professional_experience',
         ],
@@ -386,6 +393,13 @@ export class EmployeeService {
           'clinic',
           'specializations',
           'roleIds',
+          // {
+          //   path: 'workingHours',
+          //   populate: {
+          //     path: 'shift1',
+          //     model: 'Shift',
+          //   },
+          // },
         ])
         .exec();
       if (!employee || employee.deleted)
@@ -423,7 +437,12 @@ export class EmployeeService {
           'You are not allowed to active/deactivate your own account',
         );
       }
-      const restrictedFields = ['employeeType', 'email', 'password'];
+      const restrictedFields = [
+        'employeeType',
+        'email',
+        'password',
+        'identity',
+      ];
       const isRestrictedFieldUpdated = restrictedFields.some(
         (field) => field in updateEmployeeDto,
       );
@@ -465,7 +484,7 @@ export class EmployeeService {
       employee.deleted = true;
       employee.isActive = false;
       employee.name = employee.name + ' (Deleted)' + employee.publicId;
-      // employee.identity = employee.identity + '(Deleted)' + employee.publicId;
+      employee.identity = employee.identity + '(Deleted)' + employee.publicId;
       employee.email = `(Deleted)${employee.publicId}${employee.email}`;
 
       const deletedEmployee = await employee.save();
