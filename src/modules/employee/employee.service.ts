@@ -81,6 +81,16 @@ export class EmployeeService {
           `Missing required fields: ${missingFields.join(', ')}`,
         );
       }
+      if (typeof createEmployeeDto.contactInfos === 'string') {
+        createEmployeeDto.contactInfos = JSON.parse(
+          createEmployeeDto.contactInfos,
+        );
+      }
+      if (typeof createEmployeeDto.workingHours === 'string') {
+        createEmployeeDto.workingHours = JSON.parse(
+          createEmployeeDto.workingHours,
+        );
+      }
       const publicId = await generateUniquePublicId(this.employeeModel, 'emp');
       const relativeFilePath = file
         ? saveFileLocally(file, 'employees/images')
@@ -90,6 +100,14 @@ export class EmployeeService {
         createEmployeeDto.password,
         saltRounds,
       );
+      const CVSize = CV ? CV.size / 1024 : 0;
+      const workPermitSize = workPermit ? workPermit.size / 1024 : 0;
+      const employmentContractSize = employmentContract
+        ? employmentContract.size / 1024
+        : 0;
+      const certificationsSize = certifications
+        ? certifications.size / 1024
+        : 0;
       const newEmployee = new this.employeeModel({
         ...createEmployeeDto,
         publicId,
@@ -105,6 +123,10 @@ export class EmployeeService {
         employmentContract: employmentContract
           ? saveFileLocally(employmentContract, 'employees/employmentContracts')
           : '',
+        CVSize,
+        workPermitSize,
+        employmentContractSize,
+        certificationsSize,
       });
       const savedEmployee = await newEmployee.save();
       return {

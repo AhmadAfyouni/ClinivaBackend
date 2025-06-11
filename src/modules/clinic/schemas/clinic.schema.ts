@@ -2,14 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { ContactInfo, WorkingHours } from '../../../common/utils/helper';
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  BankAccountDTO,
-  CashBoxDTO,
-  CommercialRecordDTO,
-  HolidayDTO,
-  InsuranceCompanyDTO,
-  OnlinePaymentMethodDTO,
-} from 'src/common/utils';
+import { BankAccountDTO, HolidayDTO } from 'src/common/utils';
 
 export type ClinicDocument = Clinic & Document & { _patientCount?: number };
 
@@ -24,22 +17,7 @@ export class Clinic {
   AverageDurationOfVisit: number;
 
   @Prop()
-  overview?: string;
-
-  @Prop({ type: Date })
-  yearOfEstablishment?: Date;
-
-  @Prop()
-  address: string;
-
-  @Prop()
   logo?: string;
-
-  @Prop()
-  vision?: string;
-
-  @Prop()
-  goals?: string;
 
   @Prop({ type: [ContactInfo], default: [] })
   contactInfos: ContactInfo[];
@@ -56,17 +34,6 @@ export class Clinic {
   @Prop({ type: [BankAccountDTO], default: [] })
   bankAccount: BankAccountDTO[];
 
-  @Prop({ type: [InsuranceCompanyDTO], default: [] })
-  insuranceCompany: InsuranceCompanyDTO[];
-
-  @Prop({ type: [CashBoxDTO], default: [] })
-  cashBoxes: CashBoxDTO[];
-
-  @Prop({ type: [OnlinePaymentMethodDTO], default: [] })
-  onlinePaymentMethods: OnlinePaymentMethodDTO[];
-
-  @Prop({ type: CommercialRecordDTO })
-  commercialRecord: CommercialRecordDTO;
   @Prop({ type: Object })
   locationGoogl: { x: number; y: number };
 

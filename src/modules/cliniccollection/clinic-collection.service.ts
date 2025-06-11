@@ -4,6 +4,7 @@ import {
   HttpException,
   BadRequestException,
 } from '@nestjs/common';
+import { removeFileFromLocal } from 'src/common/utils/file.util';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Complex, ComplexDocument } from './schemas/cliniccollection.schema';
@@ -25,7 +26,7 @@ import {
   AppointmentDocument,
 } from '../appointment/schemas/appointment.schema';
 import { generateUniquePublicId } from 'src/common/utils/id-generator';
-import { User, UserDocument } from '../user/schemas/user.schema';
+import { saveFileLocally } from 'src/common/utils/upload.util';
 
 @Injectable()
 export class ClinicCollectionService {
@@ -39,20 +40,18 @@ export class ClinicCollectionService {
     @InjectModel(Clinic.name) private clinicModel: Model<ClinicDocument>,
     @InjectModel(Appointment.name)
     private appointmentModel: Model<AppointmentDocument>,
-    @InjectModel(User.name)
-    private userModel: Model<UserDocument>,
   ) {}
+
   private async checkUniqueName(name: string, company) {
     const existingClinicCollection = await this.clinicCollectionModel
       .findOne({
-        name,
+        tradeName: name,
         companyId: company,
       })
       .exec();
-    console.log('existingClinicCollection', existingClinicCollection);
     if (existingClinicCollection) {
       throw new BadRequestException(
-        'A clinic collection with this name(' +
+        'A Complex with this name(' +
           name +
           ') already exists in the specified company.',
       );
@@ -60,49 +59,57 @@ export class ClinicCollectionService {
   }
   async createClinicCollection(
     createClinicCollectionDto: CreateClinicCollectionDto,
-    plan: string,
-    employeeId: string,
+    userId: string,
+    file: Express.Multer.File,
   ): Promise<ApiGetResponse<Complex>> {
     try {
-      console.log('createClinicCollectionDtpppppppppp', plan);
-      if (plan === 'company') {
-        const employee = await this.employeeModel.findById(employeeId);
-        const user = await this.userModel.findById(employee?.userId);
-        if (employee && user?.companyId)
-          createClinicCollectionDto.companyId = user.companyId;
-        else {
+      const employee = await this.employeeModel.findById(userId);
+      if (employee?.plan === 'company') {
+        if (employee && employee.companyId) {
+          createClinicCollectionDto.companyId = employee.companyId;
+
+          await this.checkUniqueName(
+            createClinicCollectionDto.tradeName,
+            createClinicCollectionDto.companyId,
+          );
+        } else {
           throw new BadRequestException(
             'Company ID is required for company plan',
           );
         }
-      }
-
-      if (createClinicCollectionDto.companyId) {
-        await this.checkUniqueName(
-          createClinicCollectionDto.name,
-          createClinicCollectionDto.companyId,
+      } else if (employee?.plan === 'complex') {
+        if (!employee?.Owner) {
+          throw new BadRequestException('Employee is not Owner');
+        }
+      } else {
+        throw new BadRequestException(
+          'there is an error while creating the Complex Employee is not Owner or Plan is wrong',
         );
       }
       const publicId = await generateUniquePublicId(
         this.clinicCollectionModel,
-        'com',
+        'cmx',
       );
+      let relativeFilePath = '';
+      if (file) {
+        relativeFilePath = file ? saveFileLocally(file, 'complex/images') : '';
+        createClinicCollectionDto.logo = relativeFilePath;
+      }
       const newClinicCollection = new this.clinicCollectionModel({
         ...createClinicCollectionDto,
         publicId,
-        plan,
+        plan: employee?.plan,
       });
       const savedClinicCollection = await newClinicCollection.save();
       return {
         success: true,
-        message: 'Medical Complex created successfully',
+        message: 'Medical complex Added successfully',
         data: savedClinicCollection,
       };
     } catch (error) {
-      console.log(error.message);
       if (error instanceof HttpException) throw error;
       throw new BadRequestException(
-        'Failed to create Medical Complex',
+        'Failed to add Medical complex',
         error.message,
       );
     }
@@ -111,7 +118,7 @@ export class ClinicCollectionService {
   async getAllClinicCollections(
     paginationDto: PaginationAndFilterDto,
     filters: any,
-  ) {
+  ): Promise<ApiGetResponse<Complex[]>> {
     try {
       let { page, limit, allData, sortBy, order } = paginationDto;
       page = Number(page) || 1;
@@ -145,7 +152,7 @@ export class ClinicCollectionService {
 
       const result = await paginate({
         model: this.clinicCollectionModel,
-        populate: ['companyId', 'specializations', 'PIC'],
+        populate: ['companyId', 'PIC'],
         page,
         limit,
         allData,
@@ -153,11 +160,13 @@ export class ClinicCollectionService {
         sort: sort,
       });
 
+      // employeeCount
+      // departmentCount
       if (result.data) {
         const clinicCollections = result.data;
         const updatedClinicCollections = await Promise.all(
           clinicCollections.map((clinicCollection) =>
-            this.addClinicCounts(clinicCollection),
+            this.getClinicCounts(clinicCollection),
           ),
         );
         result.data = updatedClinicCollections;
@@ -168,7 +177,7 @@ export class ClinicCollectionService {
       console.log(error.message);
       if (error instanceof HttpException) throw error;
       throw new BadRequestException(
-        'Failed to retrieve clinic collections',
+        'Failed to retrieve Medical Complexes',
         error.message,
       );
     }
@@ -184,7 +193,7 @@ export class ClinicCollectionService {
     });
   }
 
-  private async addClinicCounts(clinicCollection: ComplexDocument) {
+  private async getClinicCounts(clinicCollection: ComplexDocument) {
     const countConfigs = [
       {
         model: this.employeeModel,
@@ -222,14 +231,14 @@ export class ClinicCollectionService {
     try {
       const collection = await this.clinicCollectionModel
         .findById(id)
-        .populate(['companyId', 'specializations'])
+        .populate(['companyId', 'PIC'])
         .exec();
       if (!collection || collection.deleted)
         throw new NotFoundException(
-          'Clinic Collection not found or has been deleted',
+          'Medical Complex not found or has been deleted',
         );
 
-      const base = await this.addClinicCounts(collection);
+      const base = await this.getClinicCounts(collection);
 
       const departments = await this.departmentModel
         .find({ clinicCollectionId: id })
@@ -254,47 +263,74 @@ export class ClinicCollectionService {
 
       return {
         success: true,
-        message: 'Clinic Collection retrieved successfully',
+        message: 'Medical Complex retrieved successfully',
         data: {
           ...base,
+          departments: departments,
           clinicsCount: clinics.length,
           patientsCount: uniquePatients.length,
           doctorsCount: doctors.length,
           staffCount: staff.length,
           assignedDepartments: departments,
           assignedClinics: clinics,
-          assignedSpecializations: collection.specializations,
           assignedDoctors: doctors,
           assignedStaff: staff,
         },
       };
     } catch (error) {
       if (error instanceof HttpException) throw error;
-      throw new BadRequestException('Failed to retrieve clinic collection');
+      throw new BadRequestException('Failed to retrieve Medical Complex');
     }
   }
 
   async updateClinicCollection(
     id: string,
     updateClinicCollectionDto: UpdateClinicCollectionDto,
+    file?: Express.Multer.File,
   ): Promise<ApiGetResponse<Complex>> {
     try {
+      const denyFields = ['companyId', 'publicId', 'tradeName'];
+      if (
+        Object.keys(updateClinicCollectionDto).some((key) =>
+          denyFields.some((denyField) => denyField === key),
+        )
+      ) {
+        throw new BadRequestException(
+          'You are not allowed to update this fields:[ ' +
+            denyFields.join(', ') +
+            ']',
+        );
+      }
+      if (file) {
+        removeFileFromLocal(updateClinicCollectionDto.logo ?? '');
+        updateClinicCollectionDto.logo = saveFileLocally(
+          file,
+          'complex/images',
+        );
+      }
       const updatedClinicCollection = await this.clinicCollectionModel
-        .findByIdAndUpdate(id, updateClinicCollectionDto, { new: true })
+        .findByIdAndUpdate(id, updateClinicCollectionDto, {
+          new: true,
+          runValidators: true,
+          strict: 'throw',
+          strictQuery: 'throw',
+        })
         .populate(['companyId']);
       if (!updatedClinicCollection || updatedClinicCollection.deleted)
         throw new NotFoundException(
-          'Clinic Collection not found or has been deleted',
+          'Medical Complex not found or has been deleted',
         );
 
       return {
         success: true,
-        message: 'Clinic Collection update successfully',
+        message: 'Medical Complex details updated successfully',
         data: updatedClinicCollection,
       };
     } catch (error) {
       console.log(error.message);
-      throw new BadRequestException('Failed to update clinic collection');
+      throw new BadRequestException(
+        'Failed to update Medical Complex:' + error.message,
+      );
     }
   }
 
@@ -305,22 +341,25 @@ export class ClinicCollectionService {
         .exec();
       if (!clinicCollection || clinicCollection.deleted)
         throw new NotFoundException(
-          'Clinic Collection not found or has been deleted',
+          'Medical Complex not found or has been deleted',
         );
 
       clinicCollection.deleted = true;
-      clinicCollection.name =
-        clinicCollection.name + ' (Deleted)' + clinicCollection.publicId;
+      clinicCollection.tradeName =
+        clinicCollection.tradeName + ' (Deleted)' + clinicCollection.publicId;
+      clinicCollection.legalName =
+        clinicCollection.legalName + ' (Deleted)' + clinicCollection.publicId;
+      removeFileFromLocal(clinicCollection.logo);
       const deletedClinicCollection = await clinicCollection.save();
 
       return {
         success: true,
-        message: 'Clinic Collection marked as deleted successfully',
+        message: 'Medical Complex marked as deleted successfully',
         data: deletedClinicCollection,
       };
     } catch (error) {
       console.log(error.message);
-      throw new BadRequestException('Failed to delete clinic collection');
+      throw new BadRequestException('Failed to delete Medical Complex');
     }
   }
 }
