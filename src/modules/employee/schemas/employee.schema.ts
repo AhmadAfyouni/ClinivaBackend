@@ -56,7 +56,7 @@ export class Employee {
 
   @Prop({
     required: [true, 'Employee type is required'],
-    enum: ['Admin', 'Doctor', 'Medical Staff', 'Staff'],
+    enum: ['Staff Member', 'Doctor'],
   })
   employeeType: string;
 
@@ -168,11 +168,17 @@ export class Employee {
   @Prop({ type: String, required: false })
   certifications?: string;
 
+  @Prop({ type: Number, required: false })
+  certificationsSize?: number;
+
   @Prop({ required: false })
   employmentContractEffectiveDate: Date;
 
   @Prop({ type: String, required: false })
   employmentContract?: string;
+
+  @Prop({ type: Number, required: false })
+  employmentContractSize?: number;
 
   @Prop({ require: false })
   CVEffectiveDate: Date;
@@ -180,11 +186,17 @@ export class Employee {
   @Prop({ type: String, required: false })
   CV?: string;
 
+  @Prop({ type: Number, required: false })
+  CVSize?: number;
+
   @Prop({ required: false })
   workPermitEffectiveDate: Date;
 
   @Prop({ type: String, required: false })
   workPermit?: string;
+
+  @Prop({ type: Number, required: false })
+  workPermitSize?: number;
 
   @Prop({ type: String, required: false })
   Qualifications?: string;

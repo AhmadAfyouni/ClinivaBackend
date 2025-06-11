@@ -12,6 +12,7 @@ import {
   BadRequestException,
   UseGuards,
   HttpException,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ClinicCollectionService } from './clinic-collection.service';
 import { CreateClinicCollectionDto } from './dto/create-clinic-collection.dto';
@@ -23,6 +24,8 @@ import { CompanyService } from '../company/company.service';
 import { Permissions } from 'src/config/permissions.decorator';
 import { PermissionsEnum } from 'src/config/permission.enum';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UploadedFile } from '@nestjs/common';
 
 @Controller('cliniccollections')
 @UseGuards(PermissionsGuard)
@@ -36,29 +39,19 @@ export class ClinicCollectionController {
 
   @Post()
   @Permissions(PermissionsEnum.ADMIN)
+  @UseInterceptors(FileInterceptor('logo'))
   async createClinicCollection(
     @Body() createClinicCollectionDto: CreateClinicCollectionDto,
     @Request() req,
+    @UploadedFile() file: Express.Multer.File,
   ) {
     try {
       const userId = req.user.userId;
-      const response = await this.userService.getUserById(userId);
-      const user = response.data;
-      
-      if (!user || !user._id) {
-        throw new NotFoundException('User not found');
-      }
-
-      // Find the employee associated with this user
-      const employee = await this.employeeService.findByUserId(user._id.toString());
-      if (!employee) {
-        throw new NotFoundException('Employee not found for this user');
-      }
 
       return this.clinicCollectionService.createClinicCollection(
         createClinicCollectionDto,
-        user.plan,
-        employee._id.toString(),
+        userId,
+        file,
       );
     } catch (error) {
       if (error instanceof HttpException) throw error;
@@ -97,13 +90,16 @@ export class ClinicCollectionController {
 
   @Put(':id')
   @Permissions(PermissionsEnum.ADMIN)
+  @UseInterceptors(FileInterceptor('logo'))
   async updateClinicCollection(
     @Param('id') id: string,
     @Body() updateClinicCollectionDto: UpdateClinicCollectionDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
     return this.clinicCollectionService.updateClinicCollection(
       id,
       updateClinicCollectionDto,
+      file,
     );
   }
 

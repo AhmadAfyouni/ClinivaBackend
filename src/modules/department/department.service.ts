@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Department, DepartmentDocument } from './schemas/department.schema';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
@@ -24,6 +24,10 @@ import {
   Complex,
 } from '../cliniccollection/schemas/cliniccollection.schema';
 import { generateUniquePublicId } from 'src/common/utils/id-generator';
+import {
+  EmployeeDocument,
+  Employee,
+} from '../employee/schemas/employee.schema';
 @Injectable()
 export class DepartmentService {
   constructor(
@@ -36,6 +40,8 @@ export class DepartmentService {
     private medicalRecordModel: Model<MedicalRecordDocument>, // 👈 هنا
     @InjectModel(Complex.name)
     private cliniccollectionModel: Model<ComplexDocument>, // 👈 هنا
+    @InjectModel(Employee.name)
+    private employeeModel: Model<EmployeeDocument>,
   ) {}
 
   private async checkUniqueName(name: string, clinicCollectionId: string) {
@@ -52,16 +58,16 @@ export class DepartmentService {
   }
   async createDepartment(
     createDepartmentDto: CreateDepartmentDto,
-    plan: string,
+    employeeId: string,
   ): Promise<ApiGetResponse<Department>> {
     try {
+      const employee = await this.employeeModel.findById(employeeId).exec();
       if (
-        (plan === 'complex' || plan === 'company') &&
+        !employee?.plan ||
+        employee.plan === 'clinic' ||
         !createDepartmentDto.clinicCollectionId
       ) {
-        throw new BadRequestException(
-          'complex id is required for department plan',
-        );
+        throw new BadRequestException('complex id is missing or plan is wrong');
       }
       if (createDepartmentDto.clinicCollectionId) {
         await this.checkUniqueName(
@@ -90,77 +96,89 @@ export class DepartmentService {
       throw new BadRequestException(error.message);
     }
   }
-  async getAllDepartments(paginationDto: PaginationAndFilterDto, filters: any) {
+  async getAllDepartments(
+    paginationDto: PaginationAndFilterDto,
+    clinicCollectionId: string,
+  ) {
     try {
-      let { page, limit, allData, sortBy, order } = paginationDto;
+      const {
+        page,
+        limit,
+        allData,
+        sortBy,
+        order,
+        search,
+        fields,
+        filter_fields,
+      } = paginationDto;
 
-      // Convert page & limit to numbers
-      page = Number(page) || 1;
-      limit = Number(limit) || 10;
+      const query: any = {
+        // clinicCollectionId: new Types.ObjectId(clinicCollectionId),
+      };
 
-      // تحديد حقل الفرز الافتراضي
-      const sortField: string = sortBy ?? 'id';
+      const sortField: string = sortBy ?? 'createdAt';
       const sort: Record<string, 1 | -1> = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
 
-      // إعداد شروط البحث
-      const searchConditions: any[] = [];
+      if (search) {
+        query['$or'] = ['name', 'description'].map((field) => ({
+          [field]: { $regex: search, $options: 'i' },
+        }));
 
-      // تحقق إذا كان يوجد نص للبحث
-      if (filters.search) {
-        const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
+        // Also search in clinic collection names
         const clinics = await this.cliniccollectionModel
-          .find({ name: regex })
+          .find({ name: { $regex: search, $options: 'i' } })
           .select('_id');
-        const clinicIds = clinics.map((c) => c._id.toString());
-        // إضافة شروط البحث للحقول النصية والمرتبطة بالمجمع
-        searchConditions.push(
-          { name: regex },
-          { address: regex },
-          { clinicCollectionId: { $in: clinicIds } }, // البحث داخل المجمع المرتبط
-        );
+
+        if (clinics.length > 0) {
+          query['$or'].push({
+            clinicCollectionId: { $in: clinics.map((c) => c._id) },
+          });
+        }
       }
 
-      delete filters.search;
+      // Apply any additional filters from filter_fields
+      if (filter_fields) {
+        Object.entries(filter_fields).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== '') {
+            query[key] = value;
+          }
+        });
+      }
 
-      const finalFilter = {
-        ...filters,
-        ...(searchConditions.length > 0
-          ? { $and: [{ $or: searchConditions }] }
-          : {}),
-      };
-      finalFilter.deleted = { $ne: true };
-      // استخدام paginate مع populate
+      // Get only requested fields if specified
+      const selectFields = fields ? fields.split(',').join(' ') : '';
+
       const result = await paginate({
         model: this.departmentModel,
         populate: [
-          { path: 'clinicCollectionId', select: 'name' },
-          'specializations',
-          'PIC',
-        ], // الحقول المرتبطة التي سيتم تحميلها
+          {
+            path: 'clinicCollectionId',
+            select: 'name tradeName legalName logo',
+          },
+        ],
         page,
         limit,
         allData,
-        filter: finalFilter,
-        sort: sort,
+        filter: { clinicCollectionId },
+        sort,
+        // select: selectFields,
       });
 
-      // إضافة عدد المرضى المرتبطين بكل قسم
+      // Add stats to each department if needed
       if (result.data) {
-        const departments = result.data;
-        const updatedDepartments = await Promise.all(
-          departments.map((department) =>
-            this.addStatsToDepartment(department),
-          ),
+        result.data = await Promise.all(
+          result.data.map((dept) => this.addStatsToDepartment(dept)),
         );
-        result.data = updatedDepartments;
       }
 
       return result;
     } catch (error) {
-      console.log(error);
-      throw new BadRequestException(error.message);
+      console.error('Error in getAllDepartments:', error);
+      throw new BadRequestException(
+        error.message || 'Failed to retrieve departments',
+      );
     }
   }
   async addStatsToDepartment(department: any) {
@@ -216,7 +234,7 @@ export class DepartmentService {
     try {
       const department = await this.departmentModel
         .findById(id)
-        .populate(['clinicCollectionId', 'specializations'])
+        .populate(['clinicCollectionId'])
         .exec();
 
       if (!department || department.deleted)
@@ -237,7 +255,6 @@ export class DepartmentService {
         .exec();
 
       const clinicCount = clinics.length;
-      const countSpecializations = department.specializations.length;
 
       return {
         success: true,
@@ -247,7 +264,6 @@ export class DepartmentService {
           assignedClinics, // from main
           clinics, // from M-test-1
           clinicCount, // from M-test-1
-          countSpecializations, // from M-test-1
         },
       };
     } catch (error) {

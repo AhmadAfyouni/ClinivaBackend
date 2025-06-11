@@ -62,10 +62,6 @@ export class CompanyService {
         relativeFilePath = file ? saveFileLocally(file, 'company/images') : '';
       }
       companyData.logo = relativeFilePath;
-      const createdCompany = new this.companyModel(companyData);
-      const savedCompany = await createdCompany.save();
-      console.log(savedCompany._id);
-      // Get and update employee instance directly
       const employee = await this.employeeModel.findById(employeeId);
       if (!employee) {
         throw new InternalServerErrorException(
@@ -74,12 +70,17 @@ export class CompanyService {
       }
 
       // Update the employee
-      if (employee.first_login) {
+      let savedCompany;
+      if (employee.first_login && employee.Owner) {
+        const createdCompany = new this.companyModel(companyData);
+        savedCompany = await createdCompany.save();
         employee.companyId = savedCompany._id;
         employee.first_login = false;
         await employee.save();
       } else {
-        throw new BadRequestException('Employee is not first login');
+        throw new BadRequestException(
+          'Employee is not first login or not Owner',
+        );
       }
 
       return {
