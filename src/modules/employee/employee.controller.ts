@@ -111,15 +111,34 @@ export class EmployeeController {
   }
 
   @Put(':id')
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(
+    FileFieldsInterceptor([
+      { name: 'image', maxCount: 1 },
+      { name: 'workPermit', maxCount: 1 },
+      { name: 'CV', maxCount: 1 },
+      { name: 'certifications', maxCount: 1 },
+      { name: 'employmentContract', maxCount: 1 },
+    ]),
+  )
   @Permissions(PermissionsEnum.ADMIN)
   async updateEmployee(
     @Param('id') id: string,
     @Body() updateEmployeeDto: UpdateEmployeeDto,
+    @UploadedFiles()
+    files: {
+      image?: Express.Multer.File[];
+      workPermit?: Express.Multer.File[];
+      CV?: Express.Multer.File[];
+      certifications?: Express.Multer.File[];
+      employmentContract?: Express.Multer.File[];
+    },
     @Req() req: Request & { user: { userId: string } },
   ) {
     return this.employeeService.updateEmployee(
       id,
       updateEmployeeDto,
+      files,
       req.user.userId,
     );
   }

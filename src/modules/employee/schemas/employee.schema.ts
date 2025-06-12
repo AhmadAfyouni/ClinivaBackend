@@ -204,6 +204,9 @@ export class Employee {
   @Prop({ default: 0 })
   consultation_fee: number; // رسوم الاستشارة
 
+  @Prop({ default: '', required: false })
+  Relationship: string;
+
   @Prop({ default: true })
   on_call: boolean;
 

@@ -93,7 +93,7 @@ export class EmployeeService {
       }
       const publicId = await generateUniquePublicId(this.employeeModel, 'emp');
       const relativeFilePath = file
-        ? saveFileLocally(file, 'employees/images')
+        ? saveFileLocally(file, 'employees/' + publicId + '/images')
         : '';
       const saltRounds = 10;
       const hashedPassword = await bcrypt.hash(
@@ -114,14 +114,23 @@ export class EmployeeService {
         password: hashedPassword,
         image: relativeFilePath || '',
         workPermit: workPermit
-          ? saveFileLocally(workPermit, 'employees/workPermits')
+          ? saveFileLocally(
+              workPermit,
+              'employees/' + publicId + '/workPermits',
+            )
           : '',
-        CV: CV ? saveFileLocally(CV, 'employees/CVs') : '',
+        CV: CV ? saveFileLocally(CV, 'employees/' + publicId + '/CVs') : '',
         certifications: certifications
-          ? saveFileLocally(certifications, 'employees/certifications')
+          ? saveFileLocally(
+              certifications,
+              'employees/' + publicId + '/certifications',
+            )
           : '',
         employmentContract: employmentContract
-          ? saveFileLocally(employmentContract, 'employees/employmentContracts')
+          ? saveFileLocally(
+              employmentContract,
+              'employees/' + publicId + '/employmentContracts',
+            )
           : '',
         CVSize,
         workPermitSize,
@@ -162,12 +171,12 @@ export class EmployeeService {
         saltRounds,
       );
       const relativeFilePath = file
-        ? saveFileLocally(file, 'employees/images')
+        ? saveFileLocally(file, 'employees/' + publicId + '/images')
         : '';
       const employeeType =
         'employeeType' in createEmployeeDto
           ? createEmployeeDto.employeeType
-          : 'Staff';
+          : 'Staff Member';
       let role;
       if (employeeType === 'Admin') {
         role = await this.roleModel.findOne({ name: 'Admin' });
@@ -440,18 +449,108 @@ export class EmployeeService {
   async updateEmployee(
     id: string,
     updateEmployeeDto: UpdateEmployeeDto,
+    files: {
+      image?: Express.Multer.File[];
+      workPermit?: Express.Multer.File[];
+      CV?: Express.Multer.File[];
+      certifications?: Express.Multer.File[];
+      employmentContract?: Express.Multer.File[];
+    },
     userId: string,
   ): Promise<ApiGetResponse<Employee>> {
     try {
       console.log('userId', userId);
       console.log('updateEmployeeDto', updateEmployeeDto);
-      let updatedEmployee = await this.employeeModel
+      let InstanceEmployee = await this.employeeModel
         .findByIdAndUpdate(id, { deleted: false })
         .exec();
 
-      if (!updatedEmployee || updatedEmployee.deleted)
+      if (!InstanceEmployee || InstanceEmployee.deleted)
         throw new NotFoundException('Employee not found or has been deleted');
-
+      console.log('step 1', updateEmployeeDto);
+      console.log('files', files);
+      if (
+        'contactInfos' in updateEmployeeDto &&
+        typeof updateEmployeeDto.contactInfos === 'string'
+      ) {
+        updateEmployeeDto.contactInfos = JSON.parse(
+          updateEmployeeDto.contactInfos,
+        );
+      }
+      console.log('step 2');
+      let employmentContractSize = 0;
+      let certificationsSize = 0;
+      let CVSize = 0;
+      let workPermitSize = 0;
+      let relativeFilePath = '';
+      if (files) {
+        if (files.image) {
+          CVSize = files.CV ? files.CV[0].size / 1024 : 0;
+          workPermitSize = files.workPermit
+            ? files.workPermit[0].size / 1024
+            : 0;
+          employmentContractSize = files.employmentContract
+            ? files.employmentContract[0].size / 1024
+            : 0;
+          certificationsSize = files.certifications
+            ? files.certifications[0].size / 1024
+            : 0;
+          relativeFilePath = files.image
+            ? saveFileLocally(
+                files.image[0],
+                'employees/' + InstanceEmployee.publicId + '/images',
+              )
+            : '';
+          InstanceEmployee.image = relativeFilePath;
+        }
+        if (files.workPermit) {
+          const relativeFilePath = files.workPermit
+            ? saveFileLocally(
+                files.workPermit[0],
+                'employees/' + InstanceEmployee.publicId + '/workPermits',
+              )
+            : '';
+          InstanceEmployee.workPermit = relativeFilePath;
+        }
+        if (files.CV) {
+          const relativeFilePath = files.CV
+            ? saveFileLocally(
+                files.CV[0],
+                'employees/' + InstanceEmployee.publicId + '/CVs',
+              )
+            : '';
+          InstanceEmployee.CV = relativeFilePath;
+        }
+        if (files.certifications) {
+          const relativeFilePath = files.certifications
+            ? saveFileLocally(
+                files.certifications[0],
+                'employees/' + InstanceEmployee.publicId + '/certifications',
+              )
+            : '';
+          InstanceEmployee.certifications = relativeFilePath;
+        }
+        if (files.employmentContract) {
+          const relativeFilePath = files.employmentContract
+            ? saveFileLocally(
+                files.employmentContract[0],
+                'employees/' +
+                  InstanceEmployee.publicId +
+                  '/employmentContracts',
+              )
+            : '';
+          InstanceEmployee.employmentContract = relativeFilePath;
+        }
+      }
+      if (
+        'workingHours' in updateEmployeeDto &&
+        typeof updateEmployeeDto.workingHours === 'string'
+      ) {
+        updateEmployeeDto.workingHours = JSON.parse(
+          updateEmployeeDto.workingHours,
+        );
+      }
+      console.log('step 3');
       //Todo: check if the user has appointments
 
       if (id === userId && 'isActive' in updateEmployeeDto) {
@@ -474,12 +573,19 @@ export class EmployeeService {
             restrictedFields.join(', '),
         );
       }
-      updatedEmployee.set(updateEmployeeDto);
-      await updatedEmployee.save();
+
+      InstanceEmployee.set(updateEmployeeDto);
+      InstanceEmployee.set('certificationsSize', certificationsSize);
+      InstanceEmployee.set('CVSize', CVSize);
+      InstanceEmployee.set('employmentContractSize', employmentContractSize);
+      InstanceEmployee.set('workPermitSize', workPermitSize);
+      console.log('step 4');
+      await InstanceEmployee.save();
+      console.log('step 5');
       return {
         success: true,
         message: 'The changes have been saved successfully',
-        data: updatedEmployee,
+        data: InstanceEmployee,
       };
     } catch (error) {
       console.log(error.message);
