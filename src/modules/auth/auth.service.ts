@@ -113,6 +113,7 @@ export class AuthService {
       plan: user.plan,
       Owner: user.Owner,
       firstLogin: user.first_login,
+      employeeType: user.employeeType,
     };
 
     const accessToken = this.jwtService.sign(payload, { expiresIn: '45m' });
@@ -147,6 +148,7 @@ export class AuthService {
           plan: user.plan,
           Owner: user.Owner,
           firstLogin: user.first_login,
+          employeeType: user.employeeType,
         },
       },
     };
