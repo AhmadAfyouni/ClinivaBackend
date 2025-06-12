@@ -176,7 +176,7 @@ export class EmployeeService {
       const employeeType =
         'employeeType' in createEmployeeDto
           ? createEmployeeDto.employeeType
-          : 'Staff';
+          : 'Staff Member';
       let role;
       if (employeeType === 'Admin') {
         role = await this.roleModel.findOne({ name: 'Admin' });
