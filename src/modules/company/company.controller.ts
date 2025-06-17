@@ -12,6 +12,7 @@ import {
   UseInterceptors,
   UploadedFile,
   BadRequestException,
+  Request,
 } from '@nestjs/common';
 import { CompanyService } from './company.service';
 import { CreateCompanyDto } from './dto/create-company.dto';
@@ -21,6 +22,7 @@ import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/config/permissions.decorator';
 import { PermissionsEnum } from 'src/config/permission.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { ApiConsumes } from '@nestjs/swagger';
 
 @Controller('companies')
 @UseGuards(PermissionsGuard)
@@ -29,6 +31,7 @@ export class CompanyController {
 
   @Post()
   @Permissions(PermissionsEnum.ADMIN)
+  @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('logo'))
   async create(
     @Body() createCompanyDto: CreateCompanyDto,

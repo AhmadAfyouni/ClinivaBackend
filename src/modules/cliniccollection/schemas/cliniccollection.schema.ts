@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { WorkingHours } from 'src/common/utils/helper';
 import { GeneralInfo } from 'src/common/utils/helper.dto';
 
 export type ComplexDocument = Complex & Document;
@@ -44,6 +45,9 @@ export class Complex {
 
   @Prop({ type: Boolean, default: false })
   deleted: boolean;
+
+  @Prop({ type: [WorkingHours], default: [] })
+  WorkingHours?: WorkingHours[];
 }
 
 export const ClinicCollectionSchema = SchemaFactory.createForClass(Complex);

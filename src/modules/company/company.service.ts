@@ -30,8 +30,8 @@ export class CompanyService {
   ): Promise<ApiGetResponse<Company>> {
     try {
       const companyData = {
-        nameTrade: createCompanyDto.nameTrade,
-        nameLegal: createCompanyDto.nameLegal,
+        tradeName: createCompanyDto.tradeName,
+        legalName: createCompanyDto.legalName,
         logo: createCompanyDto.logo,
         generalInfo: createCompanyDto.generalInfo
           ? {

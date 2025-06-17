@@ -9,10 +9,10 @@ export class Company {
   _id: Types.ObjectId;
 
   @Prop({ required: true })
-  nameTrade: string;
+  tradeName: string;
 
   @Prop({ required: true })
-  nameLegal: string;
+  legalName: string;
 
   @Prop({ required: false })
   logo: string;
@@ -30,8 +30,8 @@ export const CompanySchema = SchemaFactory.createForClass(Company);
  * Example JSON for adding a new company:
  *
  * {
- *   "nameTrade": "Al-Noor Medical Center",
- *   "nameLegal": "Al-Noor Medical Services Co. Ltd.",
+ *   "tradeName": "Al-Noor Medical Center",
+ *   "legalName": "Al-Noor Medical Services Co. Ltd.",
  *   "generalInfo": {
  *     "logo": "https://example.com/logo.png",
  *     "yearOfEstablishment": 2010,

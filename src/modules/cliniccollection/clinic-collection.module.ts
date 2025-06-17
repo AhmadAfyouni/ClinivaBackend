@@ -37,6 +37,9 @@ import {
   ],
   controllers: [ClinicCollectionController],
   providers: [ClinicCollectionService],
-  exports: [ClinicCollectionService],
+  exports: [
+    ClinicCollectionService,
+    MongooseModule.forFeature([{ name: Complex.name, schema: ClinicCollectionSchema }])
+  ],
 })
 export class ClinicCollectionModule {}
