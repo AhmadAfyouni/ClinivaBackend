@@ -72,7 +72,7 @@ export class ClinicCollectionController {
     console.log('queryParams', queryParams);
     return this.clinicCollectionService.getAllClinicCollections(
       paginationDto,
-      filters,
+      // filters,
     );
   }
 

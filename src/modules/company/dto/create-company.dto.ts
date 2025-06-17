@@ -17,7 +17,7 @@ export class CreateCompanyDto {
   })
   @IsString()
   @IsNotEmpty()
-  nameTrade: string;
+  tradeName: string;
 
   @ApiProperty({ description: '', required: false })
   logo: string;
@@ -29,7 +29,7 @@ export class CreateCompanyDto {
   })
   @IsString()
   @IsNotEmpty()
-  nameLegal: string;
+  legalName: string;
 
   @ApiPropertyOptional({
     description: 'General information about the company',

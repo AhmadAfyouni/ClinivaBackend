@@ -29,6 +29,10 @@ import { generateUniquePublicId } from 'src/common/utils/id-generator';
 import { saveFileLocally } from 'src/common/utils/upload.util';
 import * as bcrypt from 'bcrypt';
 import { Role, RoleDocument } from '../role/schemas/role.schema';
+import { WorkingHoursBase } from 'src/common/utils/helper.dto';
+import { validateEmployeeWorkingHours } from 'src/common/utils/time-utils';
+import { Clinic, ClinicDocument } from '../clinic/schemas/clinic.schema';
+import { EmailService } from './dto/email.service';
 
 @Injectable()
 export class EmployeeService {
@@ -36,12 +40,211 @@ export class EmployeeService {
     @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
     @InjectModel(Complex.name)
     private clinicCollectionModel: Model<ComplexDocument>,
+    @InjectModel(Clinic.name)
+    private clinicModel: Model<ClinicDocument>,
     @InjectModel(Role.name)
     private roleModel: Model<RoleDocument>,
     @InjectModel(Department.name)
     private departmentModel: Model<DepartmentDocument>,
+    private readonly emailService: EmailService,
     // @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
+
+  private async validateEmployeeWorkingHours(
+    createEmployeeDto: CreateEmployeeDto,
+  ): Promise<void> {
+    interface WorkingHoursDay {
+      day: string;
+      shift1?: { startTime: string; endTime: string };
+      shift2?: { startTime: string; endTime: string };
+    }
+    try {
+      if (
+        !createEmployeeDto.workingHours ||
+        createEmployeeDto.workingHours.length === 0
+      ) {
+        return; // No working hours to validate
+      }
+
+      // Check if employee is assigned to a clinic
+      if (createEmployeeDto.clinicId) {
+        // Get the first clinic (assuming one clinic per employee for simplicity)
+        const clinic = await this.clinicModel
+          .findById(createEmployeeDto.clinicId)
+          .select('WorkingHours departmentId name')
+          .lean()
+          .exec();
+
+        if (clinic) {
+          const clinicWorkingHours = (clinic as any).WorkingHours;
+
+          if (clinicWorkingHours && clinicWorkingHours.length > 0) {
+            // Validate against clinic working hours
+            try {
+              validateEmployeeWorkingHours(
+                createEmployeeDto.workingHours as any,
+                clinicWorkingHours,
+                'clinic',
+              );
+              return; // Validation successful
+            } catch (error) {
+              // Enhance error message with clinic name and working hours
+              const clinicName = (clinic as any).name || 'the clinic';
+              const dayMatch = (error as Error).message.match(/on (\w+)/);
+              const day = dayMatch ? dayMatch[1] : 'the specified day';
+              const clinicDay = clinicWorkingHours.find(
+                (wh: WorkingHoursDay) =>
+                  wh.day.toLowerCase() === day.toLowerCase(),
+              ) as WorkingHoursDay | undefined;
+
+              if (clinicDay) {
+                const shifts: string[] = [];
+                if (clinicDay.shift1?.startTime && clinicDay.shift1?.endTime) {
+                  shifts.push(
+                    `Shift 1: ${clinicDay.shift1.startTime} - ${clinicDay.shift1.endTime}`,
+                  );
+                }
+                if (clinicDay.shift2?.startTime && clinicDay.shift2?.endTime) {
+                  shifts.push(
+                    `Shift 2: ${clinicDay.shift2.startTime} - ${clinicDay.shift2.endTime}`,
+                  );
+                }
+
+                throw new Error(
+                  `${error.message}. ` +
+                    `The clinic "${clinicName}" is only open ${shifts.join(' and ')} on ${day}. ` +
+                    'Please adjust the working hours accordingly.',
+                );
+              }
+              throw error;
+            }
+          }
+
+          // If clinic doesn't have working hours, check the complex
+          if (clinic.departmentId) {
+            const department = await this.departmentModel
+              .findById(clinic.departmentId)
+              .select('clinicCollectionId')
+              .lean()
+              .exec();
+
+            if (department?.clinicCollectionId) {
+              const complex = await this.clinicCollectionModel
+                .findById(department.clinicCollectionId)
+                .select('generalInfo name')
+                .lean()
+                .exec();
+
+              const complexWorkingHours = (complex?.generalInfo as any)
+                ?.workingHours;
+              if (complexWorkingHours?.length > 0) {
+                try {
+                  validateEmployeeWorkingHours(
+                    createEmployeeDto.workingHours as any,
+                    complexWorkingHours,
+                    'complex',
+                  );
+                  return; // Validation successful
+                } catch (error) {
+                  // Enhance error message with complex name and working hours
+                  const complexName = (complex as any)?.name || 'the complex';
+                  const dayMatch = (error as Error).message.match(/on (\w+)/);
+                  const day = dayMatch ? dayMatch[1] : 'the specified day';
+                  const complexDay = complexWorkingHours.find(
+                    (wh: WorkingHoursDay) =>
+                      wh.day.toLowerCase() === day.toLowerCase(),
+                  ) as WorkingHoursDay | undefined;
+
+                  if (complexDay) {
+                    const shifts: string[] = [];
+                    if (
+                      complexDay.shift1?.startTime &&
+                      complexDay.shift1?.endTime
+                    ) {
+                      shifts.push(
+                        `Shift 1: ${complexDay.shift1.startTime} - ${complexDay.shift1.endTime}`,
+                      );
+                    }
+                    if (
+                      complexDay.shift2?.startTime &&
+                      complexDay.shift2?.endTime
+                    ) {
+                      shifts.push(
+                        `Shift 2: ${complexDay.shift2.startTime} - ${complexDay.shift2.endTime}`,
+                      );
+                    }
+
+                    throw new Error(
+                      `${error.message}. ` +
+                        `The complex "${complexName}" is only open ${shifts.join(' and ')} on ${day}. ` +
+                        'Please adjust the working hours accordingly.',
+                    );
+                  }
+                  throw error;
+                }
+              }
+            }
+          }
+        }
+      }
+
+      // If employee is directly assigned to a complex
+      if (createEmployeeDto.complexId) {
+        const complex = await this.clinicCollectionModel
+          .findById(createEmployeeDto.complexId)
+          .select('generalInfo name')
+          .lean()
+          .exec();
+
+        const complexWorkingHours = (complex?.generalInfo as any)?.workingHours;
+        if (complexWorkingHours?.length > 0) {
+          try {
+            validateEmployeeWorkingHours(
+              createEmployeeDto.workingHours as any,
+              complexWorkingHours,
+              'complex',
+            );
+            return; // Validation successful
+          } catch (error) {
+            // Enhance error message with complex name and working hours
+            const complexName = (complex as any)?.name || 'the complex';
+            const dayMatch = (error as Error).message.match(/on (\w+)/);
+            const day = dayMatch ? dayMatch[1] : 'the specified day';
+            const complexDay = complexWorkingHours.find(
+              (wh: WorkingHoursDay) =>
+                wh.day.toLowerCase() === day.toLowerCase(),
+            ) as WorkingHoursDay | undefined;
+
+            if (complexDay) {
+              const shifts: string[] = [];
+              if (complexDay.shift1?.startTime && complexDay.shift1?.endTime) {
+                shifts.push(
+                  `Shift 1: ${complexDay.shift1.startTime} - ${complexDay.shift1.endTime}`,
+                );
+              }
+              if (complexDay.shift2?.startTime && complexDay.shift2?.endTime) {
+                shifts.push(
+                  `Shift 2: ${complexDay.shift2.startTime} - ${complexDay.shift2.endTime}`,
+                );
+              }
+
+              throw new Error(
+                `${error.message}. ` +
+                  `The complex "${complexName}" is only open ${shifts.join(' and ')} on ${day}. ` +
+                  'Please adjust the working hours accordingly.',
+              );
+            }
+            throw error;
+          }
+        }
+      }
+
+      // If we reach here, no validation was performed (no parent entity or no working hours defined)
+      // This is acceptable as working hours are optional at the parent level
+    } catch (error) {
+      throw new BadRequestException(`Invalid working hours: ${error.message}`);
+    }
+  }
 
   async createEmployee(
     createEmployeeDto: CreateEmployeeDto,
@@ -52,25 +255,12 @@ export class EmployeeService {
     employmentContract?: Express.Multer.File,
   ): Promise<ApiGetResponse<Employee>> {
     try {
-      // Get the user to check employeeType
-      // const user = await this.userModel.findById(createEmployeeDto.userId);
-      // if (!user) {
-      //   throw new NotFoundException('User not found');
-      // }
-
-      // Check if the employee needs to be assigned to a company, clinic, etc.
-      // if (
-      //   !createEmployeeDto.companyId &&
-      //   !createEmployeeDto.clinicCollectionId &&
-      //   !createEmployeeDto.clinics?.length &&
-      //   !createEmployeeDto.departmentId &&
-      //   createEmployeeDto.employeeType !== 'PIC' &&
-      //   createEmployeeDto.employeeType !== 'Admin'
-      // ) {
-      //   throw new BadRequestException(
-      //     'The staff has not been assigned to any of these: Company, Clinic Collection, clinics, department',
-      //   );
-      // }
+      if (
+        createEmployeeDto.workingHours &&
+        createEmployeeDto.workingHours.length > 0
+      ) {
+        await this.validateEmployeeWorkingHours(createEmployeeDto);
+      }
       const requiredFields = ['name', 'password', 'email', 'employeeType'];
       const missingFields = requiredFields.filter(
         (field) => !createEmployeeDto[field],
@@ -137,6 +327,17 @@ export class EmployeeService {
         employmentContractSize,
         certificationsSize,
       });
+      if (createEmployeeDto.email) {
+        console.log(createEmployeeDto.email);
+        this.emailService.validateEmailOrThrow(createEmployeeDto.email);
+        await this.emailService.sendEmail(
+          // Add await here
+          createEmployeeDto.email,
+          'Welcome to Cliniva',
+          'Thank you for signing up to Cliniva!',
+        );
+      }
+
       const savedEmployee = await newEmployee.save();
       return {
         success: true,
@@ -458,17 +659,33 @@ export class EmployeeService {
     },
     userId: string,
   ): Promise<ApiGetResponse<Employee>> {
+    // If working hours are being updated, validate them
+    if (updateEmployeeDto.workingHours) {
+      // Create a temporary DTO with the update data
+      const tempDto = new CreateEmployeeDto();
+      Object.assign(tempDto, updateEmployeeDto);
+
+      // If clinics or clinicCollectionId are not being updated, get them from the existing employee
+      if (!tempDto.clinicIds?.length && !tempDto.complexId) {
+        const existingEmployee = await this.employeeModel
+          .findById(id)
+          .lean()
+          .exec();
+        if (existingEmployee) {
+          tempDto.clinicIds = (existingEmployee as any).clinics || [];
+          tempDto.complexId = (existingEmployee as any).complexId;
+        }
+      }
+
+      await this.validateEmployeeWorkingHours(tempDto);
+    }
     try {
-      console.log('userId', userId);
-      console.log('updateEmployeeDto', updateEmployeeDto);
       let InstanceEmployee = await this.employeeModel
         .findByIdAndUpdate(id, { deleted: false })
         .exec();
 
       if (!InstanceEmployee || InstanceEmployee.deleted)
         throw new NotFoundException('Employee not found or has been deleted');
-      console.log('step 1', updateEmployeeDto);
-      console.log('files', files);
       if (
         'contactInfos' in updateEmployeeDto &&
         typeof updateEmployeeDto.contactInfos === 'string'
@@ -477,7 +694,6 @@ export class EmployeeService {
           updateEmployeeDto.contactInfos,
         );
       }
-      console.log('step 2');
       let employmentContractSize = 0;
       let certificationsSize = 0;
       let CVSize = 0;
@@ -550,7 +766,6 @@ export class EmployeeService {
           updateEmployeeDto.workingHours,
         );
       }
-      console.log('step 3');
       //Todo: check if the user has appointments
 
       if (id === userId && 'isActive' in updateEmployeeDto) {
@@ -579,9 +794,7 @@ export class EmployeeService {
       InstanceEmployee.set('CVSize', CVSize);
       InstanceEmployee.set('employmentContractSize', employmentContractSize);
       InstanceEmployee.set('workPermitSize', workPermitSize);
-      console.log('step 4');
       await InstanceEmployee.save();
-      console.log('step 5');
       return {
         success: true,
         message: 'The changes have been saved successfully',
@@ -709,8 +922,17 @@ export class EmployeeService {
     if (!employee) {
       throw new NotFoundException('user not found');
     }
-    const randomPassword = '12345678';
-    //TODO send to email of employee the new password !?
+    const randomPassword = await generateUniquePublicId(
+      this.employeeModel,
+      employee.name,
+      'new',
+    );
+    this.emailService.sendEmail(
+      employee.email,
+      'reset cliniva password account',
+      'Your password is: ' + randomPassword,
+      'Your password is <strong><u>' + randomPassword + '</u></strong>',
+    );
     employee.password = await bcrypt.hash(randomPassword, 10);
     await employee.save();
     return {

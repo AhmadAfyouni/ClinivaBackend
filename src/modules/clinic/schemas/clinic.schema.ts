@@ -2,7 +2,7 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
 import { ContactInfo, WorkingHours } from '../../../common/utils/helper';
 import { ApiProperty } from '@nestjs/swagger';
-import { BankAccountDTO, HolidayDTO } from 'src/common/utils';
+import { BankAccountDTO, GeneralInfo, HolidayDTO } from 'src/common/utils';
 
 export type ClinicDocument = Clinic & Document & { _patientCount?: number };
 
@@ -19,8 +19,11 @@ export class Clinic {
   @Prop()
   logo?: string;
 
-  @Prop({ type: [ContactInfo], default: [] })
-  contactInfos: ContactInfo[];
+  @Prop({ type: GeneralInfo })
+  generalInfo: GeneralInfo;
+
+  @Prop({ required: true, type: [Types.ObjectId], ref: 'Service' })
+  services: Types.ObjectId[];
 
   @Prop({ type: [HolidayDTO], default: [] })
   holidays?: HolidayDTO[];
@@ -31,17 +34,8 @@ export class Clinic {
   @Prop({ type: [WorkingHours], default: [] })
   WorkingHours?: WorkingHours[];
 
-  @Prop({ type: [BankAccountDTO], default: [] })
-  bankAccount: BankAccountDTO[];
-
-  @Prop({ type: Object })
-  locationGoogl: { x: number; y: number };
-
   @Prop({ type: Types.ObjectId, ref: 'Department', default: null })
   departmentId?: Types.ObjectId;
-
-  @Prop({ type: [Types.ObjectId], ref: 'Specialization', required: true })
-  specializations: Types.ObjectId[];
 
   @ApiProperty({
     description: 'Department PIC ID',
@@ -53,6 +47,18 @@ export class Clinic {
 
   @Prop({ unique: true, required: true })
   publicId: string;
+
+  @Prop({ required: false })
+  Description?: string;
+
+  @Prop({ required: true })
+  PatientCapacity: number;
+
+  @Prop({ required: true })
+  DoctorsCapacity: number;
+
+  @Prop({ required: true })
+  StaffMembersCapacity: number;
 
   @Prop({ type: Boolean, default: false })
   deleted: boolean;

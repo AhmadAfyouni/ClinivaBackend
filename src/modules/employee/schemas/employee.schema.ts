@@ -72,6 +72,7 @@ export class Employee {
       nation: { type: String, required: false },
       emergencyContactName: { type: String, required: false },
       emergencyContactPhone: { type: String, required: false },
+      emergencyContactRelationship: { type: String, required: false },
     },
     required: false,
     _id: false,
@@ -122,7 +123,22 @@ export class Employee {
   @Prop({ default: 0 })
   evaluation: number;
 
-  @Prop({ type: [String], default: [] })
+  @Prop({
+    type: [String],
+    default: [],
+    enum: [
+      'Arabic',
+      'English',
+      'French',
+      'German',
+      'Spanish',
+      'Italian',
+      'Russian',
+      'Chinese',
+      'Japanese',
+      'Korean',
+    ],
+  })
   Languages?: string[];
 
   @Prop({

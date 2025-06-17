@@ -43,23 +43,20 @@ export class RoleService {
   async getAllRoles(paginationDto: PaginationAndFilterDto, filters: any) {
     try {
       let { page, limit, allData, sortBy, order } = paginationDto;
-
+      console.log('step1');
       page = Number(page) || 1;
       limit = Number(limit) || 10;
+      console.log('step2');
 
-      const sortField = sortBy ?? 'id';
-      const sort: SortType = {
-        [sortField]: order === 'asc' ? 1 : -1,
-      };
-
+      console.log('step3');
       return paginate({
         model: this.roleModel,
         populate: [],
         page,
         limit,
-        allData,
+        allData: true,
         filter: filters,
-        sort: sort,
+        sort: {},
       });
     } catch (error) {
       console.log(error);

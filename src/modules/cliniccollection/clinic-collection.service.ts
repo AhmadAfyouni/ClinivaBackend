@@ -11,7 +11,12 @@ import { Complex, ComplexDocument } from './schemas/cliniccollection.schema';
 import { UpdateClinicCollectionDto } from './dto/update-clinic-collection.dto';
 import { CreateClinicCollectionDto } from './dto/create-clinic-collection.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { ApiGetResponse, paginate, SortType } from 'src/common/utils/paginate';
+import {
+  ApiGetResponse,
+  ApiListResponse,
+  paginate,
+  SortType,
+} from 'src/common/utils/paginate';
 import {
   Employee,
   EmployeeDocument,
@@ -92,7 +97,9 @@ export class ClinicCollectionService {
       );
       let relativeFilePath = '';
       if (file) {
-        relativeFilePath = file ? saveFileLocally(file, 'complex/images') : '';
+        relativeFilePath = file
+          ? saveFileLocally(file, 'complex/' + publicId + '/images')
+          : '';
         createClinicCollectionDto.logo = relativeFilePath;
       }
       const newClinicCollection = new this.clinicCollectionModel({
@@ -115,64 +122,41 @@ export class ClinicCollectionService {
     }
   }
 
-  async getAllClinicCollections(
-    paginationDto: PaginationAndFilterDto,
-    filters: any,
-  ): Promise<ApiGetResponse<Complex[]>> {
+  async getAllClinicCollections(paginationDto: PaginationAndFilterDto) {
     try {
-      let { page, limit, allData, sortBy, order } = paginationDto;
-      page = Number(page) || 1;
-      limit = Number(limit) || 10;
-
-      order = order || 'asc';
+      const {
+        page,
+        limit,
+        allData,
+        sortBy,
+        order,
+        search,
+        fields,
+        filter_fields,
+      } = paginationDto;
+      const query = {};
       const sortField: string = sortBy ?? 'id';
       const sort: SortType = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
-
-      const searchConditions: any[] = [];
-
-      if (filters.search) {
-        const regex = new RegExp(filters.search, 'i'); // غير حساس لحالة الحروف
-
-        searchConditions.push(
-          { name: regex },
-
-          { address: regex },
-        );
+      if (search) {
+        query['$or'] = ['legalName'].map((field) => ({
+          [field]: { $regex: search, $options: 'i' },
+        }));
       }
 
-      delete filters.search;
-
-      const finalFilter = {
-        ...filters,
-        ...(searchConditions.length > 0 ? { $or: searchConditions } : {}),
-      };
-      finalFilter.deleted = { $ne: true };
-
-      const result = await paginate({
+      return paginate({
         model: this.clinicCollectionModel,
         populate: ['companyId', 'PIC'],
-        page,
-        limit,
-        allData,
-        filter: finalFilter,
+        page: page,
+        limit: limit,
+        allData: allData,
+        filter: filter_fields ? JSON.parse(filter_fields) : {},
+        search: search,
+        searchFields: ['legalName', 'tradeName', 'policies', 'publicId'],
+        message: 'Request successful',
         sort: sort,
       });
-
-      // employeeCount
-      // departmentCount
-      if (result.data) {
-        const clinicCollections = result.data;
-        const updatedClinicCollections = await Promise.all(
-          clinicCollections.map((clinicCollection) =>
-            this.getClinicCounts(clinicCollection),
-          ),
-        );
-        result.data = updatedClinicCollections;
-      }
-
-      return result;
     } catch (error) {
       console.log(error.message);
       if (error instanceof HttpException) throw error;

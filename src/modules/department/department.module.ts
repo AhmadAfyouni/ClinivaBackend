@@ -24,6 +24,7 @@ import { forwardRef } from '@nestjs/common';
 import { EmployeeService } from '../employee/employee.service';
 import { RoleModule } from '../role/role.module';
 import { EmployeeModule } from '../employee/employee.module';
+import { EmailModule } from '../employee/dto/email.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -39,9 +40,10 @@ import { EmployeeModule } from '../employee/employee.module';
     forwardRef(() => ClinicCollectionModule),
     forwardRef(() => EmployeeModule),
     forwardRef(() => RoleModule),
+    EmailModule,
   ],
   controllers: [DepartmentController],
-  providers: [DepartmentService, EmployeeService],
+  providers: [DepartmentService],
   exports: [DepartmentService],
 })
 export class DepartmentModule {}
