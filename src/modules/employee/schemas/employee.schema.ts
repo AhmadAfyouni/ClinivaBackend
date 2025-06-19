@@ -56,7 +56,7 @@ export class Employee {
 
   @Prop({
     required: [true, 'Employee type is required'],
-    enum: ['Staff Member', 'Doctor'],
+    enum: ['Staff Member', 'Doctor', 'Admin'],
   })
   employeeType: string;
 
