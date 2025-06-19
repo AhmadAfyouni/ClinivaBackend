@@ -37,7 +37,7 @@ export class Complex {
   @Prop({ type: Types.ObjectId, ref: 'Company', default: null })
   companyId?: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'Employee', required: false })
   PIC: Types.ObjectId;
 
   @Prop({ unique: true, required: true })
