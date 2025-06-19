@@ -40,9 +40,9 @@ export class Clinic {
   @ApiProperty({
     description: 'Department PIC ID',
     example: '60f7c7b84f1a2c001c8b4567',
-    required: true,
+    required: false,
   })
-  @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'Employee', required: false })
   PIC: Types.ObjectId;
 
   @Prop({ unique: true, required: true })
