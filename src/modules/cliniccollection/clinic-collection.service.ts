@@ -25,6 +25,7 @@ import {
   Department,
   DepartmentDocument,
 } from '../department/schemas/department.schema';
+import { DepartmentService } from '../department/department.service';
 import { Clinic, ClinicDocument } from '../clinic/schemas/clinic.schema';
 import {
   Appointment,
@@ -45,6 +46,7 @@ export class ClinicCollectionService {
     @InjectModel(Clinic.name) private clinicModel: Model<ClinicDocument>,
     @InjectModel(Appointment.name)
     private appointmentModel: Model<AppointmentDocument>,
+    private readonly departmentService: DepartmentService,
   ) {}
 
   private async checkUniqueName(name: string, company) {
@@ -62,6 +64,7 @@ export class ClinicCollectionService {
       );
     }
   }
+
   async createClinicCollection(
     createClinicCollectionDto: CreateClinicCollectionDto,
     userId: string,
@@ -107,7 +110,21 @@ export class ClinicCollectionService {
         publicId,
         plan: employee?.plan,
       });
+      if (!createClinicCollectionDto.department_name) {
+        throw new BadRequestException('Department name is required');
+      }
+
       const savedClinicCollection = await newClinicCollection.save();
+      const department = await this.departmentService.createDepartment(
+        {
+          clinicCollectionId: savedClinicCollection.id,
+          name: createClinicCollectionDto.department_name,
+          description: createClinicCollectionDto.department_description || '',
+        },
+        userId,
+      );
+      console.log(savedClinicCollection);
+      console.log(department);
       return {
         success: true,
         message: 'Medical complex Added successfully',

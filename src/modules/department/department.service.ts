@@ -8,7 +8,7 @@ import { Model, Types } from 'mongoose';
 import { Department, DepartmentDocument } from './schemas/department.schema';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
-import { ApiGetResponse, paginate } from 'src/common/utils/paginate';
+import { ApiGetResponse, paginate, SortType } from 'src/common/utils/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { ClinicDocument, Clinic } from '../clinic/schemas/clinic.schema';
 import {
@@ -101,23 +101,14 @@ export class DepartmentService {
     clinicCollectionId: string,
   ) {
     try {
-      const {
-        page,
-        limit,
-        allData,
-        sortBy,
-        order,
-        search,
-        fields,
-        filter_fields,
-      } = paginationDto;
-
-      const query: any = {
-        // clinicCollectionId: new Types.ObjectId(clinicCollectionId),
-      };
-
-      const sortField: string = sortBy ?? 'createdAt';
-      const sort: Record<string, 1 | -1> = {
+      const { page, limit, allData, search, sortBy, order } = paginationDto;
+      console.log(clinicCollectionId);
+      const query = {};
+      // const query: any = {
+      //   clinicCollectionId: new Types.ObjectId(clinicCollectionId),
+      // };
+      const sortField: string = sortBy ?? 'id';
+      const sort: SortType = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
 
@@ -126,7 +117,6 @@ export class DepartmentService {
           [field]: { $regex: search, $options: 'i' },
         }));
 
-        // Also search in clinic collection names
         const clinics = await this.cliniccollectionModel
           .find({ name: { $regex: search, $options: 'i' } })
           .select('_id');
@@ -137,18 +127,6 @@ export class DepartmentService {
           });
         }
       }
-
-      // Apply any additional filters from filter_fields
-      if (filter_fields) {
-        Object.entries(filter_fields).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== '') {
-            query[key] = value;
-          }
-        });
-      }
-
-      // Get only requested fields if specified
-      const selectFields = fields ? fields.split(',').join(' ') : '';
 
       const result = await paginate({
         model: this.departmentModel,
