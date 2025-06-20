@@ -15,6 +15,7 @@ import {
   Department,
   DepartmentSchema,
 } from '../department/schemas/department.schema';
+import { DepartmentModule } from '../department/department.module';
 import { Clinic, ClinicSchema } from '../clinic/schemas/clinic.schema';
 import {
   Appointment,
@@ -34,6 +35,7 @@ import {
     UserModule,
     forwardRef(() => EmployeeModule),
     forwardRef(() => CompanyModule), // Use forwardRef for EmployeeModule
+    DepartmentModule, // Add DepartmentModule to resolve dependency injection
   ],
   controllers: [ClinicCollectionController],
   providers: [ClinicCollectionService],

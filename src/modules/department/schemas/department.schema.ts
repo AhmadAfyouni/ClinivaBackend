@@ -33,7 +33,7 @@ export class Department {
   @Prop({
     type: Types.ObjectId,
     ref: 'Complex',
-    default: null,
+    required: true,
   })
   clinicCollectionId: Types.ObjectId;
 

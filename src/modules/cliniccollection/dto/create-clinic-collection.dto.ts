@@ -13,6 +13,24 @@ import { GeneralInfo } from 'src/common/utils/helper.dto';
 
 export class CreateClinicCollectionDto {
   @ApiProperty({
+    description: 'Department name of the complex',
+    example: 'Saudi Clinics Group',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  department_name: string;
+
+  @ApiProperty({
+    description: 'Department description of the complex',
+    example: 'Saudi Clinics Group',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  department_description: string;
+
+  @ApiProperty({
     description: 'Indicates if the complex is active',
     example: true,
     default: true,
