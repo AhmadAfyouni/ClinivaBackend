@@ -4,4 +4,6 @@ import { CreateSpecializationDto } from './create-specialization.dto';
 
 export class UpdateSpecializationDto extends PartialType(
   CreateSpecializationDto,
-) {}
+) {
+  isActive?: boolean;
+}
