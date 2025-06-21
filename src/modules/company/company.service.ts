@@ -111,7 +111,7 @@ export class CompanyService {
 
       return paginate({
         model: this.companyModel,
-        populate: [],
+        populate: [{ path: 'generalInfo' }],
         page,
         limit,
         allData,

@@ -42,9 +42,13 @@ import {
   EmployeeDocument,
 } from '../employee/schemas/employee.schema';
 import { Service } from '../service/schemas/service.schema';
-import { saveFileLocally } from 'src/common/utils/upload.util';
+import {
+  deleteFileLocally,
+  saveFileLocally,
+} from 'src/common/utils/upload.util';
 import { validateClinicWorkingHours } from 'src/common/utils/time-utils';
 import { Complex } from '../cliniccollection/schemas/cliniccollection.schema';
+import { removeFileFromLocal } from 'src/common/utils/file.util';
 
 @Injectable()
 export class ClinicService {
@@ -395,6 +399,7 @@ export class ClinicService {
   async updateClinic(
     id: string,
     updateClinicDto: UpdateClinicDto,
+    file: Express.Multer.File,
   ): Promise<ApiGetResponse<Clinic>> {
     try {
       const updatedClinic = await this.clinicModel
@@ -402,6 +407,19 @@ export class ClinicService {
         .populate(['departmentId']);
       if (!updatedClinic || updatedClinic.deleted)
         throw new NotFoundException('Clinic not found or has been deleted');
+
+      let relativeFilePath = '';
+      if (file) {
+        // removeFileFromLocal(updatedClinic.logo || '');
+        // deleteFileLocally(updatedClinic.logo || '');
+        relativeFilePath = file
+          ? saveFileLocally(
+              file,
+              'clinic/' + updatedClinic.publicId + '/images',
+            )
+          : '';
+        updatedClinic.logo = relativeFilePath;
+      }
       return {
         success: true,
         message: 'Clinic update successfully',

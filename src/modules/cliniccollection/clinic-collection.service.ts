@@ -303,10 +303,11 @@ export class ClinicCollectionService {
         );
       }
       if (file) {
-        removeFileFromLocal(updateClinicCollectionDto.logo ?? '');
+        // removeFileFromLocal(updateClinicCollectionDto.logo ?? '');
+
         updateClinicCollectionDto.logo = saveFileLocally(
           file,
-          'complex/images',
+          'complex/' + updateClinicCollectionDto.publicId + '/images',
         );
       }
       const updatedClinicCollection = await this.clinicCollectionModel
