@@ -20,6 +20,9 @@ import { UserSchema, User } from '../user/schemas/user.schema';
 import { EmployeeModule } from '../employee/employee.module';
 import { ServiceModule } from '../service/service.module';
 import { Service, ServiceSchema } from '../service/schemas/service.schema';
+import { ClinicCollectionModule } from '../cliniccollection/clinic-collection.module';
+import { Department, DepartmentSchema } from '../department/schemas/department.schema';
+import { Complex, ClinicCollectionSchema } from '../cliniccollection/schemas/cliniccollection.schema';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -30,12 +33,15 @@ import { Service, ServiceSchema } from '../service/schemas/service.schema';
       { name: Employee.name, schema: EmployeeSchema },
       { name: User.name, schema: UserSchema },
       { name: Service.name, schema: ServiceSchema },
+      { name: Department.name, schema: DepartmentSchema },
+      { name: Complex.name, schema: ClinicCollectionSchema },
     ]),
     forwardRef(() => MedicalRecordModule),
     forwardRef(() => SpecializationModule),
     forwardRef(() => UserModule),
     forwardRef(() => EmployeeModule),
     forwardRef(() => ServiceModule),
+    forwardRef(() => ClinicCollectionModule),
   ],
 
   controllers: [ClinicController],

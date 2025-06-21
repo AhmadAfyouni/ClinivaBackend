@@ -14,7 +14,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Types } from 'mongoose';
-import { MedicationDTO } from 'src/common/utlis/helper.dto';
+import { MedicationDTO } from 'src/common/utils/helper.dto';
 
 export class CreateMedicalRecordDto {
   @ApiProperty({

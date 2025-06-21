@@ -8,7 +8,7 @@ import { Model } from 'mongoose';
 import { Role, RoleDocument } from './schemas/role.schema';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { UpdateRoleDto } from './dto/update-role.dto';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, paginate, SortType } from 'src/common/utils/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 
 @Injectable()
@@ -43,16 +43,21 @@ export class RoleService {
   async getAllRoles(paginationDto: PaginationAndFilterDto, filters: any) {
     try {
       let { page, limit, allData, sortBy, order } = paginationDto;
-
+      console.log('step1');
       page = Number(page) || 1;
       limit = Number(limit) || 10;
+      console.log('step2');
 
-      const sortField = sortBy ?? 'id';
-      const sort: Record<string, number> = {
-        [sortField]: order === 'asc' ? 1 : -1,
-      };
-
-      return paginate(this.roleModel, [], page, limit, allData, filters, sort);
+      console.log('step3');
+      return paginate({
+        model: this.roleModel,
+        populate: [],
+        page,
+        limit,
+        allData: true,
+        filter: filters,
+        sort: {},
+      });
     } catch (error) {
       console.log(error);
       throw new BadRequestException(error.message);

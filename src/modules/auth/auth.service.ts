@@ -1,12 +1,17 @@
-import { Injectable, UnauthorizedException, Req } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  Req,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { UserService } from '../user/user.service';
-import { User } from '../user/schemas/user.schema';
+import { EmployeeService } from '../employee/employee.service';
+import { Employee } from '../employee/schemas/employee.schema';
 import { Role, RoleDocument } from '../role/schemas/role.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { ApiGetResponse } from 'src/common/utlis/paginate';
+import { ApiGetResponse } from 'src/common/utils/paginate';
 import { PermissionsEnum } from 'src/config/permission.enum';
 import {
   SystemLogService,
@@ -18,40 +23,52 @@ import { Request } from 'express'; // Added import for Request
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly userService: UserService,
+    private readonly employeeService: EmployeeService,
     private readonly jwtService: JwtService,
     @InjectModel(Role.name) private roleModel: Model<RoleDocument>,
-    private readonly systemLogService: SystemLogService, // Injected SystemLogService
+    private readonly systemLogService: SystemLogService,
   ) {}
 
   /**
-   * Validates a user by email and password
+   * Validates an employee by email or username and password
    */
   async validateUser(
     identifier: string,
     password: string,
-  ): Promise<User | null> {
+  ): Promise<Employee | null> {
+
     try {
-      // Try to find user by either email or username
-      const user = await this.userService.getUserByIdentifier(identifier);
+      // Try to find employee by either email or name
+      const employee =
+        await this.employeeService.getUserByIdentifier(identifier);
 
-      if (!user.isActive) {
-        throw new UnauthorizedException('User account is inactive.');
+      if (!employee.isActive) {
+        throw new BadRequestException(
+          'Your account is currently inactive. Please contact the system administrator for assistance.',
+        );
       }
 
-      if (user.deleted) {
-        throw new UnauthorizedException('User account has been deleted.');
+      if (employee.deleted) {
+        throw new BadRequestException(
+          'Your account has been deleted. Please contact the system administrator for assistance.',
+        );
       }
 
-      const isPasswordValid = await bcrypt.compare(password, user.password);
+      const isPasswordValid = await bcrypt.compare(password, employee.password);
       if (!isPasswordValid) {
-        throw new UnauthorizedException('Invalid email/username or password');
+        throw new BadRequestException(
+          'Incorrect Username or password. Please try again',
+        );
       }
 
-      return user;
+      return employee;
     } catch (error) {
       // If user is not found or any other error occurs, throw invalid credentials
-      throw new UnauthorizedException('Invalid email/username or password');
+      console.log('Error', error.message);
+
+      throw new BadRequestException(
+        'Incorrect Username or password. Please try again',
+      );
     }
   }
 
@@ -71,12 +88,11 @@ export class AuthService {
       user: any;
     };
   }> {
-    const jwtExpiration = process.env.JWT_EXPIRATION;
-    const jwtRefreshExpiration = process.env.JWT_REFRESH_EXPIRATION;
+
     const user = await this.validateUser(email, password);
 
     if (!user || !user._id) {
-      throw new UnauthorizedException('Invalid user');
+      throw new BadRequestException('Invalid user');
     }
 
     // Get all permissions from user's roles
@@ -96,6 +112,9 @@ export class AuthService {
       email: user.email,
       permissions: uniquePermissions,
       plan: user.plan,
+      Owner: user.Owner,
+      firstLogin: user.first_login,
+      employeeType: user.employeeType,
     };
 
     const accessToken = this.jwtService.sign(payload, {
@@ -121,7 +140,7 @@ export class AuthService {
 
     return {
       success: true,
-      message: 'user retrieved successfully',
+      message: 'Logged in successfully',
       data: {
         accessToken,
         refreshToken,
@@ -132,6 +151,9 @@ export class AuthService {
           roles: roles.map((r) => r.name),
           permissions: uniquePermissions,
           plan: user.plan,
+          Owner: user.Owner,
+          firstLogin: user.first_login,
+          employeeType: user.employeeType,
         },
       },
     };
@@ -146,7 +168,9 @@ export class AuthService {
     try {
       const payload = this.jwtService.verify(refreshToken);
 
-      const userResponse = await this.userService.getUserById(payload.sub);
+      const userResponse = await this.employeeService.getEmployeeById(
+        payload.sub,
+      );
       const user = userResponse.data;
       if (!user || Array.isArray(user))
         throw new UnauthorizedException('User not found');
@@ -163,7 +187,7 @@ export class AuthService {
 
       return {
         success: true,
-        message: 'user retrieved successfully',
+        message: 'Login successful',
         data: {
           accessToken: this.jwtService.sign(newPayload, {
             expiresIn: process.env.JWT_EXPIRATION,

@@ -10,20 +10,8 @@ export class Specialization {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true })
+  @Prop({ required: false, default: 'Description' })
   description: string;
-
-  @Prop({ required: true, type: [String] })
-  requiredEquipment: string[];
-
-  @Prop({ required: true, type: [String] })
-  requiredStaff: string[];
-
-  @Prop({ required: true, type: [String] })
-  medicalProcedures: string[];
-
-  @Prop({ required: true })
-  certificationRequirements: string;
 
   @Prop({ required: true, default: true })
   isActive: boolean;

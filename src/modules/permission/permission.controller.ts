@@ -1,6 +1,6 @@
 import { Controller, Get } from '@nestjs/common';
 import { PermissionService } from './permission.service';
-import { ApiListResponse } from '../../common/utlis/paginate'; // Added import
+import { ApiListResponse } from '../../common/utils/paginate'; // Added import
 
 @Controller('permissions')
 export class PermissionController {

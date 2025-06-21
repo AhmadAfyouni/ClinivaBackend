@@ -1,16 +1,8 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
-import {
-  BankAccount,
-  CashBox,
-  CommercialRecord,
-  ContactInfo,
-  Holiday,
-  InsuranceCompany,
-  OnlinePaymentMethod,
-  WorkingHours,
-} from '../../../common/utlis/helper';
+import { ContactInfo, WorkingHours } from '../../../common/utils/helper';
 import { ApiProperty } from '@nestjs/swagger';
+import { BankAccountDTO, GeneralInfo, HolidayDTO } from 'src/common/utils';
 
 export type ClinicDocument = Clinic & Document & { _patientCount?: number };
 
@@ -25,28 +17,16 @@ export class Clinic {
   AverageDurationOfVisit: number;
 
   @Prop()
-  overview?: string;
-
-  @Prop({ type: Date })
-  yearOfEstablishment?: Date;
-
-  @Prop()
-  address: string;
-
-  @Prop()
   logo?: string;
 
-  @Prop()
-  vision?: string;
+  @Prop({ type: GeneralInfo })
+  generalInfo: GeneralInfo;
 
-  @Prop()
-  goals?: string;
+  @Prop({ required: true, type: [Types.ObjectId], ref: 'Service' })
+  services: Types.ObjectId[];
 
-  @Prop({ type: [ContactInfo], default: [] })
-  contactInfos: ContactInfo[];
-
-  @Prop({ type: [Holiday], default: [] })
-  holidays?: Holiday[];
+  @Prop({ type: [HolidayDTO], default: [] })
+  holidays?: HolidayDTO[];
 
   @Prop({ required: true })
   name: string;
@@ -54,39 +34,31 @@ export class Clinic {
   @Prop({ type: [WorkingHours], default: [] })
   WorkingHours?: WorkingHours[];
 
-  @Prop({ type: [BankAccount], default: [] })
-  bankAccount: BankAccount[];
-
-  @Prop({ type: [InsuranceCompany], default: [] })
-  insuranceCompany: InsuranceCompany[];
-
-  @Prop({ type: [CashBox], default: [] })
-  cashBoxes: CashBox[];
-
-  @Prop({ type: [OnlinePaymentMethod], default: [] })
-  onlinePaymentMethods: OnlinePaymentMethod[];
-
-  @Prop({ type: CommercialRecord })
-  commercialRecord: CommercialRecord;
-  @Prop({ type: Object })
-  locationGoogl: { x: number; y: number };
-
   @Prop({ type: Types.ObjectId, ref: 'Department', default: null })
   departmentId?: Types.ObjectId;
-
-  @Prop({ type: [Types.ObjectId], ref: 'Specialization', required: true })
-  specializations: Types.ObjectId[];
 
   @ApiProperty({
     description: 'Department PIC ID',
     example: '60f7c7b84f1a2c001c8b4567',
-    required: true,
+    required: false,
   })
-  @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
+  @Prop({ type: Types.ObjectId, ref: 'Employee', required: false })
   PIC: Types.ObjectId;
 
   @Prop({ unique: true, required: true })
   publicId: string;
+
+  @Prop({ required: false })
+  Description?: string;
+
+  @Prop({ required: true })
+  PatientCapacity: number;
+
+  @Prop({ required: true })
+  DoctorsCapacity: number;
+
+  @Prop({ required: true })
+  StaffMembersCapacity: number;
 
   @Prop({ type: Boolean, default: false })
   deleted: boolean;

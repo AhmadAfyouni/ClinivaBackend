@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PermissionsEnum } from '../../config/permission.enum';
-import { ApiListResponse } from '../../common/utlis/paginate';
+import { ApiListResponse } from '../../common/utils/paginate';
 
 @Injectable()
 export class PermissionService {

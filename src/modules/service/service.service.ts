@@ -11,9 +11,9 @@ import { Service } from './schemas/service.schema';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { Clinic } from '../clinic/schemas/clinic.schema';
 import { Employee } from '../employee/schemas/employee.schema';
-import { ApiGetResponse, paginate } from 'src/common/utlis/paginate';
+import { ApiGetResponse, paginate, SortType } from 'src/common/utils/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
 
 @Injectable()
 export class ServiceService {
@@ -104,7 +104,7 @@ export class ServiceService {
       order?: 'asc' | 'desc';
       search?: string;
     },
-    filters: any
+    filters: any,
   ) {
     try {
       let { page, limit, allData, sortBy, order, search } = paginationDto;
@@ -113,7 +113,7 @@ export class ServiceService {
       page = Number(page) || 1;
       limit = Number(limit) || 10;
       const sortField = sortBy ?? 'id';
-      const sort = { [sortField]: order === 'asc' ? 1 : -1 };
+      const sort: SortType = { [sortField]: order === 'asc' ? 1 : -1 };
       filters.deleted = { $ne: true };
 
       // Handle search query
@@ -124,7 +124,7 @@ export class ServiceService {
           { description: searchRegex },
           { 'clinic.name': searchRegex },
           { 'doctors.name': searchRegex },
-          { 'doctors.specializations': searchRegex }
+          { 'doctors.specializations': searchRegex },
         ];
       }
 
@@ -142,15 +142,15 @@ export class ServiceService {
         { path: 'clinic', model: 'Clinic', select: 'name address' },
         { path: 'doctors', model: 'Employee', select: 'name specializations' },
       ];
-      const result = await paginate(
-        this.serviceModel,
-        populateOptions,
+      const result = await paginate({
+        model: this.serviceModel,
+        populate: populateOptions,
         page,
         limit,
         allData,
-        filters,
-        sort,
-      );
+        filter: filters,
+        sort: sort,
+      });
 
       return result;
     } catch (error) {

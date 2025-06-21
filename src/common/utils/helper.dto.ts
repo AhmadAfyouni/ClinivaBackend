@@ -1,40 +1,109 @@
 import { ApiProperty } from '@nestjs/swagger';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsString,
+  IsOptional,
+  IsNumber,
+  IsBoolean,
+  IsDateString,
+  IsArray,
+  ValidateNested,
+} from 'class-validator';
+import {
+  BaseModel,
+  ContactInfoBase,
+  DayOfWeek,
+  VacationBase,
+  WorkingHoursBase,
+} from './base.helper';
 
-export class WorkingHoursDTO {
-  @ApiProperty({
-    enum: [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-    ],
-    description: 'Day of the week',
-    required: true,
-    example: 'Monday',
-  })
-  day: string;
+export { DayOfWeek, VacationBase, WorkingHoursBase, ContactInfoBase };
 
-  @ApiProperty({
-    type: String,
-    description: 'Work start time (e.g., "04:00 PM")',
-    required: true,
-    example: '08:00 AM',
-  })
-  startTime: string;
+export class GeneralInfo extends BaseModel {
+  @ApiProperty()
+  logo: string;
 
-  @ApiProperty({
-    type: String,
-    description: 'Work end time (e.g., "08:00 PM")',
-    required: true,
-    example: '05:00 PM',
-  })
-  endTime: string;
+  @ApiProperty()
+  yearOfEstablishment: number;
+
+  @ApiProperty()
+  vision: string;
+
+  @ApiProperty()
+  goals: string;
+
+  @ApiProperty()
+  overview: string;
+
+  @ApiProperty()
+  ceo: string;
+
+  @ApiProperty({ required: false })
+  contactInformation: ContactInfoBase;
+
+  @ApiProperty({ required: false })
+  LinkedIn: string;
+
+  @ApiProperty({ required: false })
+  Twitter: string;
+
+  @ApiProperty({ required: false })
+  Facebook: string;
+
+  @ApiProperty({ required: false })
+  Instagram: string;
+
+  @ApiProperty({ required: false })
+  FinanceInfo: { VAT: string; CR: string };
+
+  @ApiProperty({ required: false })
+  PrivacyPolicy: { title: string; content: string };
+
+  @ApiProperty({ required: false })
+  TermsConditions: { title: string; content: string };
+
+  @ApiProperty({ required: true, default: 'Key_member' })
+  Key_member: string;
+
+  @ApiProperty({ required: true, default: 'Founder/Executives' })
+  Founder_Executives: string;
 }
+// export class WorkingHoursDTO {
+//   @ApiProperty({
+//     type: String,
+//     enum: DayOfWeek,
+//     description: 'Work day (e.g., "Monday")',
+//     required: true,
+//     example: 'Monday',
+//   })
+//   @IsString()
+//   @IsEnum(DayOfWeek)
+//   @IsNotEmpty()
+//   day: string;
 
-export class InsuranceCompanyDTO {
+//   @ApiProperty({
+//     type: String,
+//     description: 'Work start time (e.g., "04:00 PM")',
+//     required: true,
+//     example: '08:00 AM',
+//   })
+//   @IsString()
+//   @IsNotEmpty()
+//   startTime: string;
+
+//   @ApiProperty({
+//     type: String,
+//     description: 'Work end time (e.g., "08:00 PM")',
+//     required: true,
+//     example: '05:00 PM',
+//   })
+//   @IsString()
+//   @IsNotEmpty()
+//   endTime: string;
+// }
+
+export class InsuranceCompanyDTO extends BaseModel {
   @ApiProperty({
     type: String,
     description: 'Name of the insurance company',
@@ -135,7 +204,7 @@ export class InsuranceCompanyDTO {
   isActive?: boolean;
 }
 
-export class BankAccountDTO {
+export class BankAccountDTO extends BaseModel {
   @ApiProperty({
     type: String,
     description: 'Account name',
@@ -193,7 +262,7 @@ export class BankAccountDTO {
   isActive?: boolean;
 }
 
-export class CashBoxDTO {
+export class CashBoxDTO extends BaseModel {
   @ApiProperty({
     type: String,
     description: 'Cash box name',
@@ -272,7 +341,7 @@ export class CashBoxDTO {
   transactionHistory?: { date: Date; amount: number; description: string }[];
 }
 
-export class OnlinePaymentMethodDTO {
+export class OnlinePaymentMethodDTO extends BaseModel {
   @ApiProperty({
     type: String,
     description: 'Payment company name',
@@ -332,7 +401,7 @@ export class OnlinePaymentMethodDTO {
   isActive?: boolean;
 }
 
-export class CommercialRecordDTO {
+export class CommercialRecordDTO extends BaseModel {
   @ApiProperty({
     type: String,
     description: 'Commercial record number',
@@ -374,7 +443,7 @@ export class CommercialRecordDTO {
   taxNumber: string;
 }
 
-export class HolidayDTO {
+export class HolidayDTO extends BaseModel {
   @ApiProperty({
     type: String,
     description: 'Name of the holiday',
@@ -400,7 +469,7 @@ export class HolidayDTO {
   reason: string;
 }
 
-export class ContactInfoDTO {
+export class ContactInfoDTO extends ContactInfoBase {
   @ApiProperty({
     enum: ['email', 'phone', 'socialMedia', 'CompanyWebsite'],
     description: 'Type of contact information',
@@ -434,7 +503,7 @@ export class ContactInfoDTO {
   subType?: string;
 }
 
-export class InsuranceDTO {
+export class InsuranceDTO extends BaseModel {
   @ApiProperty({
     type: String,
     description: 'Insurance provider name',
@@ -478,42 +547,6 @@ export class InsuranceDTO {
   insuranceType: string;
 }
 
-export enum DayOfWeek {
-  Sunday = 'Sunday',
-  Monday = 'Monday',
-  Tuesday = 'Tuesday',
-  Wednesday = 'Wednesday',
-  Thursday = 'Thursday',
-  Friday = 'Friday',
-  Saturday = 'Saturday',
-}
-
-export class WorkingDaysDTO {
-  @ApiProperty({
-    enum: DayOfWeek,
-    description: 'Day of the week',
-    required: true,
-    example: DayOfWeek.Monday,
-  })
-  name: DayOfWeek;
-
-  @ApiProperty({
-    type: String,
-    description: 'Start of working time (HH:MM format)',
-    required: true,
-    example: '08:00',
-  })
-  startOfWorkingTime: string;
-
-  @ApiProperty({
-    type: String,
-    description: 'End of working time (HH:MM format)',
-    required: true,
-    example: '17:00',
-  })
-  endOfWorkingTime: string;
-}
-
 export class VacationDTO {
   @ApiProperty({
     type: Date,
@@ -549,7 +582,7 @@ export class VacationDTO {
   status: string;
 }
 
-export class MedicationDTO {
+export class MedicationDTO extends BaseModel {
   @ApiProperty({
     type: String,
     description: 'Name of medication',
@@ -567,25 +600,7 @@ export class MedicationDTO {
   dosage: string;
 }
 
-export class BreakTimeDTO {
-  @ApiProperty({
-    type: String,
-    description: 'Start time of break (HH:MM format)',
-    required: true,
-    example: '12:00',
-  })
-  startTime: string;
-
-  @ApiProperty({
-    type: String,
-    description: 'End time of break (HH:MM format)',
-    required: true,
-    example: '13:00',
-  })
-  endTime: string;
-}
-
-export class MedicalTestResultDTO {
+export class MedicalTestResultDTO extends BaseModel {
   /*  @ApiProperty({
     type: String,
     description: 'Type of file (PDF, JPEG, DICOM)',
@@ -627,7 +642,7 @@ export class MedicalTestResultDTO {
   labName: string;*/
 }
 
-export class CertificateDTO {
+export class CertificateDTO extends BaseModel {
   @ApiProperty({
     type: String,
     description: 'Name of certificate',
@@ -679,7 +694,7 @@ export class CertificateDTO {
   status: string;
 }
 
-export class ActivityLogDTO {
+export class ActivityLogDTO extends BaseModel {
   @ApiProperty({
     type: Date,
     description: 'Date when activity occurred',
@@ -697,7 +712,7 @@ export class ActivityLogDTO {
   description: string;
 }
 
-export class LoginHistoryDTO {
+export class LoginHistoryDTO extends BaseModel {
   @ApiProperty({
     type: Date,
     description: 'Date when login occurred',

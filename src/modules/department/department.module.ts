@@ -22,10 +22,9 @@ import {
 import { ClinicCollectionModule } from '../cliniccollection/clinic-collection.module';
 import { forwardRef } from '@nestjs/common';
 import { EmployeeService } from '../employee/employee.service';
-import { UserService } from '../user/user.service';
-import { UserModule } from '../user/user.module';
-import { User, UserSchema } from '../user/schemas/user.schema';
 import { RoleModule } from '../role/role.module';
+import { EmployeeModule } from '../employee/employee.module';
+import { EmailModule } from '../employee/dto/email.module';
 @Module({
   imports: [
     MongooseModule.forFeature([
@@ -34,17 +33,17 @@ import { RoleModule } from '../role/role.module';
       { name: Complex.name, schema: ClinicCollectionSchema },
       { name: Appointment.name, schema: AppointmentSchema },
       { name: MedicalRecord.name, schema: MedicalRecordSchema },
-      { name: User.name, schema: UserSchema },
     ]),
     forwardRef(() => ClinicModule),
     forwardRef(() => AppointmentModule),
     forwardRef(() => MedicalRecordModule),
     forwardRef(() => ClinicCollectionModule),
-    forwardRef(() => UserModule),
+    forwardRef(() => EmployeeModule),
     forwardRef(() => RoleModule),
+    EmailModule,
   ],
   controllers: [DepartmentController],
-  providers: [DepartmentService, EmployeeService],
+  providers: [DepartmentService],
   exports: [DepartmentService],
 })
 export class DepartmentModule {}

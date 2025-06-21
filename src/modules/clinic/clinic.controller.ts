@@ -9,33 +9,43 @@ import {
   Put,
   Query,
   Request,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ClinicService } from './clinic.service';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { UserService } from '../user/user.service';
 import { EmployeeService } from '../employee/employee.service';
 import { PermissionsEnum } from 'src/config/permission.enum';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/config/permissions.decorator';
+import { ApiConsumes } from '@nestjs/swagger';
+import { FileInterceptor } from '@nestjs/platform-express';
 @Controller('clinics')
 @UseGuards(PermissionsGuard)
 export class ClinicController {
   constructor(
     private readonly clinicService: ClinicService,
-    private readonly userService: UserService,
     private readonly employeeService: EmployeeService,
   ) {}
 
   @Post()
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('logo'))
   @Permissions(PermissionsEnum.ADMIN)
-  async createClinic(@Body() createClinicDto: CreateClinicDto, @Request() req) {
+  async createClinic(
+    @Body() createClinicDto: CreateClinicDto,
+    @Request() req,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    console.log(createClinicDto, 'createClinicDto');
     const userId = req.user.userId;
-    const response = await this.userService.getUserById(userId);
+    const response = await this.employeeService.getEmployeeById(userId);
     const user = response.data;
-    return this.clinicService.createClinic(createClinicDto, user.plan);
+    console.log('user*******');
+    return this.clinicService.createClinic(createClinicDto, user.plan, file);
   }
 
   @Get()

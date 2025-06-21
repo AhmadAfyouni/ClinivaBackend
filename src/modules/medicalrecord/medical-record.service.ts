@@ -15,9 +15,10 @@ import {
   ApiGetResponse,
   ApiListResponse,
   paginate,
-} from 'src/common/utlis/paginate';
+  SortType,
+} from 'src/common/utils/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
 import {
   Appointment,
   AppointmentDocument,
@@ -83,20 +84,20 @@ export class MedicalRecordService {
       limit = Number(limit) || 10;
 
       const sortField: string = sortBy ?? 'id';
-      const sort: Record<string, number> = {
+      const sort: SortType = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
       filters.deleted = { $ne: true };
 
-      return paginate(
-        this.medicalRecordModel,
-        ['appointment'],
+      return paginate({
+        model: this.medicalRecordModel,
+        populate: ['appointment'],
         page,
         limit,
         allData,
-        filters,
-        sort,
-      );
+        filter: filters,
+        sort: sort,
+      });
     } catch (error) {
       console.log(error);
       throw new BadRequestException(error.message);
@@ -116,7 +117,7 @@ export class MedicalRecordService {
       limit = Number(limit) || 10;
 
       const sortField: string = sortBy ?? 'id';
-      const sort: Record<string, number> = {
+      const sort: SortType = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
       filters.deleted = { $ne: true };
@@ -128,15 +129,15 @@ export class MedicalRecordService {
         throw new NotFoundException(
           'Medical Record not found or has been deleted',
         );
-      return paginate(
-        this.medicalRecordModel,
-        ['appointment', 'patient', 'doctor', 'appointment'],
+      return paginate({
+        model: this.medicalRecordModel,
+        populate: ['appointment', 'patient', 'doctor', 'appointment'],
         page,
         limit,
         allData,
-        filters,
-        sort,
-      );
+        filter: filters,
+        sort: sort,
+      });
     } catch (error) {
       console.log(error);
       throw new BadRequestException(error.message);

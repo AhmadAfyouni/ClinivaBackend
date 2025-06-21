@@ -17,13 +17,13 @@ import {
   applyModelFilter,
   buildFinalFilter,
   paginate,
-} from 'src/common/utlis/paginate';
+} from 'src/common/utils/paginate';
 import {
   Employee,
   EmployeeDocument,
 } from '../employee/schemas/employee.schema';
 import { Patient, PatientDocument } from '../patient/schemas/patient.schema';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
 import { Clinic, ClinicDocument } from '../clinic/schemas/clinic.schema';
 import { Service } from '../service/schemas/service.schema';
 import { MedicalRecordService } from '../medicalrecord/medical-record.service';
@@ -196,14 +196,16 @@ export class AppointmentService {
     if (!schedule) {
       throw new BadRequestException(`Clinic is closed on ${day}`);
     }
-    const { hours: sh, minutes: sm } = this.parseTime(schedule.startTime);
-    const { hours: eh, minutes: em } = this.parseTime(schedule.endTime);
+    const { hours: sh, minutes: sm } = this.parseTime(
+      schedule.shift1.startTime,
+    );
+    const { hours: eh, minutes: em } = this.parseTime(schedule.shift1.endTime);
     return {
       start: sh * 60 + sm,
       end: eh * 60 + em,
       startHour: sh,
       endHour: eh,
-      description: `${schedule.startTime}-${schedule.endTime}`,
+      description: `${schedule.shift1.startTime}-${schedule.shift1.endTime}`,
       day,
     };
   }
@@ -324,9 +326,9 @@ export class AppointmentService {
         filterConditions,
       );
 
-      const result = await paginate(
-        this.appointmentModel,
-        [
+      const result = await paginate({
+        model: this.appointmentModel,
+        populate: [
           { path: 'doctor', select: 'name' },
           { path: 'patient', select: 'name' },
           { path: 'clinic', select: 'name' },
@@ -334,9 +336,9 @@ export class AppointmentService {
         page,
         limit,
         allData,
-        finalFilter,
-        sort,
-      );
+        // finalFilter,
+        // sort,
+      });
 
       return result;
     } catch (error) {
@@ -348,8 +350,10 @@ export class AppointmentService {
     try {
       if (filters.employeeId) {
         // First, get the employee to access the userId
-        const employee = await this.doctorModel.findById(filters.employeeId.toString());
-        
+        const employee = await this.doctorModel.findById(
+          filters.employeeId.toString(),
+        );
+
         if (!employee) {
           throw new NotFoundException('Employee not found');
         }
@@ -373,13 +377,15 @@ export class AppointmentService {
             filters._id = null; // This will return no results
           }
         }
-        
+
         // Remove the employeeId filter as we've processed it
         delete filters.employeeId;
       }
     } catch (error) {
       console.error('Error in viewWonerAppointment:', error);
-      throw new BadRequestException(error.message || 'Failed to process appointment view');
+      throw new BadRequestException(
+        error.message || 'Failed to process appointment view',
+      );
     }
   }
   async getAppointmentById(id: string): Promise<ApiGetResponse<Appointment>> {

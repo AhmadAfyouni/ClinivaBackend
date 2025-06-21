@@ -16,7 +16,7 @@ import {
   ContactInfoDTO,
   InsuranceDTO,
   MedicalTestResultDTO,
-} from 'src/common/utlis/helper.dto';
+} from 'src/common/utils/helper.dto';
 
 export class CreatePatientDto {
   @ApiProperty({
@@ -56,8 +56,7 @@ export class CreatePatientDto {
   })
   @IsEnum(['male', 'female'])
   @IsNotEmpty()
-  gender: string;
-
+  // gender: string;
   @ApiProperty({
     description: 'National ID or Passport',
     example: '9876543210',

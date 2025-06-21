@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -15,20 +16,15 @@ import { DepartmentService } from './department.service';
 import { CreateDepartmentDto } from './dto/create-department.dto';
 import { UpdateDepartmentDto } from './dto/update-department.dto';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
-import { UserService } from '../user/user.service';
 import { EmployeeService } from '../employee/employee.service';
-import { extractId } from 'src/common/utlis/paginate';
+import { extractId } from 'src/common/utils/paginate';
 import { PermissionsEnum } from 'src/config/permission.enum';
 import { PermissionsGuard } from 'src/common/guards/permissions.guard';
 import { Permissions } from 'src/config/permissions.decorator';
 @Controller('departments')
 @UseGuards(PermissionsGuard)
 export class DepartmentController {
-  constructor(
-    private readonly departmentService: DepartmentService,
-    private readonly userService: UserService,
-    private readonly employeeService: EmployeeService,
-  ) {}
+  constructor(private readonly departmentService: DepartmentService) {}
 
   @Post()
   @Permissions(PermissionsEnum.ADMIN)
@@ -37,23 +33,21 @@ export class DepartmentController {
     @Request() req,
   ) {
     const userId = req.user.userId;
-    const response = await this.userService.getUserById(userId);
-    const user = response.data;
-    return this.departmentService.createDepartment(
-      createDepartmentDto,
-      user.plan,
-    );
+    return this.departmentService.createDepartment(createDepartmentDto, userId);
   }
 
   @Get()
   @Permissions(PermissionsEnum.ADMIN)
   async getAllDepartments(
     @Query() paginationDto: PaginationAndFilterDto,
-    @Query() queryParams: any,
+    @Query('clinicCollectionId') clinicCollectionId?: string,
   ) {
-    const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-
-    return this.departmentService.getAllDepartments(paginationDto, filters);
+    if (!clinicCollectionId)
+      throw new BadRequestException('clinic Collection Id is missing');
+    return this.departmentService.getAllDepartments(
+      paginationDto,
+      clinicCollectionId,
+    );
   }
 
   @Get(':id')

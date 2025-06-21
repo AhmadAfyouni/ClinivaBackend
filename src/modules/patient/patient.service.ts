@@ -15,7 +15,8 @@ import {
   applyBooleanFilter,
   buildFinalFilter,
   paginate,
-} from 'src/common/utlis/paginate';
+  SortType,
+} from 'src/common/utils/paginate';
 import {
   AppointmentDocument,
   Appointment,
@@ -28,8 +29,8 @@ import {
   MedicalRecordDocument,
   MedicalRecord,
 } from '../medicalrecord/schemas/medicalrecord.schema';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
-import { saveFileLocally } from 'src/common/utlis/upload.util';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
+import { saveFileLocally } from 'src/common/utils/upload.util';
 @Injectable()
 export class PatientService {
   constructor(
@@ -76,7 +77,7 @@ export class PatientService {
       limit = Number(limit) || 10;
 
       const sortField: string = sortBy ?? 'id';
-      const sort: Record<string, number> = {
+      const sort: SortType = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
 
@@ -107,15 +108,20 @@ export class PatientService {
       );
 
       // استخدام paginate مع الشروط النهائية
-      const result = await paginate(
-        this.patientModel,
-        [],
+      const result = await paginate({
+        model: this.patientModel,
+        populate: [],
         page,
         limit,
         allData,
-        finalFilter,
-        sort,
-      );
+        filter: finalFilter,
+        sort: sort,
+      });
+
+      // إضافة آخر زيارة للمريض مع اسم الطبيب
+      if (result.data) {
+        const patients = result.data;
+      }
 
       // إضافة آخر زيارة للمريض مع اسم الطبيب
       if (result.data) {

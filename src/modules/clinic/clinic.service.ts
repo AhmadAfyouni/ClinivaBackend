@@ -1,13 +1,18 @@
 import {
-  BadRequestException,
-  HttpException,
   Injectable,
-  InternalServerErrorException,
+  BadRequestException,
   NotFoundException,
+  HttpException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { DayOfWeek } from 'src/common/utils/base.helper';
 import { Clinic, ClinicDocument } from './schemas/clinic.schema';
+import {
+  Department,
+  DepartmentDocument,
+} from '../department/schemas/department.schema';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 import { UpdateClinicDto } from './dto/update-clinic.dto';
 import {
@@ -16,7 +21,8 @@ import {
   applyModelFilter,
   buildFinalFilter,
   paginate,
-} from 'src/common/utlis/paginate';
+  SortType,
+} from 'src/common/utils/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import {
   Appointment,
@@ -30,12 +36,15 @@ import {
   SpecializationDocument,
   Specialization,
 } from '../specialization/schemas/specialization.schema';
-import { generateUniquePublicId } from 'src/common/utlis/id-generator';
+import { generateUniquePublicId } from 'src/common/utils/id-generator';
 import {
   Employee,
   EmployeeDocument,
 } from '../employee/schemas/employee.schema';
 import { Service } from '../service/schemas/service.schema';
+import { saveFileLocally } from 'src/common/utils/upload.util';
+import { validateClinicWorkingHours } from 'src/common/utils/time-utils';
+import { Complex } from '../cliniccollection/schemas/cliniccollection.schema';
 
 @Injectable()
 export class ClinicService {
@@ -49,6 +58,9 @@ export class ClinicService {
     private specializationModel: Model<SpecializationDocument>,
     @InjectModel(Employee.name) private employeeModel: Model<EmployeeDocument>,
     @InjectModel(Service.name) private serviceModel: Model<Service>,
+    @InjectModel(Complex.name) private complexModel: Model<Complex>,
+    @InjectModel(Department.name)
+    private departmentModel: Model<DepartmentDocument>,
   ) {}
   private async checkUniqueName(name: string, departmentId: string) {
     const existingClinic = await this.clinicModel.findOne({
@@ -65,13 +77,138 @@ export class ClinicService {
   async createClinic(
     createClinicDto: CreateClinicDto,
     plan: string,
+    file: Express.Multer.File,
   ): Promise<ApiGetResponse<Clinic>> {
     try {
       if (plan != 'clinic' && !createClinicDto.departmentId) {
         throw new BadRequestException(
-          'departmentId is required for collection plan',
+          'departmentId is required for complex plan',
         );
       }
+
+      // If clinic has working hours and is part of a department, validate against complex hours
+      if (
+        createClinicDto.WorkingHours &&
+        createClinicDto.WorkingHours.length > 0 &&
+        createClinicDto.departmentId
+      ) {
+        try {
+          // Find the department to get the complex (clinicCollectionId in Department schema)
+          const department = await this.departmentModel
+            .findById(createClinicDto.departmentId)
+            .select('clinicCollectionId')
+            .lean()
+            .exec();
+
+          if (department?.clinicCollectionId) {
+            // Find the complex to get its general info which contains working hours
+            const complex = await this.complexModel
+              .findById(department.clinicCollectionId)
+              .select('generalInfo')
+              .lean()
+              .exec();
+
+            // Check if complex has working hours in generalInfo
+            const complexGeneralInfo = complex?.generalInfo as any;
+            if (
+              complexGeneralInfo?.workingHours &&
+              Array.isArray(complexGeneralInfo.workingHours) &&
+              complexGeneralInfo.workingHours.length > 0
+            ) {
+              // Convert complex working hours to the expected format
+              const complexWorkingHours = complexGeneralInfo.workingHours.map(
+                (wh: any) => ({
+                  day: wh.day,
+                  shift1: {
+                    startTime: wh.shift1?.startTime || '09:00',
+                    endTime: wh.shift1?.endTime || '17:00',
+                  },
+                  shift2: wh.shift2
+                    ? {
+                        startTime: wh.shift2.startTime,
+                        endTime: wh.shift2.endTime,
+                      }
+                    : undefined,
+                }),
+              );
+
+              // Convert clinic working hours to match the expected type
+              const clinicWorkingHours = createClinicDto.WorkingHours.map(
+                (wh) => ({
+                  day: wh.day as any, // Cast to any to bypass the enum check
+                  shift1: {
+                    startTime: wh.shift1.startTime,
+                    endTime: wh.shift1.endTime,
+                  },
+                  shift2: wh.shift2
+                    ? {
+                        startTime: wh.shift2.startTime,
+                        endTime: wh.shift2.endTime,
+                      }
+                    : undefined,
+                }),
+              );
+
+              // Validate clinic working hours against complex working hours
+              validateClinicWorkingHours(
+                clinicWorkingHours,
+                complexWorkingHours,
+              );
+            } else {
+              // If complex doesn't have working hours defined, use default working hours
+              const defaultWorkingHours = [
+                {
+                  day: DayOfWeek.Monday,
+                  shift1: { startTime: '09:00', endTime: '17:00' },
+                },
+                {
+                  day: DayOfWeek.Tuesday,
+                  shift1: { startTime: '09:00', endTime: '17:00' },
+                },
+                {
+                  day: DayOfWeek.Wednesday,
+                  shift1: { startTime: '09:00', endTime: '17:00' },
+                },
+                {
+                  day: DayOfWeek.Thursday,
+                  shift1: { startTime: '09:00', endTime: '17:00' },
+                },
+                {
+                  day: DayOfWeek.Sunday,
+                  shift1: { startTime: '09:00', endTime: '17:00' },
+                },
+              ] as const;
+
+              const clinicWorkingHours = createClinicDto.WorkingHours.map(
+                (wh) => ({
+                  day: wh.day as DayOfWeek,
+                  shift1: {
+                    startTime: wh.shift1.startTime,
+                    endTime: wh.shift1.endTime,
+                  },
+                  shift2: wh.shift2
+                    ? {
+                        startTime: wh.shift2.startTime,
+                        endTime: wh.shift2.endTime,
+                      }
+                    : undefined,
+                }),
+              );
+
+              validateClinicWorkingHours(
+                clinicWorkingHours,
+                defaultWorkingHours as any, // Cast to any to bypass the type check for default hours
+              );
+            }
+          }
+        } catch (error: any) {
+          // If validation fails, rethrow the error with a more descriptive message
+          throw new BadRequestException(
+            `Invalid working hours: ${error.message}`,
+          );
+        }
+      }
+
       if (createClinicDto.departmentId) {
         await this.checkUniqueName(
           createClinicDto.name,
@@ -80,10 +217,17 @@ export class ClinicService {
       }
 
       const publicId = await generateUniquePublicId(this.clinicModel, 'cli');
-
+      let relativeFilePath = '';
+      if (file) {
+        relativeFilePath = file
+          ? saveFileLocally(file, 'clinic/' + publicId + '/images')
+          : '';
+        createClinicDto.logo = relativeFilePath;
+      }
       const newClinic = new this.clinicModel({
         ...createClinicDto,
         publicId,
+        logo: relativeFilePath,
       });
       const savedClinic = await newClinic.save();
       return {
@@ -98,73 +242,40 @@ export class ClinicService {
   }
   async getAllClinics(paginationDto: PaginationAndFilterDto, filters: any) {
     try {
-      let { page, limit, allData, sortBy, order } = paginationDto;
-
-      page = Number(page) || 1;
-      limit = Number(limit) || 10;
-
-      const sortField: string = sortBy ?? 'id';
-      const sort: Record<string, number> = {
-        [sortField]: order === 'asc' ? 1 : -1,
-      };
-
-      const searchConditions: any[] = [];
-      const filterConditions: any[] = [];
-      let specializationIds: string[] = [];
-      await applyBooleanFilter(filters, 'isActive', filterConditions);
-
-      if (filters.search) {
-        const regex = new RegExp(filters.search, 'i');
-        searchConditions.push({ name: regex });
-
-        const specializations = await this.specializationModel
-          .find({ name: regex })
-          .select('_id');
-        specializationIds = specializations.map((spec) => spec._id.toString());
-
-        if (specializationIds.length) {
-          searchConditions.push({
-            specializations: { $in: specializationIds },
-          });
-        }
-      }
-
-      await applyModelFilter(
-        this.specializationModel,
-        filters,
-        'specializationName',
-        'name',
-        'specializations',
-        filterConditions,
-        page,
-        limit,
-      );
-
-      const fieldsToDelete = ['search', 'isActive', 'specializationName'];
-      fieldsToDelete.forEach((field) => delete filters[field]);
-      filterConditions.push({ deleted: { $ne: true } });
-
-      const finalFilter = buildFinalFilter(
-        filters,
-        searchConditions,
-        filterConditions,
-      );
-
-      const populateFields = [
-        { path: 'departmentId' },
-        { path: 'specializations', select: 'name' },
-        { path: 'insuranceCompany' },
-      ];
-
-      const result = await paginate(
-        this.clinicModel,
-        populateFields,
+      const {
         page,
         limit,
         allData,
-        finalFilter,
-        sort,
-      );
+        sortBy,
+        order,
+        search,
+        fields,
+        filter_fields,
+      } = paginationDto;
+      const query = {};
+      const sortField: string = sortBy ?? 'id';
+      const sort: SortType = {
+        [sortField]: order === 'asc' ? 1 : -1,
+      };
+      if (search) {
+        query['$or'] = ['legalName'].map((field) => ({
+          [field]: { $regex: search, $options: 'i' },
+        }));
+      }
+      const populateFields = [{ path: 'departmentId' }];
+
+      const result = await paginate({
+        model: this.clinicModel,
+        populate: populateFields,
+        page: page,
+        limit: limit,
+        allData: allData,
+        filter: filter_fields ? JSON.parse(filter_fields) : {},
+        search: search,
+        searchFields: ['name', 'generalInfo', 'Description', 'publicId'],
+        message: 'Request successful',
+        sort: sort,
+      });
 
       // إحصائيات لكل عيادة
       if (result.data) {
@@ -234,9 +345,7 @@ export class ClinicService {
         employees,
         ,
       ] = await Promise.all([
-        this.clinicModel
-          .findById(id)
-          .populate(['departmentId', 'specializations', 'insuranceCompany']),
+        this.clinicModel.findById(id).populate(['departmentId', 'PIC']),
         this.appointmentModel.countDocuments({ clinic: id }),
         Promise.all([
           this.getEmployeeCountByDoctorType(id, 'Doctor'),
@@ -267,7 +376,6 @@ export class ClinicService {
         total: employeeCounts.reduce((a, b) => a + b, 0),
       };
       clinicObj['doctors'] = doctors;
-      clinicObj['services'] = services;
       clinicObj['employees'] = employees;
 
       return {
@@ -368,7 +476,7 @@ export class ClinicService {
   ): Promise<ApiGetResponse<any>> {
     const clinics = await this.clinicModel
       .find({ departmentId })
-      .populate(['departmentId', 'specializations', 'insuranceCompany'])
+      .populate(['departmentId'])
       .exec();
     return {
       success: true,
