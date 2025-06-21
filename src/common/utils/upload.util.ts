@@ -1,5 +1,5 @@
 import { InternalServerErrorException } from '@nestjs/common';
-import { existsSync, mkdirSync, writeFileSync } from 'fs';
+import { existsSync, mkdirSync, unlinkSync, writeFileSync } from 'fs';
 import { join } from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import { Express } from 'express'; // For Express.Multer.File type
@@ -52,5 +52,18 @@ export const saveFileLocally = (
     console.error('Error saving file locally:', error);
     // Consider logging the specific error for better debugging
     throw new InternalServerErrorException('Could not save uploaded file.');
+  }
+};
+
+export const deleteFileLocally = (filePath: string) => {
+  try {
+    const baseUploadDir = join(process.cwd(), 'uploads');
+    const fullPath = join(baseUploadDir, filePath);
+    if (existsSync(fullPath)) {
+      unlinkSync(fullPath);
+    }
+  } catch (error) {
+    console.error('Error deleting file locally:', error);
+    throw new InternalServerErrorException('Could not delete file.');
   }
 };
