@@ -73,11 +73,14 @@ export class ClinicController {
 
   @Put(':id')
   @Permissions(PermissionsEnum.ADMIN)
+  @ApiConsumes('multipart/form-data')
+  @UseInterceptors(FileInterceptor('logo'))
   async updateClinic(
     @Param('id') id: string,
     @Body() updateClinicDto: UpdateClinicDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.clinicService.updateClinic(id, updateClinicDto);
+    return this.clinicService.updateClinic(id, updateClinicDto, file);
   }
 
   @Delete(':id')
