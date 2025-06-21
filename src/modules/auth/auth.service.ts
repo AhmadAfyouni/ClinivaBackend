@@ -36,6 +36,7 @@ export class AuthService {
     identifier: string,
     password: string,
   ): Promise<Employee | null> {
+
     try {
       // Try to find employee by either email or name
       const employee =
@@ -87,7 +88,7 @@ export class AuthService {
       user: any;
     };
   }> {
-    console.log('start login', email);
+
     const user = await this.validateUser(email, password);
 
     if (!user || !user._id) {
@@ -116,8 +117,12 @@ export class AuthService {
       employeeType: user.employeeType,
     };
 
-    const accessToken = this.jwtService.sign(payload, { expiresIn: '45m' });
-    const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+    const accessToken = this.jwtService.sign(payload, {
+      expiresIn: jwtExpiration,
+    });
+    const refreshToken = this.jwtService.sign(payload, {
+      expiresIn: jwtRefreshExpiration,
+    });
 
     // Log the login action
     try {
@@ -184,7 +189,9 @@ export class AuthService {
         success: true,
         message: 'Login successful',
         data: {
-          accessToken: this.jwtService.sign(newPayload, { expiresIn: '45m' }),
+          accessToken: this.jwtService.sign(newPayload, {
+            expiresIn: process.env.JWT_EXPIRATION,
+          }),
         },
       };
     } catch (error) {
