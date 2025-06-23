@@ -78,11 +78,12 @@ export class CompanyController {
     @Query() queryParams: any,
   ) {
     {
-      const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+      const { page, limit, allData, sortBy, order, search, deleted, ...filters } = queryParams;
 
       return this.companyService.findAll(paginationDto, filters);
     }
   }
+
 
   @Get(':id')
   @Permissions(PermissionsEnum.ADMIN)
