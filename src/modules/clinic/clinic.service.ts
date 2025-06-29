@@ -452,9 +452,9 @@ export class ClinicService {
     }
   }
 
-  async getCountByClinicCollectionId(
+  async getClinicByClinicCollectionId(
     clinicCollectionId: string,
-  ): Promise<ApiGetResponse<{ count: number }>> {
+  ): Promise<ApiGetResponse<{ count: object }>> {
     const clinics = await this.clinicModel
       .find()
       .populate({
@@ -463,14 +463,14 @@ export class ClinicService {
         match: { clinicCollectionId: clinicCollectionId },
       })
       .lean();
-    const count = clinics.filter(
+    const ClinicObjects = clinics.filter(
       (clinic) => clinic.departmentId !== null,
-    ).length;
+    );
 
     return {
       success: true,
-      message: 'clinic count  in Clinic Collection retrieved successfully',
-      data: { count },
+      message: 'clinic count  in Complex retrieved successfully',
+      data: { count: ClinicObjects },
     };
   }
 

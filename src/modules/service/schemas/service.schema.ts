@@ -1,22 +1,45 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Types } from 'mongoose';
+import { ServiceSession } from 'src/common/utils/helper.dto';
 
 @Schema({ timestamps: true })
 export class Service extends Document {
   @Prop({ required: true, unique: false })
   name: string;
 
-  @Prop()
-  description: string;
+  @Prop({
+    required: true,
+    enum: [
+      'Consultation',
+      'Medical Examination',
+      'Medical Procedure',
+      'Therapy Session',
+      'Dental Session',
+      'Laboratory Test',
+      'Radiology',
+      'Vaccination',
+      'Cosmetic Procedure',
+      'Wellness or Counseling',
+      'Reevaluation',
+      'Emergency Procedure',
+    ],
+  })
+  category: string;
 
-  @Prop({ required: true })
-  price: number;
+  @Prop({ required: true, type: Number, unique: false })
+  sessionsNumber: number;
 
-  @Prop({ type: Types.ObjectId, ref: 'Clinic', required: true })
-  clinic: Types.ObjectId;
+  @Prop({ required: false, type: [ServiceSession] })
+  session: ServiceSession[];
 
-  @Prop({ type: [{ type: Types.ObjectId, ref: 'Employee' }], required: true })
-  doctors: Types.ObjectId[];
+  @Prop({ required: false, type: [Types.ObjectId], ref: 'Employee' })
+  doctor: Types.ObjectId[];
+
+  @Prop({ required: false, type: [Types.ObjectId], ref: 'Clinic' })
+  clinics: Types.ObjectId[];
+
+  @Prop({ required: false, type: Types.ObjectId, ref: 'Complex' })
+  complex: Types.ObjectId;
 
   @Prop({ default: true })
   isActive: boolean;
@@ -26,9 +49,6 @@ export class Service extends Document {
 
   @Prop({ type: Boolean, default: false })
   deleted: boolean;
-
-  @Prop({ type: Number, default: 30 }) // default duration of 30 minutes
-  duration: number;
 }
 
 export const ServiceSchema = SchemaFactory.createForClass(Service);

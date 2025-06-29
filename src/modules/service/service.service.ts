@@ -6,7 +6,7 @@ import {
   HttpException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types, isValidObjectId } from 'mongoose';
+import { Model, Types, isValidObjectId, model } from 'mongoose';
 import { Service } from './schemas/service.schema';
 import { CreateServiceDto } from './dto/create-service.dto';
 import { Clinic } from '../clinic/schemas/clinic.schema';
@@ -14,6 +14,7 @@ import { Employee } from '../employee/schemas/employee.schema';
 import { ApiGetResponse, paginate, SortType } from 'src/common/utils/paginate';
 import { PaginationAndFilterDto } from 'src/common/dtos/pagination-filter.dto';
 import { generateUniquePublicId } from 'src/common/utils/id-generator';
+import { UpdateServiceDto } from './dto/update-service.dto';
 
 @Injectable()
 export class ServiceService {
@@ -23,56 +24,96 @@ export class ServiceService {
     @InjectModel('Employee') private readonly employeeModel: Model<Employee>,
   ) {}
 
+  async verifyClinicsBelongToComplex(
+    clinicIds: string[],
+    complexId: string,
+  ): Promise<string[]> {
+    console.log('Verifying clinics:', clinicIds, 'for complex:', complexId);
+
+    // Find all clinics with their departments
+    const clinics = await this.clinicModel
+      .find({
+        _id: { $in: clinicIds },
+      })
+      .populate('departmentId', 'clinicCollectionId')
+      .lean();
+
+    const invalidClinics = clinics.filter((clinic) => {
+      if (
+        !clinic.departmentId ||
+        !(clinic.departmentId as any).clinicCollectionId
+      ) {
+        return true;
+      }
+      return (
+        (clinic.departmentId as any).clinicCollectionId.toString() !== complexId
+      );
+    });
+
+    return invalidClinics.map((clinic) => clinic._id.toString());
+  }
+
   async create(createServiceDto: CreateServiceDto): Promise<any> {
     try {
-      if (!isValidObjectId(createServiceDto.clinic)) {
-        throw new BadRequestException('Invalid clinic ID.');
-      }
-      if (
-        !Array.isArray(createServiceDto.doctors) ||
-        createServiceDto.doctors.length === 0
-      ) {
-        throw new BadRequestException('Doctors list must not be empty.');
-      }
-      for (const doctorId of createServiceDto.doctors) {
-        if (!isValidObjectId(doctorId)) {
-          throw new BadRequestException(`Invalid doctor ID: ${doctorId}`);
+      if (createServiceDto.clinics && createServiceDto.clinics.length > 0) {
+        for (const clinicId of createServiceDto.clinics) {
+          if (!isValidObjectId(clinicId)) {
+            throw new BadRequestException(`Invalid clinic ID: ${clinicId}`);
+          }
         }
       }
-      const clinic = await this.clinicModel
-        .findOne({ _id: createServiceDto.clinic, isActive: true })
+
+      if (createServiceDto.doctor && createServiceDto.doctor.length > 0) {
+        for (const clinicId of createServiceDto.doctor) {
+          if (!isValidObjectId(clinicId)) {
+            throw new BadRequestException(`Invalid Doctors ID: ${clinicId}`);
+          }
+        }
+      }
+
+      const clinics = await this.clinicModel
+        .find({
+          _id: { $in: createServiceDto.clinics },
+          isActive: true,
+        })
         .exec();
-      if (!clinic) {
+      if (clinics.length === 0) {
         throw new BadRequestException(
-          'Clinic does not exist or is not active.',
+          'No active clinics found for the provided IDs.',
         );
       }
-      const hasComplex = !!clinic.collection;
+
       const doctors = await this.employeeModel.find({
-        _id: { $in: createServiceDto.doctors },
+        _id: { $in: createServiceDto.doctor },
         isActive: true,
-        clinics: clinic._id,
-        $or: [
-          { employeeType: 'Doctor' },
-          { specialization: { $exists: true, $ne: [] } },
-        ],
+        employeeType: 'Doctor',
       });
       const hasDoctor = doctors.length > 0;
-      if (!(clinic || hasComplex || hasDoctor)) {
+      if (!hasDoctor) {
+        throw new BadRequestException('No valid doctors found.');
+      }
+      console.log('111', createServiceDto.complex);
+      console.log('222', createServiceDto);
+      const invalidClinics = await this.verifyClinicsBelongToComplex(
+        createServiceDto.clinics || [],
+        createServiceDto.complex || '',
+      );
+      if (invalidClinics.length > 0) {
         throw new BadRequestException(
-          'At least one precondition must be satisfied: (1) Clinic exists and is active, (2) Clinic assigned to a complex, (3) At least one valid doctor assigned to the clinic.',
+          `The following clinics do not belong to the complex: ${invalidClinics.join(', ')}`,
         );
       }
       const existingService = await this.serviceModel.findOne({
         name: createServiceDto.name,
-        clinic: createServiceDto.clinic,
-        doctors: { $in: createServiceDto.doctors },
+        clinics: { $in: createServiceDto.clinics },
+        doctor: { $in: createServiceDto.doctor },
       });
       if (existingService) {
         throw new BadRequestException(
-          'A service with this name already exists for the same clinic and doctor.',
+          'A service with this name already exists for the same clinics and doctors.',
         );
       }
+
       const publicId = await generateUniquePublicId(this.serviceModel, 'ser');
 
       const service = new this.serviceModel({
@@ -80,6 +121,7 @@ export class ServiceService {
         isActive: true,
         publicId,
       });
+
       const savedService = await service.save();
       return {
         success: true,
@@ -109,38 +151,35 @@ export class ServiceService {
     try {
       let { page, limit, allData, sortBy, order, search } = paginationDto;
 
-      // Default pagination values
       page = Number(page) || 1;
       limit = Number(limit) || 10;
       const sortField = sortBy ?? 'id';
       const sort: SortType = { [sortField]: order === 'asc' ? 1 : -1 };
       filters.deleted = { $ne: true };
 
-      // Handle search query
       if (search) {
         const searchRegex = new RegExp(search, 'i'); // Case-insensitive search
         filters.$or = [
           { name: searchRegex },
           { description: searchRegex },
           { 'clinic.name': searchRegex },
-          { 'doctors.name': searchRegex },
-          { 'doctors.specializations': searchRegex },
+          { 'doctor.name': searchRegex },
+          { 'doctor.specializations': searchRegex },
         ];
       }
 
-      // Handle doctorId filter: convert to ObjectId and build $in query
       if (filters.doctorId) {
         if (!isValidObjectId(filters.doctorId)) {
           throw new BadRequestException('Invalid doctor ID provided.');
         }
-        filters.doctors = { $in: [new Types.ObjectId(filters.doctorId)] };
+        filters.doctor = { $in: [new Types.ObjectId(filters.doctorId)] };
         delete filters.doctorId;
       }
 
-      // Populate clinic with only name & address, and doctors with name & specialization
       const populateOptions = [
-        { path: 'clinic', model: 'Clinic', select: 'name address' },
-        { path: 'doctors', model: 'Employee', select: 'name specializations' },
+        { path: 'clinics', model: 'Clinic' },
+        { path: 'doctor', model: 'Employee' },
+        // { path: 'complex', model: 'Complex' },
       ];
       const result = await paginate({
         model: this.serviceModel,
@@ -183,16 +222,62 @@ export class ServiceService {
     }
   }
 
-  async update(id: string, updateServiceDto: any): Promise<any> {
+  async update(id: string, updateServiceDto: UpdateServiceDto): Promise<any> {
     try {
+      if (!isValidObjectId(id)) {
+        throw new BadRequestException('Invalid service ID.');
+      }
+
+      if (updateServiceDto.clinics && updateServiceDto.clinics.length > 0) {
+        for (const clinicId of updateServiceDto.clinics) {
+          if (!isValidObjectId(clinicId)) {
+            throw new BadRequestException(`Invalid clinic ID: ${clinicId}`);
+          }
+        }
+
+        const clinics = await this.clinicModel
+          .find({
+            _id: { $in: updateServiceDto.clinics },
+            isActive: true,
+          })
+          .exec();
+        if (clinics.length === 0) {
+          throw new BadRequestException(
+            'No active clinics found for the provided IDs.',
+          );
+        }
+      }
+
+      if (updateServiceDto.doctor && updateServiceDto.doctor.length > 0) {
+        for (const doctorId of updateServiceDto.doctor) {
+          if (!isValidObjectId(doctorId)) {
+            throw new BadRequestException(`Invalid doctor ID: ${doctorId}`);
+          }
+        }
+
+        const doctors = await this.employeeModel.find({
+          _id: { $in: updateServiceDto.doctor },
+          isActive: true,
+          employeeType: 'Doctor',
+        });
+        const hasDoctor = doctors.length > 0;
+        if (!hasDoctor) {
+          throw new BadRequestException(
+            'No valid doctors found assigned to the provided clinics.',
+          );
+        }
+      }
+
       const updatedService = await this.serviceModel
         .findByIdAndUpdate(id, updateServiceDto, { new: true })
         .exec();
+
       if (!updatedService || updatedService.deleted) {
         throw new NotFoundException(
-          `Service with ID ${id} not found or has been deleted`,
+          `Service with ID ${id} not found or has been deleted.`,
         );
       }
+
       return {
         success: true,
         message: 'Service updated successfully',
@@ -205,10 +290,12 @@ export class ServiceService {
       throw new InternalServerErrorException('Failed to update service');
     }
   }
-
   async deleteService(id: string): Promise<ApiGetResponse<Service>> {
     try {
       const service = await this.serviceModel.findById(id).exec();
+      if (service?.isActive)
+        throw new NotFoundException("can't delete active Service!");
+
       if (!service || service.deleted)
         throw new NotFoundException('Service not found or has been deleted');
 

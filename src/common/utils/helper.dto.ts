@@ -103,6 +103,40 @@ export class GeneralInfo extends BaseModel {
 //   endTime: string;
 // }
 
+export class ServiceSession extends BaseModel {
+  @ApiProperty({
+    type: String,
+    required: true,
+    example: 'Consultation',
+    description: 'Session name',
+  })
+  sessionName: string;
+
+  @ApiProperty({
+    type: Number,
+    required: true,
+    example: 30,
+    description: 'Session duration',
+  })
+  duration: number;
+
+  @ApiProperty({
+    type: String,
+    required: true,
+    example: 'Consultation',
+    description: 'Session description',
+  })
+  description: string;
+
+  @ApiProperty({
+    type: Boolean,
+    required: true,
+    example: true,
+    description: 'Is appointment required',
+  })
+  appointmentRequired: boolean;
+}
+
 export class InsuranceCompanyDTO extends BaseModel {
   @ApiProperty({
     type: String,

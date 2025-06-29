@@ -24,6 +24,13 @@ import { PermissionsEnum } from 'src/config/permission.enum';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes } from '@nestjs/swagger';
 
+import {
+  ParseFilePipe, // <-- Import
+  MaxFileSizeValidator, // <-- Import
+  FileTypeValidator, // <-- Import
+} from '@nestjs/common';
+import { ParseJsonPipe } from 'src/common/pipes/parse-json.pipe';
+
 @Controller('companies')
 @UseGuards(PermissionsGuard)
 export class CompanyController {
@@ -34,8 +41,17 @@ export class CompanyController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('logo'))
   async create(
-    @Body() createCompanyDto: CreateCompanyDto,
-    @UploadedFile() file: Express.Multer.File,
+    @Body('data', new ParseJsonPipe()) createCompanyDto: CreateCompanyDto,
+    @UploadedFile(
+      new ParseFilePipe({
+        validators: [
+          new MaxFileSizeValidator({ maxSize: 2 * 1024 * 1024 }), // 2MB
+          new FileTypeValidator({ fileType: '.(png|jpeg|jpg|gif|svg)' }),
+        ],
+        fileIsRequired: false,
+      }),
+    )
+    file: Express.Multer.File,
     @Req() req: Request & { user: { userId: string } },
   ) {
     const user_id = req.user.userId;

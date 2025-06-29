@@ -64,13 +64,14 @@ export class AppointmentService {
         throw new NotFoundException('Clinic not found');
       }
       if (
-        serviceData.clinic.toString() !== createAppointmentDto.clinic.toString()
+        serviceData.clinics.toString() !==
+        createAppointmentDto.clinic.toString()
       ) {
         throw new BadRequestException('Service is not offered by this clinic');
       }
       if (
         createAppointmentDto.doctor &&
-        !serviceData.doctors
+        !serviceData.doctor
           .map((d) => d.toString())
           .includes(createAppointmentDto.doctor.toString())
       ) {
