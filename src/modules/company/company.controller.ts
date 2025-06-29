@@ -25,13 +25,12 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes } from '@nestjs/swagger';
 
 import {
- 
+
   ParseFilePipe, // <-- Import
   MaxFileSizeValidator, // <-- Import
   FileTypeValidator, // <-- Import
 } from '@nestjs/common';
 import { ParseJsonPipe } from 'src/common/pipes/parse-json.pipe';
-
 
 @Controller('companies')
 @UseGuards(PermissionsGuard)
@@ -60,6 +59,7 @@ export class CompanyController {
           new MaxFileSizeValidator({ maxSize: 2 * 1024 * 1024 }), // 2MB
           new FileTypeValidator({ fileType: '.(png|jpeg|jpg|gif|svg)' }),
         ],
+
         fileIsRequired: false, 
       }),
     )

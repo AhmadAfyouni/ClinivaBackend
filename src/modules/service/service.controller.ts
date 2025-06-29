@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   UseGuards,
+  Put,
 } from '@nestjs/common';
 import { ServiceService } from './service.service';
 import { CreateServiceDto } from './dto/create-service.dto';
@@ -39,7 +40,7 @@ export class ServiceController {
     return await this.serviceService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @Permissions(PermissionsEnum.ADMIN)
   async update(@Param('id') id: string, @Body() updateServiceDto: any) {
     return await this.serviceService.update(id, updateServiceDto);

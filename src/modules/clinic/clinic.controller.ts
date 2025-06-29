@@ -89,10 +89,10 @@ export class ClinicController {
     return this.clinicService.deleteClinic(id);
   }
 
-  @Get('count/by-cliniccollection/:clinicCollectionId')
+  @Get('by-cliniccollection/:clinicCollectionId')
   @Permissions(PermissionsEnum.ADMIN)
   getDepartmentCount(@Param('clinicCollectionId') clinicCollectionId: string) {
-    return this.clinicService.getCountByClinicCollectionId(clinicCollectionId);
+    return this.clinicService.getClinicByClinicCollectionId(clinicCollectionId);
   }
 
   @Get(':id/patient-count')
