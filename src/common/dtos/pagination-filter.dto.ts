@@ -150,4 +150,18 @@ export class PaginationAndFilterDto {
   @IsOptional()
   @IsString()
   filter_fields?: string;
+
+   @ApiPropertyOptional({
+    description: 'Filter by deletion status. "true" for inactive, "false" for active.',
+    example: false,
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => {
+    if (value === 'true') return true;
+    if (value === 'false') return false;
+    return value;
+  })
+  deleted?: boolean; // <-- ADD THIS PROPERTY
 }

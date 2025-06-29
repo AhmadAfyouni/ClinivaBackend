@@ -7,7 +7,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Employee } from '../employee/schemas/employee.schema';
 import { EmployeeService } from '../employee/employee.service';
-import { get, Model } from 'mongoose';
+import { FilterQuery, get, Model } from 'mongoose';
 import { Company, CompanyDocument } from './schemas/company.schema';
 import { CreateCompanyDto } from './dto/create-company.dto';
 import { UpdateCompanyDto } from './dto/update-company.dto';
@@ -98,7 +98,7 @@ export class CompanyService {
 
   async findAll(paginationDto: PaginationAndFilterDto, filters: any) {
     try {
-      let { page, limit, allData, sortBy, order } = paginationDto;
+      let { page, limit, allData, sortBy, order,search,deleted } = paginationDto;
 
       // Convert page & limit to numbers
       page = Number(page) || 1;
@@ -108,6 +108,22 @@ export class CompanyService {
       const sort: SortType = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
+       const query: FilterQuery<Company> = { ...filters };
+
+         if (search) {
+        delete query.tradeName; 
+        delete query.legalName;
+
+        query.$or = [
+          { tradeName: { $regex: search, $options: 'i' } },
+          { legalName: { $regex: search, $options: 'i' } },
+        ];
+      }
+
+       if (deleted !== undefined) {
+        // Assuming your schema field is 'isDeleted'
+        query.isDeleted = deleted;
+      }
 
       return paginate({
         model: this.companyModel,
@@ -115,7 +131,55 @@ export class CompanyService {
         page,
         limit,
         allData,
-        filter: filters,
+        filter: query,
+        // filter: filters,
+        sort: sort,
+      });
+    } catch (error) {
+      console.error('Error finding companies:', error);
+      throw new BadRequestException(
+        error.message || 'Failed to retrieve companies',
+      );
+    }
+  }
+
+  async findAll_(paginationDto: PaginationAndFilterDto) {
+    try {
+      // Destructure all the properties you need from the DTO
+      const { page, limit, allData, sortBy, order, search, deleted } = paginationDto;
+
+      const sortField: string = sortBy ?? 'createdAt';
+      const sort: { [key: string]: 1 | -1 } = {
+        [sortField]: order === 'asc' ? 1 : -1,
+      };
+      
+      // --- THIS IS THE CORE FIX ---
+      // 1. Create a dynamic query object
+      const query: FilterQuery<Company> = {};
+
+      // 2. Add search logic if the 'search' parameter exists
+      if (search) {
+        query.$or = [
+          { tradeName: { $regex: search, $options: 'i' } },
+          { legalName: { $regex: search, $options: 'i' } },
+        ];
+      }
+
+      // 3. Add deletion status logic if the 'deleted' parameter exists
+      // We check for `undefined` because the value could be `false`
+      if (deleted !== undefined) {
+        // Assuming your schema field is named 'isDeleted'. Change if necessary.
+        query.isDeleted = deleted;
+      }
+
+      // 4. Pass the correctly built 'query' object to your paginate helper
+      return paginate({
+        model: this.companyModel,
+        populate: [{ path: 'generalInfo' }],
+        page,
+        limit,
+        allData,
+        filter: query, // Use the new query object
         sort: sort,
       });
     } catch (error) {

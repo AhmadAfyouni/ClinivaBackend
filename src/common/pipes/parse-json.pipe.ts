@@ -8,6 +8,7 @@ export class ParseJsonPipe implements PipeTransform {
       throw new BadRequestException(
         'Validation failed (expected a stringified JSON).',
       );
+
     }
     try {
       // Parse the string into a JavaScript object
@@ -17,4 +18,5 @@ export class ParseJsonPipe implements PipeTransform {
       throw new BadRequestException('Validation failed (invalid JSON string).');
     }
   }
+
 }

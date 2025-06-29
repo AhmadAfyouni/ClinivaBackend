@@ -25,6 +25,7 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiConsumes } from '@nestjs/swagger';
 
 import {
+
   ParseFilePipe, // <-- Import
   MaxFileSizeValidator, // <-- Import
   FileTypeValidator, // <-- Import
@@ -40,7 +41,17 @@ export class CompanyController {
   @Permissions(PermissionsEnum.ADMIN)
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(FileInterceptor('logo'))
+  // async create(
+  //   @Body() createCompanyDto: CreateCompanyDto,
+  //   @UploadedFile() file: Express.Multer.File,
+  //   @Req() req: Request & { user: { userId: string } },
+  // ) {
+  //   const user_id = req.user.userId;
+  //   return this.companyService.create(createCompanyDto, user_id, file);
+  // }
+
   async create(
+
     @Body('data', new ParseJsonPipe()) createCompanyDto: CreateCompanyDto,
     @UploadedFile(
       new ParseFilePipe({
@@ -48,13 +59,15 @@ export class CompanyController {
           new MaxFileSizeValidator({ maxSize: 2 * 1024 * 1024 }), // 2MB
           new FileTypeValidator({ fileType: '.(png|jpeg|jpg|gif|svg)' }),
         ],
-        fileIsRequired: false,
+
+        fileIsRequired: false, 
       }),
     )
     file: Express.Multer.File,
-    @Req() req: Request & { user: { userId: string } },
+    @Req() req: Request & { user: { userId:string } },
   ) {
     const user_id = req.user.userId;
+
     return this.companyService.create(createCompanyDto, user_id, file);
   }
 
@@ -65,11 +78,12 @@ export class CompanyController {
     @Query() queryParams: any,
   ) {
     {
-      const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+      const { page, limit, allData, sortBy, order, search, deleted, ...filters } = queryParams;
 
       return this.companyService.findAll(paginationDto, filters);
     }
   }
+
 
   @Get(':id')
   @Permissions(PermissionsEnum.ADMIN)
