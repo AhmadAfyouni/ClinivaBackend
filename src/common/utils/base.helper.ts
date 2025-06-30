@@ -77,10 +77,10 @@ export class WorkingHoursBase extends BaseModel {
 // Base ContactInfo class
 export class ContactInfoBase extends BaseModel {
   @Prop({ type: String })
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: [String], required: false })
   @IsString()
   @IsOptional()
-  phone_numbers?: string;
+  phone_numbers?: [string];
 
   @Prop({ type: String })
   @ApiProperty({ type: String, format: 'email', required: false })

@@ -39,11 +39,11 @@ export class CreateClinicDto {
   AverageDurationOfVisit: number;
 
   @ApiPropertyOptional({
-    description: 'Brief overview of the clinic (اذا مافي شركة)',
+    description: '',
   })
   @IsOptional()
   @IsString()
-  overview?: string;
+  overview?: [string];
 
   @ApiProperty({
     description: 'Clinic activation status',

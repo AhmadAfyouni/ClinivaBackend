@@ -72,6 +72,7 @@ export class ClinicCollectionService {
   ): Promise<ApiGetResponse<Complex>> {
     try {
       const employee = await this.employeeModel.findById(userId);
+      console.log(employee, '@@@@@@', employee?.companyId);
       if (employee?.plan === 'company') {
         if (employee && employee.companyId) {
           createClinicCollectionDto.companyId = employee.companyId;
@@ -110,21 +111,24 @@ export class ClinicCollectionService {
         publicId,
         plan: employee?.plan,
       });
-      if (!createClinicCollectionDto.department_name) {
+      if (!createClinicCollectionDto.departments) {
         throw new BadRequestException('Department name is required');
       }
 
       const savedClinicCollection = await newClinicCollection.save();
-      const department = await this.departmentService.createDepartment(
-        {
-          clinicCollectionId: savedClinicCollection.id,
-          name: createClinicCollectionDto.department_name,
-          description: createClinicCollectionDto.department_description || '',
-        },
-        userId,
-      );
+      createClinicCollectionDto.departments.forEach(async (dep) => {
+        const department = await this.departmentService.createDepartment(
+          {
+            clinicCollectionId: savedClinicCollection.id,
+            name: dep.name,
+            description: dep.description || '',
+          },
+          userId,
+        );
+        console.log(department);
+      });
       console.log(savedClinicCollection);
-      console.log(department);
+
       return {
         success: true,
         message: 'Medical complex Added successfully',
