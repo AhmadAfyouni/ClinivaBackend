@@ -11,25 +11,21 @@ import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
 import { GeneralInfo } from 'src/common/utils/helper.dto';
 
+class DepartmentDto {
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  description: string;
+}
 export class CreateClinicCollectionDto {
   @ApiProperty({
-    description: 'Department name of the complex',
-    example: 'Saudi Clinics Group',
+    description: 'list of Department name for the complex',
+    type: [DepartmentDto],
     required: true,
   })
-  @IsString()
-  @IsNotEmpty()
-  department_name: string;
-
-  @ApiProperty({
-    description: 'Department description of the complex',
-    example: 'Saudi Clinics Group',
-    required: true,
-  })
-  @IsString()
-  @IsNotEmpty()
-  department_description: string;
-
+  @Type(() => DepartmentDto)
+  departments: DepartmentDto[];
   @ApiProperty({
     description: 'Indicates if the complex is active',
     example: true,

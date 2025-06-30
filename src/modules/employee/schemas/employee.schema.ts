@@ -228,10 +228,8 @@ export class Employee {
 
   @Prop({
     required: true,
-    enum: ['FULL_TIME', 'PART_TIME'],
-    default: 'FULL_TIME',
   })
-  jobType: string;
+  jobTitle: string;
 
   @Prop({ type: Boolean, default: true })
   isActive: boolean;

@@ -34,7 +34,7 @@ export class GeneralInfo extends BaseModel {
   goals: string;
 
   @ApiProperty()
-  overview: string;
+  overview: [string];
 
   @ApiProperty()
   ceo: string;
@@ -58,10 +58,10 @@ export class GeneralInfo extends BaseModel {
   FinanceInfo: { VAT: string; CR: string };
 
   @ApiProperty({ required: false })
-  PrivacyPolicy: { title: string; content: string };
+  PrivacyPolicy: [{ title: string; content: string }];
 
-  @ApiProperty({ required: false })
-  TermsConditions: { title: string; content: string };
+  @ApiProperty({ required: false }) //list of string
+  TermsConditions: [{ title: string; content: string }];
 
   @ApiProperty({ required: true, default: 'Key_member' })
   Key_member: string;
