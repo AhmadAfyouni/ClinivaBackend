@@ -29,6 +29,7 @@ export class CompanyService {
     file: Express.Multer.File,
   ): Promise<ApiGetResponse<Company>> {
     try {
+      console.log(createCompanyDto);
       const companyData = {
         tradeName: createCompanyDto.tradeName,
         legalName: createCompanyDto.legalName,
@@ -98,7 +99,8 @@ export class CompanyService {
 
   async findAll(paginationDto: PaginationAndFilterDto, filters: any) {
     try {
-      let { page, limit, allData, sortBy, order,search,deleted } = paginationDto;
+      let { page, limit, allData, sortBy, order, search, deleted } =
+        paginationDto;
 
       // Convert page & limit to numbers
       page = Number(page) || 1;
@@ -108,10 +110,10 @@ export class CompanyService {
       const sort: SortType = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
-       const query: FilterQuery<Company> = { ...filters };
+      const query: FilterQuery<Company> = { ...filters };
 
-         if (search) {
-        delete query.tradeName; 
+      if (search) {
+        delete query.tradeName;
         delete query.legalName;
 
         query.$or = [
@@ -120,7 +122,7 @@ export class CompanyService {
         ];
       }
 
-       if (deleted !== undefined) {
+      if (deleted !== undefined) {
         // Assuming your schema field is 'isDeleted'
         query.isDeleted = deleted;
       }
@@ -146,13 +148,14 @@ export class CompanyService {
   async findAll_(paginationDto: PaginationAndFilterDto) {
     try {
       // Destructure all the properties you need from the DTO
-      const { page, limit, allData, sortBy, order, search, deleted } = paginationDto;
+      const { page, limit, allData, sortBy, order, search, deleted } =
+        paginationDto;
 
       const sortField: string = sortBy ?? 'createdAt';
       const sort: { [key: string]: 1 | -1 } = {
         [sortField]: order === 'asc' ? 1 : -1,
       };
-      
+
       // --- THIS IS THE CORE FIX ---
       // 1. Create a dynamic query object
       const query: FilterQuery<Company> = {};
