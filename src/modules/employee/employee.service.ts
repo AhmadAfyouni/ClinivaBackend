@@ -384,6 +384,8 @@ export class EmployeeService {
         if (!role) throw new InternalServerErrorException('No Roles Found');
         createEmployeeDto.identity = '(Admin)-' + publicId;
         createEmployeeDto.Owner = true;
+        console.log('#########');
+        createEmployeeDto.jobTitle = 'Admin';
       }
 
       const newEmployee = new this.employeeModel({

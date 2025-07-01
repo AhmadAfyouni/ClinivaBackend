@@ -234,13 +234,11 @@ export class CreateEmployeeDto {
   certifications?: string[];
 
   @ApiProperty({
-    description: 'Job Type',
-    enum: ['FULL_TIME', 'PART_TIME'],
+    description: 'Job Title',
     required: true,
   })
-  @IsEnum(['FULL_TIME', 'PART_TIME'])
   @IsNotEmpty()
-  jobType: string;
+  jobTitle: string;
 
   @ApiProperty({
     description: 'Employee activation status',
