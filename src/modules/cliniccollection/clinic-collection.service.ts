@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { removeFileFromLocal } from 'src/common/utils/file.util';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { Complex, ComplexDocument } from './schemas/cliniccollection.schema';
 import { UpdateClinicCollectionDto } from './dto/update-clinic-collection.dto';
 import { CreateClinicCollectionDto } from './dto/create-clinic-collection.dto';
@@ -113,6 +113,14 @@ export class ClinicCollectionService {
       });
       if (!createClinicCollectionDto.departments) {
         throw new BadRequestException('Department name is required');
+      }
+      if (createClinicCollectionDto.PIC) {
+        const PIC = await this.employeeModel.findById(
+          createClinicCollectionDto.PIC,
+        );
+        if (!PIC) {
+          throw new BadRequestException('PIC not found');
+        }
       }
 
       const savedClinicCollection = await newClinicCollection.save();
