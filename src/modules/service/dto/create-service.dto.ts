@@ -1,12 +1,14 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsString,
   IsNotEmpty,
   IsNumber,
   IsMongoId,
   IsArray,
-  ArrayNotEmpty,
+  IsOptional,
+  IsBoolean,
   IsEnum,
+  ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ServiceSession } from 'src/common/utils/helper.dto';
@@ -56,69 +58,76 @@ export class CreateServiceDto {
   ])
   category: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Number of sessions',
-    example: 5,
-    required: true,
+    example: 1,
+    default: 1,
   })
   @IsNumber()
   @Type(() => Number)
-  sessionsNumber: number;
+  @IsOptional()
+  sessionsNumber?: number = 1;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'List of session details',
-    required: false,
+    type: [ServiceSession],
   })
-  session?: ServiceSession[];
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => ServiceSession)
+  @IsOptional()
+  session?: ServiceSession[] = [];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'List of Doctor IDs',
     example: ['609e125f531123456789dcba', '609e125f531123456789dcbb'],
-    required: false,
+    type: [String],
   })
   @IsArray()
-  @ArrayNotEmpty()
   @IsMongoId({ each: true })
-  doctor?: string[];
+  @IsOptional()
+  doctor?: string[] = [];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'List of clinic IDs',
     example: ['609e125f531123456789dcba', '609e125f531123456789dcbb'],
-    required: false,
+    type: [String],
   })
   @IsArray()
-  @ArrayNotEmpty()
   @IsMongoId({ each: true })
-  clinics?: string[];
+  @IsOptional()
+  clinics?: string[] = [];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Complex ID',
     example: '609e125f531123456789dcbb',
-    required: false,
   })
   @IsMongoId()
+  @IsOptional()
   complex?: string;
 
-  @ApiProperty({
-    description: 'Is the service active?',
-    example: true,
-    required: false,
+  @ApiPropertyOptional({
+    description: 'Service active status',
+    default: true,
   })
-  isActive?: boolean;
+  @IsBoolean()
+  @IsOptional()
+  isActive: boolean = true;
 
   @ApiProperty({
-    description: 'Public ID of the service',
-    example: 'service-12345',
+    description: 'Public ID for the service',
+    example: 'SRV-12345',
     required: true,
   })
   @IsString()
   @IsNotEmpty()
   publicId: string;
 
-  @ApiProperty({
-    description: 'Is the service deleted?',
-    example: false,
-    required: false,
+  @ApiPropertyOptional({
+    description: 'Whether the service is deleted',
+    default: false,
   })
-  deleted?: boolean;
+  @IsBoolean()
+  @IsOptional()
+  deleted: boolean = false;
 }

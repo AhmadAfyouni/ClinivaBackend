@@ -2,27 +2,17 @@ import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
-  IsDate,
   IsMongoId,
   IsNotEmpty,
   IsNumber,
-  IsObject,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
-import {
-  BankAccountDTO,
-  CashBoxDTO,
-  CommercialRecordDTO,
-  ContactInfoDTO,
-  HolidayDTO,
-  InsuranceCompanyDTO,
-  OnlinePaymentMethodDTO,
-} from 'src/common/utils/helper.dto';
 import { WorkingHours } from 'src/common/utils/helper';
+import { GeneralInfo } from 'src/common/utils';
 
 export class CreateClinicDto {
   @ApiProperty({ description: 'Clinic name', example: 'Al Noor Clinic' })
@@ -30,20 +20,13 @@ export class CreateClinicDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'Add the expected time for each visit in minutes.',
     example: 30,
   })
   @IsNotEmpty()
   @IsNumber()
   AverageDurationOfVisit: number;
-
-  @ApiPropertyOptional({
-    description: '',
-  })
-  @IsOptional()
-  @IsString()
-  overview?: [string];
 
   @ApiProperty({
     description: 'Clinic activation status',
@@ -56,132 +39,39 @@ export class CreateClinicDto {
   isActive?: boolean = true;
 
   @ApiPropertyOptional({
-    description: 'Year of establishment',
-    example: '2005-06-15',
+    description: 'Clinic logo URL',
+    example: 'https://example.com/logo.png',
   })
+  @IsString()
   @IsOptional()
-  @IsDate()
-  yearOfEstablishment?: Date;
+  logo?: string;
 
   @ApiProperty({
-    description: 'Clinic address',
-    example: '123 Main Street, Riyadh, Saudi Arabia  (اذا مافي شركة)',
+    description: 'General information about the clinic',
+    type: GeneralInfo,
   })
-  @IsString()
+  @ValidateNested()
+  @Type(() => GeneralInfo)
+  generalInfo: GeneralInfo;
+
+  @ApiProperty({
+    description: 'List of service IDs associated with the clinic',
+    example: ['60f7c7b84f1a2c001c8b4567', '60f7c7b84f1a2c001c8b4568'],
+  })
+  @IsArray()
+  @IsMongoId({ each: true })
   @IsNotEmpty()
-  address: string;
-
-  @ApiPropertyOptional({
-    description: 'Clinic logo image file (upload)',
-    type: 'string',
-    format: 'binary',
-  })
-  @IsOptional() // Still optional if the logo itself is optional for a clinic
-  @IsString() // This decorator might seem odd for a file, but it's for the field name from swagger. The actual validation of file type/size happens elsewhere.
-  logo?: string; // This field is mainly for Swagger, the actual file is handled by @UploadedFile
-
-  @ApiPropertyOptional({
-    description: 'Clinic vision statement  (اذا مافي شركة)',
-  })
-  @IsOptional()
-  @IsString()
-  vision?: string;
-
-  @ApiPropertyOptional({
-    description: 'Additional goals about the clinic  (اذا مافي شركة)',
-  })
-  @IsOptional()
-  @IsString()
-  goals?: string;
-
-  @ApiPropertyOptional({
-    type: [ContactInfoDTO],
-    description: 'Contact information of the clinic',
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => ContactInfoDTO)
-  @IsOptional()
-  contactInfos?: ContactInfoDTO[];
-
-  @ApiPropertyOptional({
-    type: [HolidayDTO],
-    description: 'Clinic holidays  (اذا مافي مجمع)',
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => HolidayDTO)
-  @IsOptional()
-  holidays?: HolidayDTO[];
+  services: Types.ObjectId[];
 
   @ApiPropertyOptional({
     type: [WorkingHours],
-    description: 'Working hours of the clinic  (اذا مافي مجمع)',
+    description: 'Working hours of the clinic',
   })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => WorkingHours)
   @IsOptional()
   WorkingHours?: WorkingHours[];
-
-  @ApiPropertyOptional({
-    type: [BankAccountDTO],
-    description: 'Bank accounts of the clinic (اذا مافي شركة)',
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => BankAccountDTO)
-  @IsOptional()
-  bankAccount?: BankAccountDTO[];
-
-  @ApiPropertyOptional({
-    type: [CashBoxDTO],
-    description: 'Company cash boxes (اذا مافي شركة)',
-    required: false,
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CashBoxDTO)
-  @IsOptional()
-  cashBoxes?: CashBoxDTO[];
-
-  @ApiPropertyOptional({
-    type: [OnlinePaymentMethodDTO],
-    description: 'Accepted online payment methods (اذا مافي شركة)',
-    required: false,
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => OnlinePaymentMethodDTO)
-  @IsOptional()
-  onlinePaymentMethods?: OnlinePaymentMethodDTO[];
-
-  @ApiPropertyOptional({
-    type: [InsuranceCompanyDTO],
-    description: 'Accepted insurance companies (اذا مافي شركة)',
-  })
-  @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => InsuranceCompanyDTO)
-  @IsOptional()
-  insuranceCompany?: InsuranceCompanyDTO[];
-
-  @ApiPropertyOptional({
-    type: CommercialRecordDTO,
-    description: 'Commercial record of the clinic  (اذا مافي شركة)',
-  })
-  @IsOptional()
-  @ValidateNested()
-  @Type(() => CommercialRecordDTO)
-  commercialRecord?: CommercialRecordDTO;
-
-  @ApiPropertyOptional({
-    description: 'Google Maps location coordinates  (اذا مافي شركة)',
-    example: { x: 24.7136, y: 46.6753 },
-  })
-  @IsOptional()
-  @IsObject()
-  locationGoogl?: { x: number; y: number };
 
   @ApiPropertyOptional({
     description: 'Department ID that the clinic belongs to',
@@ -192,12 +82,41 @@ export class CreateClinicDto {
   departmentId?: Types.ObjectId;
 
   @ApiProperty({
-    description: 'List of specialization IDs associated with the clinic ',
-    example: ['60f7c7b84f1a2c001c8b4567', '60f7c7b84f1a2c001c8b4568'],
-    required: true,
+    description: 'Public ID for the clinic',
+    example: 'clinic-123',
   })
-  @IsArray()
-  @IsMongoId({ each: true })
+  @IsString()
   @IsNotEmpty()
-  specializations: Types.ObjectId[];
+  publicId: string;
+
+  @ApiPropertyOptional({
+    description: 'Description of the clinic',
+  })
+  @IsString()
+  @IsOptional()
+  Description?: string;
+
+  @ApiProperty({
+    description: 'Maximum number of patients the clinic can handle',
+    example: 100,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  PatientCapacity: number;
+
+  @ApiProperty({
+    description: 'Maximum number of doctors the clinic can accommodate',
+    example: 10,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  DoctorsCapacity: number;
+
+  @ApiProperty({
+    description: 'Maximum number of staff members the clinic can accommodate',
+    example: 20,
+  })
+  @IsNumber()
+  @IsNotEmpty()
+  StaffMembersCapacity: number;
 }
