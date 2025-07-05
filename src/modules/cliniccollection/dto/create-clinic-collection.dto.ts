@@ -6,26 +6,15 @@ import {
   IsOptional,
   IsString,
   IsMongoId,
+  ValidateNested,
+  IsArray,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
-import { GeneralInfo } from 'src/common/utils/helper.dto';
+import { GeneralInfo } from 'src/common/utils';
+import { WorkingHours } from 'src/common/utils/helper';
 
-class DepartmentDto {
-  @ApiProperty()
-  name: string;
-
-  @ApiProperty()
-  description: string;
-}
 export class CreateClinicCollectionDto {
-  @ApiProperty({
-    description: 'list of Department name for the complex',
-    type: [DepartmentDto],
-    required: true,
-  })
-  @Type(() => DepartmentDto)
-  departments: DepartmentDto[];
   @ApiProperty({
     description: 'Indicates if the complex is active',
     example: true,
@@ -96,13 +85,13 @@ export class CreateClinicCollectionDto {
   @IsOptional()
   companyId?: Types.ObjectId;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     description: 'Reference to the Person in Charge (PIC) of the complex',
-    required: true,
+    required: false,
   })
   @IsMongoId()
-  @IsNotEmpty()
-  PIC: Types.ObjectId;
+  @IsOptional()
+  PIC?: Types.ObjectId;
 
   @ApiProperty({
     description: 'Public unique identifier for the complex',
@@ -112,4 +101,15 @@ export class CreateClinicCollectionDto {
   @IsString()
   @IsNotEmpty()
   publicId: string;
+
+  @ApiPropertyOptional({
+    description: 'Working hours of the complex',
+    type: [WorkingHours],
+    required: false,
+  })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => WorkingHours)
+  @IsOptional()
+  WorkingHours?: WorkingHours[];
 }

@@ -25,9 +25,6 @@ export class Clinic {
   @Prop({ required: true, type: [Types.ObjectId], ref: 'Service' })
   services: Types.ObjectId[];
 
-  @Prop({ type: [HolidayDTO], default: [] })
-  holidays?: HolidayDTO[];
-
   @Prop({ required: true })
   name: string;
 

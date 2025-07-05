@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
@@ -6,17 +6,12 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
-  IsObject,
   IsOptional,
   IsString,
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import {
-  ContactInfoDTO,
-  InsuranceDTO,
-  MedicalTestResultDTO,
-} from 'src/common/utils/helper.dto';
+import { ContactInfoDTO, InsuranceDTO, MedicalTestResultDTO } from 'src/common/utils/helper.dto';
 
 export class CreatePatientDto {
   @ApiProperty({
@@ -28,16 +23,15 @@ export class CreatePatientDto {
   @IsNotEmpty()
   name: string;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: [ContactInfoDTO],
     description: 'List of contact information',
-    required: false,
   })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => ContactInfoDTO)
   @IsOptional()
-  contactInfos?: ContactInfoDTO[];
+  contactInfos?: ContactInfoDTO[] = [];
 
   @ApiProperty({
     description: 'Date of Birth',
@@ -155,23 +149,24 @@ export class CreatePatientDto {
   @IsNotEmpty()
   address: string;
 
-  @ApiProperty({
-    description: 'Emergency Contact',
-    type: Object,
-    required: false,
-    example: {
+  @ApiPropertyOptional({
+    type: [Object],
+    description: 'List of emergency contacts',
+    example: [{
       name: 'John Doe',
       phone: '+966551234567',
       relationToPatient: 'brother',
-    },
+    }],
   })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => Object)
   @IsOptional()
-  @IsObject()
-  emergencyContact?: {
+  emergencyContacts?: Array<{
     name: string;
     phone: string;
     relationToPatient: string;
-  };
+  }> = [];
 
   @ApiProperty({
     type: [Object],
@@ -181,39 +176,36 @@ export class CreatePatientDto {
   })
   @IsArray()
   @IsOptional()
-  ChronicDiseases?: { disease_name: string }[];
+  ChronicDiseases?: Array<{ disease_name: string }>;
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: [InsuranceDTO],
     description: 'List of insurance details',
-    required: false,
   })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => InsuranceDTO)
   @IsOptional()
-  insurances?: InsuranceDTO[];
+  insurances?: InsuranceDTO[] = [];
 
-  @ApiProperty({
+  @ApiPropertyOptional({
     type: [MedicalTestResultDTO],
     description: 'List of medical test results',
-    required: false,
   })
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => MedicalTestResultDTO)
   @IsOptional()
-  medicalTestResults?: MedicalTestResultDTO[];
+  medicalTestResults?: MedicalTestResultDTO[] = [];
 
-  @ApiProperty({
-    description: 'Allergies list',
-    example: 'Peanuts',
+  @ApiPropertyOptional({
+    description: 'List of allergies',
+    example: ['Peanuts', 'Pollen'],
     type: [String],
-    required: false,
   })
   @IsArray()
   @IsOptional()
-  allergies?: string[];
+  allergies: string[] = [];
 
   @ApiProperty({
     description: 'Preferred Language',
@@ -265,7 +257,28 @@ export class CreatePatientDto {
     example: '2022-11-15T00:00:00Z',
     required: false,
   })
+  @ApiPropertyOptional({
+    description: 'Date of the last surgical procedure',
+    example: '2022-11-15T00:00:00Z',
+  })
   @IsOptional()
   @IsDate()
   Surgical_History?: Date;
+
+  @ApiProperty({
+    description: 'Public ID for the patient',
+    example: 'PAT-12345',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  publicId: string;
+
+  @ApiPropertyOptional({
+    description: 'Whether the patient is deleted',
+    default: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  deleted: boolean = false;
 }

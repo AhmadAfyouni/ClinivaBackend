@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsString,
   IsNotEmpty,
@@ -7,7 +7,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { GeneralInfo } from 'src/common/utils/helper.dto';
+import { GeneralInfo } from 'src/common/utils';
 
 export class CreateCompanyDto {
   @ApiProperty({
@@ -19,8 +19,13 @@ export class CreateCompanyDto {
   @IsNotEmpty()
   tradeName: string;
 
-  @ApiProperty({ description: '', required: false })
-  logo: string;
+  @ApiProperty({
+    description: 'URL to the company logo',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  logo?: string;
 
   @ApiProperty({
     description: 'Legal name of the company',
@@ -31,23 +36,13 @@ export class CreateCompanyDto {
   @IsNotEmpty()
   legalName: string;
 
-  @ApiPropertyOptional({
+  @ApiProperty({
     description: 'General information about the company',
-    required: false,
+    type: GeneralInfo,
   })
-  @IsOptional()
   @ValidateNested()
   @Type(() => GeneralInfo)
-  generalInfo?: GeneralInfo;
-
-  @ApiPropertyOptional({
-    description: 'Whether the company is marked as deleted',
-    required: false,
-    default: false,
-  })
-  @IsOptional()
-  @IsBoolean()
-  deleted?: boolean = false;
+  generalInfo: GeneralInfo;
 }
 
 // export class GeneralInfoDto {

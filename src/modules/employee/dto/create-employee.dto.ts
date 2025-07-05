@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
@@ -11,14 +11,12 @@ import {
   IsOptional,
   IsString,
   ValidateNested,
+  Min,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { Types } from 'mongoose';
-import {
-  ContactInfoDTO,
-  VacationDTO,
-  WorkingHoursBase,
-} from 'src/common/utils/helper.dto';
+import { ContactInfo, WorkingHours, Vacation } from 'src/common/utils/helper';
+import { DayOfWeek } from 'src/common/utils/helper.dto';
 
 export class CreateEmployeeDto {
   @ApiProperty({
@@ -29,6 +27,15 @@ export class CreateEmployeeDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @ApiPropertyOptional({
+    description: 'Full name',
+    example: 'John Michael Doe',
+    required: false,
+  })
+  @IsString()
+  @IsOptional()
+  fullName?: string;
 
   @ApiProperty({
     description: 'Email',
@@ -46,24 +53,15 @@ export class CreateEmployeeDto {
   password: string;
 
   @ApiProperty({
-    description: 'User ID',
-    example: '60f7c7b84f1a2c001c8b4568',
-    required: true,
-  })
-  @IsMongoId()
-  @IsNotEmpty()
-  userId: Types.ObjectId;
-
-  @ApiProperty({
-    type: [ContactInfoDTO],
+    type: [ContactInfo],
     description: 'List of contact information',
     required: false,
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => ContactInfoDTO)
+  @Type(() => ContactInfo)
   @IsOptional()
-  contactInfos?: ContactInfoDTO[];
+  contactInfos?: ContactInfo[];
 
   @ApiProperty({
     description: 'Date of Birth',
@@ -174,47 +172,33 @@ export class CreateEmployeeDto {
   Languages?: string[];
 
   @ApiProperty({
-    type: [WorkingHoursBase],
+    type: [WorkingHours],
     description: 'Employee working hours',
     required: false,
   })
   @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => WorkingHoursBase)
-  workingHours?: WorkingHoursBase[];
+  @Type(() => WorkingHours)
+  workingHours?: WorkingHours[];
 
   @ApiProperty({
-    type: [VacationDTO],
+    type: [Vacation],
     description: 'List of leaves',
     required: true,
   })
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => VacationDTO)
-  vacationRecords: VacationDTO[];
+  @Type(() => Vacation)
+  vacationRecords: Vacation[];
 
   @ApiProperty({
     description: 'Employee Type',
-    enum: [
-      'Doctor',
-      'Nurse',
-      'Technician',
-      'Administrative',
-      'Employee',
-      'Other',
-    ],
+    enum: ['Staff Member', 'Doctor', 'Admin'],
     example: 'Doctor',
     required: true,
   })
-  @IsEnum([
-    'Doctor',
-    'Nurse',
-    'Technician',
-    'Administrative',
-    'Employee',
-    'Other',
-  ])
+  @IsEnum(['Staff Member', 'Doctor', 'Admin'])
   @IsNotEmpty()
   employeeType: string;
 
@@ -249,46 +233,97 @@ export class CreateEmployeeDto {
   @IsOptional()
   isActive?: boolean;
 
-  @ApiProperty({
-    description: 'List of specialization IDs associated with the clinic',
+  @ApiPropertyOptional({
+    description: 'List of specialization IDs',
     example: ['60f7c7b84f1a2c001c8b4567', '60f7c7b84f1a2c001c8b4568'],
-    required: true,
+    required: false,
   })
   @IsArray()
   @IsMongoId({ each: true })
-  @IsNotEmpty()
-  specializations: Types.ObjectId[];
+  @IsOptional()
+  specializations?: Types.ObjectId[];
+
+  @ApiPropertyOptional({
+    description: 'List of clinic IDs',
+    example: ['60f7c7b84f1a2c001c8b4567', '60f7c7b84f1a2c001c8b4568'],
+    required: false,
+  })
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsOptional()
+  clinic?: Types.ObjectId[];
 
   @ApiProperty({
-    description: 'Clinic ID where the user works',
-    example: '60f7c7b84f1a2c001c8b4568',
+    description: 'Public ID',
+    example: 'emp-12345',
+    required: true,
+  })
+  @IsString()
+  @IsNotEmpty()
+  publicId: string;
+
+  @ApiPropertyOptional({
+    description: 'Company ID',
+    example: '60f7c7b84f1a2c001c8b4567',
     required: false,
   })
   @IsMongoId()
   @IsOptional()
-  clinicId?: Types.ObjectId;
+  companyId?: Types.ObjectId;
 
-  @ApiProperty({
-    description: 'List of clinic IDs where the user works',
-    example: ['60f7c7b84f1a2c001c8b4567', '60f7c7b84f1a2c001c8b4568'],
-    required: false,
-  })
-  @IsArray()
-  @IsMongoId({ each: true })
-  @IsOptional()
-  clinicIds?: Types.ObjectId[];
-
-  @ApiProperty({
-    description: 'Complex ID where the user works',
-    example: '60f7c7b84f1a2c001c8b4569',
+  @ApiPropertyOptional({
+    description: 'Complex ID',
+    example: '60f7c7b84f1a2c001c8b4568',
     required: false,
   })
   @IsMongoId()
   @IsOptional()
   complexId?: Types.ObjectId;
 
-  @ApiProperty({ description: 'Owner', example: false, required: false })
+  @ApiPropertyOptional({
+    description: 'Clinic ID',
+    example: '60f7c7b84f1a2c001c8b4569',
+    required: false,
+  })
+  @IsMongoId()
+  @IsOptional()
+  clinicId?: Types.ObjectId;
+
+  @ApiPropertyOptional({
+    description: 'Role IDs',
+    example: ['60f7c7b84f1a2c001c8b4570'],
+    required: true,
+  })
+  @IsArray()
+  @IsMongoId({ each: true })
+  @IsNotEmpty()
+  roleIds: Types.ObjectId[];
+
+  @ApiPropertyOptional({
+    description: 'Plan type',
+    enum: ['company', 'complex', 'clinic'],
+    default: 'clinic',
+    required: false,
+  })
+  @IsEnum(['company', 'complex', 'clinic'])
+  @IsOptional()
+  plan?: string = 'clinic';
+
+  @ApiPropertyOptional({
+    description: 'Is this the first login?',
+    default: true,
+    required: false,
+  })
   @IsBoolean()
   @IsOptional()
-  Owner?: boolean;
+  first_login?: boolean = true;
+
+  @ApiPropertyOptional({
+    description: 'Is this user an owner?',
+    default: false,
+    required: false,
+  })
+  @IsBoolean()
+  @IsOptional()
+  Owner?: boolean = false;
 }
