@@ -271,10 +271,15 @@ export class Employee {
   @Prop({ type: Types.ObjectId, ref: 'Company', required: false })
   companyId: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Complex', required: false })
+  @Prop({
+    type: Types.ObjectId,
+    ref: 'Complex',
+    required: false,
+    default: null,
+  })
   complexId: Types.ObjectId;
 
-  @Prop({ type: Types.ObjectId, ref: 'Clinic', required: false })
+  @Prop({ type: Types.ObjectId, ref: 'Clinic', required: false, default: null })
   clinicId: Types.ObjectId;
 
   @Prop({ type: Boolean, default: true })

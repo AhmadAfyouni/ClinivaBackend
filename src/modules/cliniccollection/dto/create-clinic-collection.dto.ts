@@ -14,7 +14,21 @@ import { Types } from 'mongoose';
 import { GeneralInfo } from 'src/common/utils';
 import { WorkingHours } from 'src/common/utils/helper';
 
+class DepartmentDto {
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  description: string;
+}
 export class CreateClinicCollectionDto {
+  @ApiProperty({
+    description: 'list of Department name for the complex',
+    type: [DepartmentDto],
+    required: true,
+  })
+  @Type(() => DepartmentDto)
+  departments: DepartmentDto[];
   @ApiProperty({
     description: 'Indicates if the complex is active',
     example: true,

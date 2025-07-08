@@ -80,16 +80,23 @@ export class ClinicService {
   }
   async createClinic(
     createClinicDto: CreateClinicDto,
-    plan: string,
+    user: Employee,
     file: Express.Multer.File,
   ): Promise<ApiGetResponse<Clinic>> {
     try {
-      if (plan != 'clinic' && !createClinicDto.departmentId) {
-        throw new BadRequestException(
-          'departmentId is required for complex plan',
-        );
+      if (user.plan === 'clinic') {
+        if (user.clinicId) {
+          const existingClinic = await this.clinicModel
+            .findById(user.clinicId)
+            .where({ deleted: false })
+            .exec();
+          if (existingClinic) {
+            throw new BadRequestException(
+              'User already has an associated clinic',
+            );
+          }
+        }
       }
-
       // If clinic has working hours and is part of a department, validate against complex hours
       if (
         createClinicDto.WorkingHours &&
@@ -234,6 +241,16 @@ export class ClinicService {
         logo: relativeFilePath,
       });
       const savedClinic = await newClinic.save();
+      if (user.plan === 'clinic') {
+        const employeeDoc = await this.employeeModel.findById(user._id);
+
+        if (employeeDoc) {
+          employeeDoc.clinicId = savedClinic._id;
+          employeeDoc.first_login = false;
+          await employeeDoc.save();
+        }
+      }
+
       return {
         success: true,
         message: 'Clinic created successfully',
