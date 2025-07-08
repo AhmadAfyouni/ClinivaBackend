@@ -77,12 +77,7 @@ export class AppointmentService {
       ) {
         throw new BadRequestException('Doctor is not assigned to this service');
       }
-      // check if clinic in holiday
-      if (clinic.holidays) {
-        if (clinic.holidays.some((h) => h.date === appointmentDate)) {
-          throw new BadRequestException('Clinic is on holiday');
-        }
-      }
+
       // conflict checks with service duration
       await this.checkConflict(
         'doctor',

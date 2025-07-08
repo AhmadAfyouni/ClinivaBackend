@@ -72,7 +72,7 @@ export class ClinicCollectionService {
   ): Promise<ApiGetResponse<Complex>> {
     try {
       const employee = await this.employeeModel.findById(userId);
-      console.log(employee, '@@@@@@', employee?.companyId);
+
       if (employee?.plan === 'company') {
         if (employee && employee.companyId) {
           createClinicCollectionDto.companyId = employee.companyId;
@@ -87,8 +87,24 @@ export class ClinicCollectionService {
           );
         }
       } else if (employee?.plan === 'complex') {
+        console.log('step1');
         if (!employee?.Owner) {
+          console.log('step2');
           throw new BadRequestException('Employee is not Owner');
+        }
+        console.log('step3');
+        if (employee?.complexId) {
+          console.log('step4');
+          const complex = await this.clinicCollectionModel
+            .findById(employee.complexId)
+            .where({ deleted: false })
+            .exec();
+          if (complex) {
+            console.log('step5');
+            throw new BadRequestException(
+              'User already has an associated complex',
+            );
+          }
         }
       } else {
         throw new BadRequestException(
@@ -133,10 +149,12 @@ export class ClinicCollectionService {
           },
           userId,
         );
-        console.log(department);
       });
-      console.log(savedClinicCollection);
-
+      if (employee?.plan === 'complex') {
+        employee.first_login = false;
+        employee.complexId = savedClinicCollection.id;
+        await employee.save();
+      }
       return {
         success: true,
         message: 'Medical complex Added successfully',
@@ -187,7 +205,6 @@ export class ClinicCollectionService {
         sort: sort,
       });
     } catch (error) {
-      console.log(error.message);
       if (error instanceof HttpException) throw error;
       throw new BadRequestException(
         'Failed to retrieve Medical Complexes',

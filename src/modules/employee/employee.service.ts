@@ -327,18 +327,19 @@ export class EmployeeService {
         employmentContractSize,
         certificationsSize,
       });
+      const savedEmployee = await newEmployee.save();
+
       if (createEmployeeDto.email) {
         console.log(createEmployeeDto.email);
         this.emailService.validateEmailOrThrow(createEmployeeDto.email);
         await this.emailService.sendEmail(
           // Add await here
           createEmployeeDto.email,
-          'Welcome to Cliniva',
-          'Thank you for signing up to Cliniva!',
+          'Welcome ' + createEmployeeDto.name,
+          'Thank you for signing up to Cliniva !',
         );
       }
 
-      const savedEmployee = await newEmployee.save();
       return {
         success: true,
         message: 'The addition has been completed successfully',
@@ -668,13 +669,13 @@ export class EmployeeService {
       Object.assign(tempDto, updateEmployeeDto);
 
       // If clinics or clinicCollectionId are not being updated, get them from the existing employee
-      if (!tempDto.clinicIds?.length && !tempDto.complexId) {
+      if (!tempDto.clinic?.length && !tempDto.complexId) {
         const existingEmployee = await this.employeeModel
           .findById(id)
           .lean()
           .exec();
         if (existingEmployee) {
-          tempDto.clinicIds = (existingEmployee as any).clinics || [];
+          tempDto.clinic = (existingEmployee as any).clinics || [];
           tempDto.complexId = (existingEmployee as any).complexId;
         }
       }

@@ -43,9 +43,12 @@ export class ClinicController {
     console.log(createClinicDto, 'createClinicDto');
     const userId = req.user.userId;
     const response = await this.employeeService.getEmployeeById(userId);
-    const user = response.data;
-    console.log('user*******');
-    return this.clinicService.createClinic(createClinicDto, user.plan, file);
+    console.log(response.data, 'response.data');
+    return this.clinicService.createClinic(
+      createClinicDto,
+      response.data,
+      file,
+    );
   }
 
   @Get()
