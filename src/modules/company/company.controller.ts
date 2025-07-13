@@ -49,27 +49,27 @@ export class CompanyController {
     return this.companyService.create(createCompanyDto, user_id, file);
   }
 
-  @Get()
-  @Permissions(PermissionsEnum.ADMIN)
-  async findAll(
-    @Query() paginationDto: PaginationAndFilterDto,
-    @Query() queryParams: any,
-  ) {
-    {
-      const {
-        page,
-        limit,
-        allData,
-        sortBy,
-        order,
-        search,
-        deleted,
-        ...filters
-      } = queryParams;
+  // @Get()
+  // @Permissions(PermissionsEnum.ADMIN)
+  // async findAll(
+  //   @Query() paginationDto: PaginationAndFilterDto,
+  //   @Query() queryParams: any,
+  // ) {
+  //   {
+  //     const {
+  //       page,
+  //       limit,
+  //       allData,
+  //       sortBy,
+  //       order,
+  //       search,
+  //       deleted,
+  //       ...filters
+  //     } = queryParams;
 
-      return this.companyService.findAll(paginationDto, filters);
-    }
-  }
+  //     return this.companyService.findAll(paginationDto, filters);
+  //   }
+  // }
 
   @Get(':id')
   @Permissions(PermissionsEnum.ADMIN)

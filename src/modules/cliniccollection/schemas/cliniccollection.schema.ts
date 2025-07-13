@@ -40,6 +40,9 @@ export class Complex {
   @Prop({ type: Types.ObjectId, ref: 'Employee', required: false })
   PIC: Types.ObjectId;
 
+  @Prop({ type: Types.ObjectId, ref: 'Employee', required: true })
+  employee: Types.ObjectId;
+
   @Prop({ unique: true, required: true })
   publicId: string;
 

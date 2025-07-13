@@ -66,6 +66,7 @@ export class ClinicService {
     @InjectModel(Department.name)
     private departmentModel: Model<DepartmentDocument>,
   ) {}
+
   private async checkUniqueName(name: string, departmentId: string) {
     const existingClinic = await this.clinicModel.findOne({
       name,
@@ -78,6 +79,7 @@ export class ClinicService {
       );
     }
   }
+
   async createClinic(
     createClinicDto: CreateClinicDto,
     user: Employee,
@@ -239,6 +241,7 @@ export class ClinicService {
         ...createClinicDto,
         publicId,
         logo: relativeFilePath,
+        employee: user._id,
       });
       const savedClinic = await newClinic.save();
       if (user.plan === 'clinic') {
@@ -261,7 +264,12 @@ export class ClinicService {
       throw new BadRequestException(error.message);
     }
   }
-  async getAllClinics(paginationDto: PaginationAndFilterDto, filters: any) {
+
+  async getAllClinics(
+    paginationDto: PaginationAndFilterDto,
+    employee: Employee,
+    filters: any,
+  ) {
     try {
       const {
         page,
@@ -283,22 +291,29 @@ export class ClinicService {
           [field]: { $regex: search, $options: 'i' },
         }));
       }
-      const populateFields = [{ path: 'departmentId' }];
 
+      const populateFields = [{ path: 'departmentId' }];
+      const filter = filter_fields ? JSON.parse(filter_fields) : {};
+
+      filter['$or'] = [
+        { employee: employee._id },
+        { _id: { $in: employee.clinic } },
+      ];
+
+      console.log(filter);
       const result = await paginate({
         model: this.clinicModel,
         populate: populateFields,
         page: page,
         limit: limit,
         allData: allData,
-        filter: filter_fields ? JSON.parse(filter_fields) : {},
+        filter: filter,
         search: search,
         searchFields: ['name', 'generalInfo', 'Description', 'publicId'],
         message: 'Request successful',
         sort: sort,
       });
 
-      // إحصائيات لكل عيادة
       if (result.data) {
         const clinics = result.data;
         const updatedClinics = await Promise.all(
@@ -313,10 +328,8 @@ export class ClinicService {
       throw new BadRequestException(error.message);
     }
   }
-  async addStatsToClinic(clinic: any) {
-    console.log(`🔍 Clinic: ${clinic.name} (ID: ${clinic._id})`);
 
-    // 1. الحصول على المواعيد المرتبطة بهذه العيادة
+  async addStatsToClinic(clinic: any) {
     const appointments = await this.appointmentModel
       .find({
         clinic: clinic._id.toString(),
@@ -329,7 +342,6 @@ export class ClinicService {
     let treatedPatientCount = 0;
 
     if (appointmentCount > 0) {
-      // 2. حساب عدد السجلات الطبية المرتبطة بهذه المواعيد (عدد المرضى المعالجين)
       treatedPatientCount = await this.medicalRecordModel.countDocuments({
         appointment: { $in: appointmentIds },
       });
@@ -355,8 +367,28 @@ export class ClinicService {
     });
     return count;
   }
-  async getClinicById(id: string): Promise<ApiGetResponse<Clinic>> {
+
+  async getClinicById(
+    id: string,
+    employee: Employee,
+  ): Promise<ApiGetResponse<Clinic>> {
     try {
+      const clinicById = await this.clinicModel.findById(id);
+
+      if (clinicById) {
+        console.log(clinicById.employee);
+        console.log(employee._id);
+        console.log(clinicById.employee !== employee._id);
+        console.log(!employee.clinic.includes(clinicById._id));
+      }
+      if (
+        !clinicById ||
+        clinicById.deleted ||
+        (clinicById.employee !== employee._id &&
+          !employee.clinic.includes(clinicById._id))
+      ) {
+        throw new NotFoundException('Clinic not found or has been deleted');
+      }
       const [
         clinic,
         patientCount,
@@ -366,7 +398,11 @@ export class ClinicService {
         employees,
         ,
       ] = await Promise.all([
-        this.clinicModel.findById(id).populate(['departmentId', 'PIC']),
+        this.clinicModel
+          .find({ _id: id })
+          .populate(['departmentId', 'PIC'])
+          .exec()
+          .then((clinic) => clinic[0]),
         this.appointmentModel.countDocuments({ clinic: id }),
         Promise.all([
           this.getEmployeeCountByDoctorType(id, 'Doctor'),
@@ -417,10 +453,14 @@ export class ClinicService {
     id: string,
     updateClinicDto: UpdateClinicDto,
     file: Express.Multer.File,
+    employee: Employee,
   ): Promise<ApiGetResponse<Clinic>> {
     try {
       const updatedClinic = await this.clinicModel
-        .findByIdAndUpdate(id, updateClinicDto, { new: true })
+        .findByIdAndUpdate(id, updateClinicDto, {
+          employee: employee._id,
+          new: true,
+        })
         .populate(['departmentId']);
       if (!updatedClinic || updatedClinic.deleted)
         throw new NotFoundException('Clinic not found or has been deleted');
@@ -448,9 +488,17 @@ export class ClinicService {
     }
   }
 
-  async deleteClinic(id: string): Promise<ApiGetResponse<Clinic>> {
+  async deleteClinic(
+    id: string,
+    employee: Employee,
+  ): Promise<ApiGetResponse<Clinic>> {
     try {
-      const clinic = await this.clinicModel.findById(id).exec();
+      //if clinic not for the employee denied the id of employee in clinic
+      const clinic = await this.clinicModel
+        .find({ _id: id, employee: employee._id })
+        .exec()
+        .then((clinic) => clinic[0]);
+
       if (!clinic || clinic.deleted)
         throw new NotFoundException('Clinic not found or has been deleted');
 
@@ -471,9 +519,10 @@ export class ClinicService {
 
   async getClinicByClinicCollectionId(
     clinicCollectionId: string,
+    employee: Employee,
   ): Promise<ApiGetResponse<{ count: object }>> {
     const clinics = await this.clinicModel
-      .find()
+      .find({ deleted: false, employee: employee._id })
       .populate({
         path: 'departmentId',
         select: 'clinicCollectionId',
@@ -508,9 +557,10 @@ export class ClinicService {
 
   async getClinicsByDepartment(
     departmentId: string,
+    employee: Employee,
   ): Promise<ApiGetResponse<any>> {
     const clinics = await this.clinicModel
-      .find({ departmentId })
+      .find({ departmentId, employee: employee._id })
       .populate(['departmentId'])
       .exec();
     return {
