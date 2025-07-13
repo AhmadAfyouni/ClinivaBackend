@@ -126,6 +126,7 @@ export class ClinicCollectionService {
         ...createClinicCollectionDto,
         publicId,
         plan: employee?.plan,
+        employee,
       });
       if (!createClinicCollectionDto.departments) {
         throw new BadRequestException('Department name is required');

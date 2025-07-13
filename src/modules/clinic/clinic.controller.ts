@@ -56,22 +56,38 @@ export class ClinicController {
   async getAllClinics(
     @Query() paginationDto: PaginationAndFilterDto,
     @Query() queryParams: any,
+    @Request() req,
   ) {
     const { page, limit, allData, sortBy, order, ...filters } = queryParams;
+    const userId = req.user.userId;
+    console.log(userId, 'userId');
+    const response = await this.employeeService.getEmployeeById(userId);
+    console.log(response.data._id, 'response.data');
 
-    return this.clinicService.getAllClinics(paginationDto, filters);
+    return this.clinicService.getAllClinics(
+      paginationDto,
+      response.data,
+      filters,
+    );
   }
 
   @Get(':id')
   @Permissions(PermissionsEnum.ADMIN)
-  async getClinicById(@Param('id') id: string) {
-    return this.clinicService.getClinicById(id);
+  async getClinicById(@Param('id') id: string, @Request() req) {
+    const userId = req.user.userId;
+    const response = await this.employeeService.getEmployeeById(userId);
+    return this.clinicService.getClinicById(id, response.data);
   }
 
   @Get('by-department/:deptId')
   @Permissions(PermissionsEnum.ADMIN)
-  async getClinicsByDepartment(@Param('deptId') deptId: string) {
-    return this.clinicService.getClinicsByDepartment(deptId);
+  async getClinicsByDepartment(
+    @Param('deptId') deptId: string,
+    @Request() req,
+  ) {
+    const userId = req.user.userId;
+    const response = await this.employeeService.getEmployeeById(userId);
+    return this.clinicService.getClinicsByDepartment(deptId, response.data);
   }
 
   @Put(':id')
@@ -82,20 +98,38 @@ export class ClinicController {
     @Param('id') id: string,
     @Body() updateClinicDto: UpdateClinicDto,
     @UploadedFile() file: Express.Multer.File,
+    @Request() req,
   ) {
-    return this.clinicService.updateClinic(id, updateClinicDto, file);
+    const userId = req.user.userId;
+    const response = await this.employeeService.getEmployeeById(userId);
+    return this.clinicService.updateClinic(
+      id,
+      updateClinicDto,
+      file,
+      response.data,
+    );
   }
 
   @Delete(':id')
   @Permissions(PermissionsEnum.ADMIN)
-  async deleteClinic(@Param('id') id: string) {
-    return this.clinicService.deleteClinic(id);
+  async deleteClinic(@Param('id') id: string, @Request() req) {
+    const userId = req.user.userId;
+    const response = await this.employeeService.getEmployeeById(userId);
+    return this.clinicService.deleteClinic(id, response.data);
   }
 
   @Get('by-cliniccollection/:clinicCollectionId')
   @Permissions(PermissionsEnum.ADMIN)
-  getDepartmentCount(@Param('clinicCollectionId') clinicCollectionId: string) {
-    return this.clinicService.getClinicByClinicCollectionId(clinicCollectionId);
+  async getDepartmentCount(
+    @Param('clinicCollectionId') clinicCollectionId: string,
+    @Request() req,
+  ) {
+    const userId = req.user.userId;
+    const response = await this.employeeService.getEmployeeById(userId);
+    return this.clinicService.getClinicByClinicCollectionId(
+      clinicCollectionId,
+      response.data,
+    );
   }
 
   @Get(':id/patient-count')
