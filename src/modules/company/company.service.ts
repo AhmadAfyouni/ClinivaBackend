@@ -193,8 +193,14 @@ export class CompanyService {
     }
   }
 
-  async findOne(id: string): Promise<ApiGetResponse<Company>> {
+  async findOne(
+    id: string,
+    employee: Employee,
+  ): Promise<ApiGetResponse<Company>> {
     try {
+      if (employee.companyId?.toString() !== id) {
+        throw new NotFoundException(`Company with ID ${id} not found`);
+      }
       const company = await this.companyModel.findById(id).exec();
       if (!company) {
         throw new NotFoundException(`Company with ID ${id} not found`);
@@ -212,13 +218,40 @@ export class CompanyService {
     }
   }
 
+  async findByUser(employee: Employee): Promise<ApiGetResponse<Company>> {
+    try {
+      if (!employee.companyId) {
+        throw new NotFoundException(`no company found !`);
+      }
+      const company = await this.companyModel
+        .findById(employee.companyId)
+        .exec();
+      if (!company) {
+        throw new NotFoundException(`Company not found`);
+      }
+      return {
+        success: true,
+        message: 'Company retrieved successfully',
+        data: company,
+      };
+    } catch (error) {
+      console.error(`Error finding company :`, error);
+      throw new BadRequestException(
+        error.message || 'Failed to retrieve company',
+      );
+    }
+  }
   async update(
     id: string,
     updateCompanyDto: UpdateCompanyDto,
     file: Express.Multer.File,
+    employee: Employee,
   ): Promise<ApiGetResponse<Company>> {
     try {
       let relativeFilePath;
+      if (employee.companyId?.toString() !== id) {
+        throw new NotFoundException(`Company with ID ${id} not found`);
+      }
       if (file) {
         relativeFilePath = file ? saveFileLocally(file, 'company/images') : '';
       }

@@ -376,15 +376,15 @@ export class ClinicService {
       const clinicById = await this.clinicModel.findById(id);
 
       if (clinicById) {
-        console.log(clinicById.employee);
+        console.log(clinicById.employee.toString());
         console.log(employee._id);
-        console.log(clinicById.employee !== employee._id);
+        console.log(clinicById.employee.toString() == employee._id.toString());
         console.log(!employee.clinic.includes(clinicById._id));
       }
       if (
         !clinicById ||
         clinicById.deleted ||
-        (clinicById.employee !== employee._id &&
+        (clinicById.employee.toString() !== employee._id.toString() &&
           !employee.clinic.includes(clinicById._id))
       ) {
         throw new NotFoundException('Clinic not found or has been deleted');

@@ -95,6 +95,12 @@ export class Employee {
   })
   identity: string;
 
+  @Prop({
+    required: true,
+    unique: false,
+  })
+  internalIdentity: string;
+
   @Prop({ required: false, trim: true })
   nationality?: string;
 
