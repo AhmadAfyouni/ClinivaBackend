@@ -67,26 +67,33 @@ export class ClinicCollectionController {
   async getAllClinicCollections(
     @Query() paginationDto: PaginationAndFilterDto,
     @Query() queryParams: any,
+    @Request() req,
   ) {
-    const { page, limit, allData, sortBy, order, ...filters } = queryParams;
-    console.log('queryParams', queryParams);
+    const userId = req.user.userId;
+    const response = await this.employeeService.getEmployeeById(userId);
+
     return this.clinicCollectionService.getAllClinicCollections(
       paginationDto,
-      // filters,
+      response.data,
     );
   }
 
   @Get(':id')
   @Permissions(PermissionsEnum.ADMIN)
-  async getClinicCollectionById(@Param('id') id: string) {
-    return this.clinicCollectionService.getClinicCollectionById(id);
+  async getClinicCollectionById(@Param('id') id: string, @Request() req) {
+    const userId = req.user.userId;
+    const response = await this.employeeService.getEmployeeById(userId);
+    return this.clinicCollectionService.getClinicCollectionById(
+      id,
+      response.data,
+    );
   }
 
-  @Get(':id/complex')
-  @Permissions(PermissionsEnum.ADMIN)
-  async getMedicalComplexById(@Param('id') id: string) {
-    return this.clinicCollectionService.getClinicCollectionById(id);
-  }
+  // @Get(':id/complex')
+  // @Permissions(PermissionsEnum.ADMIN)
+  // async getMedicalComplexById(@Param('id') id: string) {
+  //   return this.clinicCollectionService.getClinicCollectionById(id);
+  // }
 
   @Put(':id')
   @Permissions(PermissionsEnum.ADMIN)
@@ -95,17 +102,26 @@ export class ClinicCollectionController {
     @Param('id') id: string,
     @Body() updateClinicCollectionDto: UpdateClinicCollectionDto,
     @UploadedFile() file: Express.Multer.File,
+    @Request() req,
   ) {
+    const userId = req.user.userId;
+    const response = await this.employeeService.getEmployeeById(userId);
     return this.clinicCollectionService.updateClinicCollection(
       id,
       updateClinicCollectionDto,
+      response.data,
       file,
     );
   }
 
   @Delete(':id')
   @Permissions(PermissionsEnum.ADMIN)
-  async deleteClinicCollection(@Param('id') id: string) {
-    return this.clinicCollectionService.deleteClinicCollection(id);
+  async deleteClinicCollection(@Param('id') id: string, @Request() req) {
+    const userId = req.user.userId;
+    const response = await this.employeeService.getEmployeeById(userId);
+    return this.clinicCollectionService.deleteClinicCollection(
+      id,
+      response.data,
+    );
   }
 }
