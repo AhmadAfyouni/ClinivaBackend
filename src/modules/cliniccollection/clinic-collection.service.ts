@@ -170,7 +170,10 @@ export class ClinicCollectionService {
     }
   }
 
-  async getAllClinicCollections(paginationDto: PaginationAndFilterDto) {
+  async getAllClinicCollections(
+    paginationDto: PaginationAndFilterDto,
+    employee: Employee,
+  ) {
     try {
       const {
         page,
@@ -192,14 +195,19 @@ export class ClinicCollectionService {
           [field]: { $regex: search, $options: 'i' },
         }));
       }
-
+      const filter = filter_fields ? JSON.parse(filter_fields) : {};
+      filter['$or'] = [
+        { employee: employee._id },
+        { _id: { $in: employee.complexId } },
+      ];
+      console.log(filter);
       return paginate({
         model: this.clinicCollectionModel,
         populate: ['companyId', 'PIC'],
         page: page,
         limit: limit,
         allData: allData,
-        filter: filter_fields ? JSON.parse(filter_fields) : {},
+        filter: filter,
         search: search,
         searchFields: ['legalName', 'tradeName', 'policies', 'publicId'],
         message: 'Request successful',
@@ -258,13 +266,21 @@ export class ClinicCollectionService {
     };
   }
 
-  async getClinicCollectionById(id: string): Promise<ApiGetResponse<Complex>> {
+  async getClinicCollectionById(
+    id: string,
+    employee: Employee,
+  ): Promise<ApiGetResponse<Complex>> {
     try {
       const collection = await this.clinicCollectionModel
         .findById(id)
         .populate(['companyId', 'PIC'])
         .exec();
-      if (!collection || collection.deleted)
+      if (
+        !collection ||
+        collection.deleted ||
+        (collection.employee?.toString() !== employee._id.toString() &&
+          employee.complexId.toString() !== id)
+      )
         throw new NotFoundException(
           'Medical Complex not found or has been deleted',
         );
@@ -317,6 +333,7 @@ export class ClinicCollectionService {
   async updateClinicCollection(
     id: string,
     updateClinicCollectionDto: UpdateClinicCollectionDto,
+    employee: Employee,
     file?: Express.Multer.File,
   ): Promise<ApiGetResponse<Complex>> {
     try {
@@ -348,7 +365,13 @@ export class ClinicCollectionService {
           strictQuery: 'throw',
         })
         .populate(['companyId']);
-      if (!updatedClinicCollection || updatedClinicCollection.deleted)
+      if (
+        !updatedClinicCollection ||
+        updatedClinicCollection.deleted ||
+        (updatedClinicCollection.employee?.toString() !==
+          employee._id.toString() &&
+          employee.complexId.toString() !== id)
+      )
         throw new NotFoundException(
           'Medical Complex not found or has been deleted',
         );
@@ -366,12 +389,20 @@ export class ClinicCollectionService {
     }
   }
 
-  async deleteClinicCollection(id: string): Promise<ApiGetResponse<Complex>> {
+  async deleteClinicCollection(
+    id: string,
+    employee: Employee,
+  ): Promise<ApiGetResponse<Complex>> {
     try {
       const clinicCollection = await this.clinicCollectionModel
         .findById(id)
         .exec();
-      if (!clinicCollection || clinicCollection.deleted)
+      if (
+        !clinicCollection ||
+        clinicCollection.deleted ||
+        (clinicCollection.employee?.toString() !== employee._id.toString() &&
+          employee.complexId.toString() !== id)
+      )
         throw new NotFoundException(
           'Medical Complex not found or has been deleted',
         );
