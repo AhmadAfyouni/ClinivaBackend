@@ -16,6 +16,7 @@ import { FileFieldsInterceptor } from '@nestjs/platform-express';
 import { UploadedFiles } from '@nestjs/common';
 import { ApiConsumes } from '@nestjs/swagger';
 import { UseInterceptors } from '@nestjs/common';
+import { Employee } from './schemas/employee.schema';
 
 @Controller('profile')
 export class ProfileController {
@@ -24,6 +25,7 @@ export class ProfileController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async getProfile(@Req() req: Request & { user: { userId: string } }) {
+    // get emoloyee by id from database
     try {
       return await this.employeeService.getEmployeeById(req.user.userId);
     } catch (error) {

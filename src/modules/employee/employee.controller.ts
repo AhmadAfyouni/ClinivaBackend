@@ -54,11 +54,14 @@ export class EmployeeController {
       employmentContract?: Express.Multer.File[];
     },
     @Body() createEmployeeDto: CreateEmployeeDto,
+    @Req() req: Request & { user: { userId: string } },
   ) {
     try {
       console.log(files);
+      const admin = await this.employeeService.getEmployeeById(req.user.userId);
       return this.employeeService.createEmployee(
         createEmployeeDto,
+        admin.data,
         files?.image?.[0] || undefined,
         files?.workPermit?.[0] || undefined,
         files?.CV?.[0] || undefined,
@@ -94,8 +97,12 @@ export class EmployeeController {
 
   @Get()
   @Permissions(PermissionsEnum.ADMIN)
-  async getAllEmployees(@Query() paginationDto: PaginationAndFilterDto) {
-    return this.employeeService.getAllEmployees(paginationDto);
+  async getAllEmployees(
+    @Query() paginationDto: PaginationAndFilterDto,
+    @Req() req: Request & { user: { userId: string } },
+  ) {
+    const admin = await this.employeeService.getEmployeeById(req.user.userId);
+    return this.employeeService.getAllEmployees(paginationDto, admin.data);
   }
 
   // @Get('without-user')
@@ -106,8 +113,15 @@ export class EmployeeController {
 
   @Get(':id')
   @Permissions(PermissionsEnum.ADMIN)
-  async getEmployeeById(@Param('id') id: string) {
-    return this.employeeService.getEmployeeById(id);
+  async getEmployeeById(
+    @Param('id') id: string,
+    @Req() req: Request & { user: { userId: string } },
+  ) {
+    const admin = await this.employeeService.getEmployeeById(
+      req.user.userId,
+      'functionCall',
+    );
+    return this.employeeService.getEmployeeById(id, admin.data.identity);
   }
 
   @Put(':id')

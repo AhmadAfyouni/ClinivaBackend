@@ -30,11 +30,15 @@ import {
   FileTypeValidator, // <-- Import
 } from '@nestjs/common';
 import { ParseJsonPipe } from 'src/common/pipes/parse-json.pipe';
+import { EmployeeService } from '../employee/employee.service';
 
 @Controller('companies')
 @UseGuards(PermissionsGuard)
 export class CompanyController {
-  constructor(private readonly companyService: CompanyService) {}
+  constructor(
+    private readonly companyService: CompanyService,
+    private readonly employeeService: EmployeeService,
+  ) {}
 
   @Post()
   @Permissions(PermissionsEnum.ADMIN)
@@ -73,8 +77,21 @@ export class CompanyController {
 
   @Get(':id')
   @Permissions(PermissionsEnum.ADMIN)
-  async findOne(@Param('id') id: string) {
-    return this.companyService.findOne(id);
+  async findOne(
+    @Param('id') id: string,
+    @Req() req: Request & { user: { userId: string } },
+  ) {
+    const user_id = req.user.userId;
+    const employee = await this.employeeService.getEmployeeById(user_id);
+    return this.companyService.findOne(id, employee.data);
+  }
+
+  @Get()
+  @Permissions(PermissionsEnum.ADMIN)
+  async findByUser(@Req() req: Request & { user: { userId: string } }) {
+    const user_id = req.user.userId;
+    const employee = await this.employeeService.getEmployeeById(user_id);
+    return this.companyService.findByUser(employee.data);
   }
 
   @Put(':id')
@@ -84,8 +101,16 @@ export class CompanyController {
     @Param('id') id: string,
     @Body() updateCompanyDto: UpdateCompanyDto,
     @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request & { user: { userId: string } },
   ) {
-    return this.companyService.update(id, updateCompanyDto, file);
+    const user_id = req.user.userId;
+    const employee = await this.employeeService.getEmployeeById(user_id);
+    return this.companyService.update(
+      id,
+      updateCompanyDto,
+      file,
+      employee.data,
+    );
   }
 
   @Delete(':id')
