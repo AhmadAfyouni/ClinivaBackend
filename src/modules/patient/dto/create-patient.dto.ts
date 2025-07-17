@@ -64,17 +64,22 @@ export class CreatePatientDto {
   @IsString()
   cardNumber: string;
 
-  @ApiProperty({ required: true })
+  @ApiProperty({ required: false })
   @IsDateString()
   dateOfBirth: Date;
 
-  @ApiProperty({ required: true, enum: ['male', 'female'] })
+  @ApiProperty({ required: false, enum: ['male', 'female'] })
   @IsEnum(['male', 'female'])
-  gender: string;
+  @IsOptional()
+  gender?: string;
 
-  @ApiProperty({ required: true })
+  @ApiProperty({
+    required: false,
+    enum: ['Arabic', 'English', 'French', 'German'],
+  })
   @IsString()
-  nationality: string;
+  @IsOptional()
+  nationality?: string;
 
   @ApiProperty({
     required: false,
@@ -84,17 +89,22 @@ export class CreatePatientDto {
   @IsOptional()
   maritalStatus?: string;
 
-  @ApiProperty({ required: false, default: 'Arabic' })
+  @ApiProperty({
+    required: false,
+    enum: ['Arabic', 'English', 'French', 'German'],
+    default: 'Arabic',
+  })
   @IsString()
   @IsOptional()
   preferredLanguage?: string;
 
   @ApiProperty({
-    required: true,
+    required: false,
     enum: ['Muslim', 'Christian', 'Druze', 'Other'],
   })
   @IsEnum(['Muslim', 'Christian', 'Druze', 'Other'])
-  religion: string;
+  @IsOptional()
+  religion?: string;
 
   @ApiProperty({ required: false })
   @IsString()
@@ -112,7 +122,7 @@ export class CreatePatientDto {
   @IsString()
   phoneNumber: string;
 
-  @ApiProperty({ required: true })
+  @ApiProperty({ required: false })
   @IsEmail()
   email: string;
 

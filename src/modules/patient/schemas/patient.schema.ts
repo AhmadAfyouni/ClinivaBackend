@@ -12,7 +12,7 @@ export class Patient {
   @Prop({ required: true })
   name: string;
 
-  @Prop({ required: true })
+  @Prop({ required: true, unique: true })
   cardNumber: string;
 
   @Prop({
@@ -22,13 +22,13 @@ export class Patient {
   })
   internalIdentity: string;
 
-  @Prop({ type: Date, required: true })
+  @Prop({ type: Date, required: false })
   dateOfBirth: Date;
 
-  @Prop({ required: true, enum: ['male', 'female'] })
+  @Prop({ required: false, enum: ['male', 'female'] })
   gender: string;
 
-  @Prop({ type: String, required: true })
+  @Prop({ type: String, required: false })
   nationality: string;
 
   @Prop({
@@ -41,12 +41,13 @@ export class Patient {
   @Prop({
     type: String,
     default: 'Arabic',
+    required: false,
   })
   preferredLanguage: string;
 
   @Prop({
     type: String,
-    required: true,
+    required: false,
     enum: ['Muslim', 'Christian', 'Druze', 'Other'],
   })
   religion: string;
@@ -62,7 +63,7 @@ export class Patient {
   @Prop({ type: String, required: true })
   phoneNumber: string;
 
-  @Prop({ type: String, required: true, unique: true })
+  @Prop({ type: String, required: false, unique: true })
   email: string;
 
   @Prop({ type: String, required: false })
