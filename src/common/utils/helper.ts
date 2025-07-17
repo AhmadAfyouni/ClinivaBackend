@@ -72,6 +72,26 @@ export class ContactInfo {
   emergencyContactPhone: string;
 }
 
+export class EmergencyContact {
+  @Prop({ required: true })
+  relationship: string;
+
+  @Prop({ required: true })
+  fullName: string;
+
+  @Prop({ required: true })
+  phoneNumber: string;
+}
+export class PersonalDocuments {
+  @Prop({ type: String })
+  Title: string;
+
+  @Prop({ type: String })
+  File: string;
+
+  @Prop({ type: Date })
+  Date: Date;
+}
 export class Vacation {
   @Prop({ required: true, type: Date })
   leaveStartDate: Date;

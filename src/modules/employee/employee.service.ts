@@ -284,6 +284,26 @@ export class EmployeeService {
           createEmployeeDto.workingHours,
         );
       }
+
+      let role;
+      if (createEmployeeDto.roleIds && createEmployeeDto.roleIds.length > 0) {
+        const roles = await Promise.all(
+          createEmployeeDto.roleIds.map(roleId => 
+            this.roleModel.findById(roleId).exec()
+          )
+        );
+        
+        // Check if any role wasn't found
+        const invalidRoleIndex = roles.findIndex(role => !role);
+        if (invalidRoleIndex !== -1) {
+          throw new BadRequestException(
+            `Role with id ${createEmployeeDto.roleIds[invalidRoleIndex]} does not exist!`
+          );
+        }
+        
+        // Use the first role if needed
+        role = roles[0];
+      }
       const publicId = await generateUniquePublicId(this.employeeModel, 'emp');
       const relativeFilePath = file
         ? saveFileLocally(file, 'employees/' + publicId + '/images')
@@ -391,14 +411,25 @@ export class EmployeeService {
         createEmployeeDto.Owner = true;
         createEmployeeDto.jobTitle = 'Admin';
       }
-
+      // else {
+      //   console.log('createEmployeeDto.roleIds', createEmployeeDto.roleIds);
+      //   createEmployeeDto.roleIds.forEach(async (roleId) => {
+      //     console.log('roleId', roleId);
+      //     role = await this.roleModel.findById(roleId);
+      //     console.log('role', role);
+      //     if (!role)
+      //       throw new BadRequestException(
+      //         'role with this id(' + roleId + ') not exists !',
+      //       );
+      //   });
+      // }
       const newEmployee = new this.employeeModel({
         ...createEmployeeDto,
         employeeType,
         image: relativeFilePath || '',
         publicId,
         password: hashedPassword,
-        roleIds: role ? [role._id] : [],
+        roleIds: role ? [role._id] : createEmployeeDto.roleIds,
         internalIdentity: '(owner)-' + publicId,
       });
       const savedEmployee = await newEmployee.save();
