@@ -3,14 +3,7 @@ import { Document, Types } from 'mongoose';
 import { ContactInfoDTO, DayOfWeek } from 'src/common/utils/helper.dto';
 
 import { MongooseDocument } from 'src/common/utils/filter-sort.util';
-import {
-  ContactInfo,
-  ActivityLog,
-  LoginHistory,
-  Vacation,
-  WorkingHours,
-  Shift,
-} from 'src/common/utils/helper';
+import { ActivityLog, LoginHistory, Vacation } from 'src/common/utils/helper';
 import { ShiftBase } from 'src/common/utils';
 
 export type EmployeeDocument = Employee & MongooseDocument;

@@ -20,7 +20,7 @@ import { forwardRef } from '@nestjs/common';
   imports: [
     MongooseModule.forFeature([
       { name: Patient.name, schema: PatientSchema },
-      { name: Appointment.name, schema: AppointmentSchema }, // إذا كنت تستخدم AppointmentModel هنا
+      { name: Appointment.name, schema: AppointmentSchema },
       { name: Employee.name, schema: EmployeeSchema },
       { name: MedicalRecord.name, schema: MedicalRecordSchema },
     ]),
@@ -30,6 +30,6 @@ import { forwardRef } from '@nestjs/common';
   ],
   controllers: [PatientController],
   providers: [PatientService],
-  exports: [PatientService], // يمكن استخدامها في وحدات أخرى
+  exports: [PatientService],
 })
 export class PatientModule {}
